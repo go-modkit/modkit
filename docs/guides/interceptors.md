@@ -64,8 +64,14 @@ import (
 )
 
 type Cache interface {
-    Get(key string) ([]byte, bool)
-    Set(key string, value []byte, ttl time.Duration)
+    Get(key string) (*CachedResponse, bool)
+    Set(key string, value *CachedResponse, ttl time.Duration)
+}
+
+type CachedResponse struct {
+    Status  int
+    Headers http.Header
+    Body    []byte
 }
 
 func CacheMiddleware(cache Cache, ttl time.Duration) func(http.Handler) http.Handler {
@@ -78,14 +84,25 @@ func CacheMiddleware(cache Cache, ttl time.Duration) func(http.Handler) http.Han
 
             key := r.URL.String()
             if cached, ok := cache.Get(key); ok {
-                w.Write(cached)
+                for k, v := range cached.Headers {
+                    w.Header()[k] = v
+                }
+                w.WriteHeader(cached.Status)
+                w.Write(cached.Body)
                 return
             }
 
             rec := httptest.NewRecorder()
             next.ServeHTTP(rec, r)
 
-            cache.Set(key, rec.Body.Bytes(), ttl)
+            if rec.Code >= http.StatusOK && rec.Code < http.StatusMultipleChoices {
+                cache.Set(key, &CachedResponse{
+                    Status:  rec.Code,
+                    Headers: rec.Header().Clone(),
+                    Body:    rec.Body.Bytes(),
+                }, ttl)
+            }
+
             for k, v := range rec.Header() {
                 w.Header()[k] = v
             }
@@ -107,9 +124,17 @@ func WrapResponse(next http.Handler) http.Handler {
         next.ServeHTTP(rec, r)
 
         body := rec.Body.Bytes()
-        wrapped := map[string]any{"data": json.RawMessage(body)}
+        wrapped := map[string]any{}
+        if json.Valid(body) {
+            wrapped["data"] = json.RawMessage(body)
+        } else {
+            wrapped["data"] = string(body)
+        }
 
-        w.Header().Set("Content-Type", "application/json")
+        for k, v := range rec.Header() {
+            w.Header()[k] = v
+        }
+        w.WriteHeader(rec.Code)
         json.NewEncoder(w).Encode(wrapped)
     })
 }
