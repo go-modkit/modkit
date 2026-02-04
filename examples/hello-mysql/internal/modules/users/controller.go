@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/aryeko/modkit/examples/hello-mysql/internal/httpapi"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -31,24 +32,24 @@ func (c *Controller) RegisterRoutes(router Router) {
 // @Produce json
 // @Param id path int true "User ID"
 // @Success 200 {object} User
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
+// @Failure 400 {object} Problem
+// @Failure 404 {object} Problem
 // @Router /users/{id} [get]
 func (c *Controller) handleGetUser(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid id"})
+		httpapi.WriteProblem(w, r, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	user, err := c.service.GetUser(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
-			writeJSON(w, http.StatusNotFound, map[string]any{"error": "not found"})
+			httpapi.WriteProblem(w, r, http.StatusNotFound, "not found")
 			return
 		}
-		writeJSON(w, http.StatusNotFound, map[string]any{"error": "not found"})
+		httpapi.WriteProblem(w, r, http.StatusInternalServerError, "internal error")
 		return
 	}
 
@@ -62,22 +63,27 @@ func (c *Controller) handleGetUser(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param body body CreateUserInput true "User payload"
 // @Success 201 {object} User
-// @Failure 400 {object} map[string]string
+// @Failure 400 {object} Problem
+// @Failure 409 {object} Problem
 // @Router /users [post]
 func (c *Controller) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	var input CreateUserInput
 	if err := decodeJSON(r, &input); err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid body"})
+		httpapi.WriteProblem(w, r, http.StatusBadRequest, "invalid body")
 		return
 	}
 	if input.Name == "" || input.Email == "" {
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "name and email required"})
+		httpapi.WriteProblem(w, r, http.StatusBadRequest, "name and email required")
 		return
 	}
 
 	user, err := c.service.CreateUser(r.Context(), input)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "failed to create"})
+		if errors.Is(err, ErrConflict) {
+			httpapi.WriteProblem(w, r, http.StatusConflict, "user already exists")
+			return
+		}
+		httpapi.WriteProblem(w, r, http.StatusInternalServerError, "internal error")
 		return
 	}
 	writeJSON(w, http.StatusCreated, user)
@@ -92,7 +98,7 @@ func (c *Controller) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) handleListUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := c.service.ListUsers(r.Context())
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "failed to list"})
+		httpapi.WriteProblem(w, r, http.StatusInternalServerError, "internal error")
 		return
 	}
 	writeJSON(w, http.StatusOK, users)
@@ -106,34 +112,34 @@ func (c *Controller) handleListUsers(w http.ResponseWriter, r *http.Request) {
 // @Param id path int true "User ID"
 // @Param body body UpdateUserInput true "User payload"
 // @Success 200 {object} User
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
+// @Failure 400 {object} Problem
+// @Failure 404 {object} Problem
 // @Router /users/{id} [put]
 func (c *Controller) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid id"})
+		httpapi.WriteProblem(w, r, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	var input UpdateUserInput
 	if err := decodeJSON(r, &input); err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid body"})
+		httpapi.WriteProblem(w, r, http.StatusBadRequest, "invalid body")
 		return
 	}
 	if input.Name == "" || input.Email == "" {
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "name and email required"})
+		httpapi.WriteProblem(w, r, http.StatusBadRequest, "name and email required")
 		return
 	}
 
 	user, err := c.service.UpdateUser(r.Context(), id, input)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
-			writeJSON(w, http.StatusNotFound, map[string]any{"error": "not found"})
+			httpapi.WriteProblem(w, r, http.StatusNotFound, "not found")
 			return
 		}
-		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "failed to update"})
+		httpapi.WriteProblem(w, r, http.StatusInternalServerError, "internal error")
 		return
 	}
 	writeJSON(w, http.StatusOK, user)
@@ -144,23 +150,23 @@ func (c *Controller) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 // @Tags users
 // @Param id path int true "User ID"
 // @Success 204 {object} map[string]string
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
+// @Failure 400 {object} Problem
+// @Failure 404 {object} Problem
 // @Router /users/{id} [delete]
 func (c *Controller) handleDeleteUser(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid id"})
+		httpapi.WriteProblem(w, r, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	if err := c.service.DeleteUser(r.Context(), id); err != nil {
 		if errors.Is(err, ErrNotFound) {
-			writeJSON(w, http.StatusNotFound, map[string]any{"error": "not found"})
+			httpapi.WriteProblem(w, r, http.StatusNotFound, "not found")
 			return
 		}
-		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "failed to delete"})
+		httpapi.WriteProblem(w, r, http.StatusInternalServerError, "internal error")
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)

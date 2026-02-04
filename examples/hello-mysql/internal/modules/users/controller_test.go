@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/aryeko/modkit/examples/hello-mysql/internal/httpapi"
 	modkithttp "github.com/aryeko/modkit/modkit/http"
 )
 
@@ -73,6 +74,68 @@ func TestController_CreateUser(t *testing.T) {
 	}
 	if user.ID != 10 {
 		t.Fatalf("expected id 10, got %d", user.ID)
+	}
+}
+
+func TestController_CreateUser_Conflict(t *testing.T) {
+	svc := stubService{
+		createFn: func(ctx context.Context, input CreateUserInput) (User, error) {
+			return User{}, ErrConflict
+		},
+		listFn:   func(ctx context.Context) ([]User, error) { return nil, nil },
+		updateFn: func(ctx context.Context, id int64, input UpdateUserInput) (User, error) { return User{}, nil },
+		deleteFn: func(ctx context.Context, id int64) error { return nil },
+	}
+
+	controller := NewController(svc)
+	router := modkithttp.NewRouter()
+	controller.RegisterRoutes(modkithttp.AsRouter(router))
+
+	body := []byte(`{"name":"Ada","email":"ada@example.com"}`)
+	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewReader(body))
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("expected status 409, got %d", rec.Code)
+	}
+	var problem httpapi.Problem
+	if err := json.NewDecoder(rec.Body).Decode(&problem); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if problem.Status != http.StatusConflict {
+		t.Fatalf("expected problem status 409, got %d", problem.Status)
+	}
+}
+
+func TestController_GetUser_NotFound(t *testing.T) {
+	svc := stubService{
+		getFn: func(ctx context.Context, id int64) (User, error) {
+			return User{}, ErrNotFound
+		},
+		createFn: func(ctx context.Context, input CreateUserInput) (User, error) { return User{}, nil },
+		listFn:   func(ctx context.Context) ([]User, error) { return nil, nil },
+		updateFn: func(ctx context.Context, id int64, input UpdateUserInput) (User, error) { return User{}, nil },
+		deleteFn: func(ctx context.Context, id int64) error { return nil },
+	}
+
+	controller := NewController(svc)
+	router := modkithttp.NewRouter()
+	controller.RegisterRoutes(modkithttp.AsRouter(router))
+
+	req := httptest.NewRequest(http.MethodGet, "/users/99", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("expected status 404, got %d", rec.Code)
+	}
+	var problem httpapi.Problem
+	if err := json.NewDecoder(rec.Body).Decode(&problem); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if problem.Status != http.StatusNotFound {
+		t.Fatalf("expected problem status 404, got %d", problem.Status)
 	}
 }
 

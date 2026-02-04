@@ -7,6 +7,19 @@ definitions:
       name:
         type: string
     type: object
+  users.Problem:
+    properties:
+      detail:
+        type: string
+      instance:
+        type: string
+      status:
+        type: integer
+      title:
+        type: string
+      type:
+        type: string
+    type: object
   users.UpdateUserInput:
     properties:
       email:
@@ -84,9 +97,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/users.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/users.Problem'
       summary: Create user
       tags:
       - users
@@ -109,15 +124,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/users.Problem'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/users.Problem'
       summary: Delete user
       tags:
       - users
@@ -139,15 +150,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/users.Problem'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/users.Problem'
       summary: Get user
       tags:
       - users
@@ -177,15 +184,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/users.Problem'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/users.Problem'
       summary: Update user
       tags:
       - users

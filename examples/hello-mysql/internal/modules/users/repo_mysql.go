@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/go-sql-driver/mysql"
 	"github.com/aryeko/modkit/examples/hello-mysql/internal/sqlc"
 )
 
@@ -30,6 +31,10 @@ func (r *mysqlRepo) GetUser(ctx context.Context, id int64) (User, error) {
 func (r *mysqlRepo) CreateUser(ctx context.Context, input CreateUserInput) (User, error) {
 	result, err := r.queries.CreateUser(ctx, sqlc.CreateUserParams{Name: input.Name, Email: input.Email})
 	if err != nil {
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+			return User{}, ErrConflict
+		}
 		return User{}, err
 	}
 	id, err := result.LastInsertId()
