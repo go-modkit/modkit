@@ -109,7 +109,7 @@ These are handled by Go-idiomatic patterns documented in guides, not framework a
 
 ### Sequential Dependencies
 
-```
+```text
 C4 (Logger Interface) ──► C5 (NewSlogLogger Rename)
         │
         └── Both modify modkit/logging/slog.go and logger_test.go
@@ -156,7 +156,7 @@ Sequential work stays within the same agent context — no cross-agent waiting r
 | Agent 3 | C4 → C5 | C5 continues immediately after C4; same files |
 | Agent 4 | C6, D10 | Independent stories, parallel within agent |
 
-```
+```text
 Agent 1: ─── C1 ───┬─── C3 ───
                    │
 Agent 2: ─── C2 ───────────────► D9 ───

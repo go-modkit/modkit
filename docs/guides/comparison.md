@@ -127,7 +127,7 @@ svc := do.MustInvoke[UserService](injector)
 
 ```go
 app, _ := kernel.Bootstrap(&AppModule{})
-svc, _ := app.Container.Get("users.service")
+svc, _ := app.Get("users.service")
 ```
 
 ### Key Differences

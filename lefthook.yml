@@ -4,4 +4,4 @@
 commit-msg:
   commands:
     commitlint:
-      run: $(go env GOPATH)/bin/commitlint lint --message {1}
+      run: '"$(go env GOPATH)/bin/commitlint" lint --message "{1}"'

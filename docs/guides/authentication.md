@@ -222,7 +222,7 @@ Usage at startup:
 ```go
 app, _ := kernel.Bootstrap(&AppModule{})
 
-authMW, _ := app.Container.Get("auth.middleware")
+authMW, _ := app.Get("auth.middleware")
 router.Use(authMW.(func(http.Handler) http.Handler))
 ```
 

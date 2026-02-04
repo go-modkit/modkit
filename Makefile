@@ -9,7 +9,7 @@ GOVULNCHECK ?= $(GOPATH)/bin/govulncheck
 LEFTHOOK ?= $(GOPATH)/bin/lefthook
 COMMITLINT ?= $(GOPATH)/bin/commitlint
 
-fmt:
+fmt: tools
 	gofmt -w .
 	$(GOIMPORTS) -w .
 

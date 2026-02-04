@@ -32,7 +32,7 @@ labels: bug, triage
 
 <!-- What happens instead. Include error messages verbatim. -->
 
-```
+```text
 <!-- paste error output here -->
 ```
 

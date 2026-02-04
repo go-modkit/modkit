@@ -59,7 +59,7 @@ commit-msg:
 
 **Notes:**
 - `{1}` is Lefthook's placeholder for the commit message file path
-- The hook only runs on `git commit`, not `git commit --amend` (by default)
+- The hook runs on both `git commit` and `git commit --amend` by default
 
 ### 2. Create tools/tools.go
 

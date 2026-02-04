@@ -199,7 +199,7 @@ func main() {
     // ... run server ...
     
     // Cleanup on shutdown
-    if db, err := app.Container.Get("db.connection"); err == nil {
+    if db, err := app.Get("db.connection"); err == nil {
         db.(*sql.DB).Close()
     }
 }
@@ -215,7 +215,7 @@ Provider A → depends on → Provider B → depends on → Provider A
 ```
 
 Error message:
-```
+```text
 provider cycle detected: a.service → b.service → a.service
 ```
 

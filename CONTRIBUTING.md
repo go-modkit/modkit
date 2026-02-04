@@ -49,7 +49,7 @@ make setup-hooks
 
 This installs git hooks that validate commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) format:
 
-```
+```text
 <type>(<scope>): <short summary>
 ```
 

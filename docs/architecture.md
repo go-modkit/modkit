@@ -6,7 +6,7 @@ This guide explains how modkit works under the hood.
 
 modkit has three core packages:
 
-```
+```text
 modkit/
 ├── module/   # Module metadata types (ModuleDef, ProviderDef, etc.)
 ├── kernel/   # Graph builder, visibility enforcer, bootstrap

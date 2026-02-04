@@ -246,7 +246,7 @@ router.Use(auth)         // 4th: runs last (innermost)
 ```
 
 Request flow:
-```
+```text
 Request → requestID → logging → recovery → auth → Handler
 Response ← requestID ← logging ← recovery ← auth ← Handler
 ```
@@ -286,7 +286,7 @@ Then retrieve and apply in your startup code:
 ```go
 app, _ := kernel.Bootstrap(&AppModule{})
 
-authMW, _ := app.Container.Get("middleware.auth")
+authMW, _ := app.Get("middleware.auth")
 router.Use(authMW.(func(http.Handler) http.Handler))
 ```
 
