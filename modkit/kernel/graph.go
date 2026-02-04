@@ -21,7 +21,7 @@ type Graph struct {
 
 func BuildGraph(root module.Module) (*Graph, error) {
 	if root == nil {
-		return nil, &DuplicateModuleNameError{Name: ""}
+		return nil, &RootModuleNilError{}
 	}
 
 	graph := &Graph{

@@ -6,6 +6,12 @@ import (
 	"github.com/aryeko/modkit/modkit/module"
 )
 
+type RootModuleNilError struct{}
+
+func (e *RootModuleNilError) Error() string {
+	return "root module is nil"
+}
+
 type DuplicateModuleNameError struct {
 	Name string
 }
@@ -32,6 +38,14 @@ func (e *DuplicateProviderTokenError) Error() string {
 		return fmt.Sprintf("duplicate provider token: %q (modules %q, %q)", e.Token, e.Modules[0], e.Modules[1])
 	}
 	return fmt.Sprintf("duplicate provider token: %q", e.Token)
+}
+
+type DuplicateControllerNameError struct {
+	Name string
+}
+
+func (e *DuplicateControllerNameError) Error() string {
+	return fmt.Sprintf("duplicate controller name: %s", e.Name)
 }
 
 type TokenNotVisibleError struct {
@@ -62,6 +76,14 @@ func (e *ProviderNotFoundError) Error() string {
 		return fmt.Sprintf("provider not found: token=%q", e.Token)
 	}
 	return fmt.Sprintf("provider not found: module=%q token=%q", e.Module, e.Token)
+}
+
+type ProviderCycleError struct {
+	Token module.Token
+}
+
+func (e *ProviderCycleError) Error() string {
+	return fmt.Sprintf("provider cycle detected: token=%q", e.Token)
 }
 
 type ProviderBuildError struct {

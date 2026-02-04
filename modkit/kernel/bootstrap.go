@@ -28,6 +28,9 @@ func Bootstrap(root module.Module) (*App, error) {
 	for _, node := range graph.Modules {
 		resolver := container.resolverFor(node.Name)
 		for _, controller := range node.Def.Controllers {
+			if _, exists := controllers[controller.Name]; exists {
+				return nil, &DuplicateControllerNameError{Name: controller.Name}
+			}
 			instance, err := controller.Build(resolver)
 			if err != nil {
 				return nil, &ControllerBuildError{Module: node.Name, Controller: controller.Name, Err: err}

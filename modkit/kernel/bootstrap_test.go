@@ -143,6 +143,36 @@ func TestBootstrapRejectsDuplicateProviderTokens(t *testing.T) {
 	}
 }
 
+func TestBootstrapRejectsDuplicateControllerNames(t *testing.T) {
+	modA := mod("A", nil, nil,
+		[]module.ControllerDef{{
+			Name: "ControllerA",
+			Build: func(r module.Resolver) (any, error) {
+				return "one", nil
+			},
+		}, {
+			Name: "ControllerA",
+			Build: func(r module.Resolver) (any, error) {
+				return "two", nil
+			},
+		}},
+		nil,
+	)
+
+	_, err := kernel.Bootstrap(modA)
+	if err == nil {
+		t.Fatalf("expected duplicate controller error")
+	}
+
+	var dupErr *kernel.DuplicateControllerNameError
+	if !errors.As(err, &dupErr) {
+		t.Fatalf("unexpected error type: %T", err)
+	}
+	if dupErr.Name != "ControllerA" {
+		t.Fatalf("unexpected controller name: %q", dupErr.Name)
+	}
+}
+
 func TestBootstrapRegistersControllers(t *testing.T) {
 	modA := mod("A", nil, nil,
 		[]module.ControllerDef{{

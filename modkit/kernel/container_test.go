@@ -75,3 +75,69 @@ func TestContainerSingletonConcurrent(t *testing.T) {
 		t.Fatalf("expected single build call, got %d", got)
 	}
 }
+
+func TestContainerDetectsSelfCycle(t *testing.T) {
+	self := module.Token("self")
+
+	modA := mod("A", nil,
+		[]module.ProviderDef{{
+			Token: self,
+			Build: func(r module.Resolver) (any, error) {
+				return r.Get(self)
+			},
+		}},
+		nil,
+		nil,
+	)
+
+	app, err := kernel.Bootstrap(modA)
+	if err != nil {
+		t.Fatalf("Bootstrap failed: %v", err)
+	}
+
+	_, err = app.Container.Get(self)
+	if err == nil {
+		t.Fatalf("expected dependency cycle error")
+	}
+
+	var cycleErr *kernel.ProviderCycleError
+	if !errors.As(err, &cycleErr) {
+		t.Fatalf("unexpected error type: %T", err)
+	}
+}
+
+func TestContainerDetectsMutualCycle(t *testing.T) {
+	a := module.Token("a")
+	b := module.Token("b")
+
+	modA := mod("A", nil,
+		[]module.ProviderDef{{
+			Token: a,
+			Build: func(r module.Resolver) (any, error) {
+				return r.Get(b)
+			},
+		}, {
+			Token: b,
+			Build: func(r module.Resolver) (any, error) {
+				return r.Get(a)
+			},
+		}},
+		nil,
+		nil,
+	)
+
+	app, err := kernel.Bootstrap(modA)
+	if err != nil {
+		t.Fatalf("Bootstrap failed: %v", err)
+	}
+
+	_, err = app.Container.Get(a)
+	if err == nil {
+		t.Fatalf("expected dependency cycle error")
+	}
+
+	var cycleErr *kernel.ProviderCycleError
+	if !errors.As(err, &cycleErr) {
+		t.Fatalf("unexpected error type: %T", err)
+	}
+}

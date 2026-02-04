@@ -47,10 +47,16 @@ func newContainer(graph *Graph, visibility Visibility) (*Container, error) {
 // Get resolves a provider without module visibility checks.
 // Visibility enforcement is applied via module-scoped resolvers.
 func (c *Container) Get(token module.Token) (any, error) {
-	return c.get(token, "")
+	return c.getWithStack(token, "", nil)
 }
 
-func (c *Container) get(token module.Token, requester string) (any, error) {
+func (c *Container) getWithStack(token module.Token, requester string, stack []module.Token) (any, error) {
+	for _, item := range stack {
+		if item == token {
+			return nil, &ProviderCycleError{Token: token}
+		}
+	}
+
 	entry, ok := c.providers[token]
 	if !ok {
 		return nil, &ProviderNotFoundError{Module: requester, Token: token}
@@ -79,9 +85,11 @@ func (c *Container) get(token module.Token, requester string) (any, error) {
 		return instance, nil
 	}
 
+	nextStack := append(append([]module.Token{}, stack...), token)
 	resolver := moduleResolver{
 		container:  c,
 		moduleName: entry.moduleName,
+		stack:      nextStack,
 	}
 	instance, err := entry.build(resolver)
 	if err != nil {
@@ -97,6 +105,7 @@ func (c *Container) get(token module.Token, requester string) (any, error) {
 type moduleResolver struct {
 	container  *Container
 	moduleName string
+	stack      []module.Token
 }
 
 func (r moduleResolver) Get(token module.Token) (any, error) {
@@ -104,7 +113,7 @@ func (r moduleResolver) Get(token module.Token) (any, error) {
 	if !visibility[token] {
 		return nil, &TokenNotVisibleError{Module: r.moduleName, Token: token}
 	}
-	return r.container.get(token, r.moduleName)
+	return r.container.getWithStack(token, r.moduleName, r.stack)
 }
 
 func (c *Container) resolverFor(moduleName string) module.Resolver {

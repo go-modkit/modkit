@@ -34,6 +34,18 @@ func mod(
 	}
 }
 
+func TestBuildGraphRejectsNilRoot(t *testing.T) {
+	_, err := kernel.BuildGraph(nil)
+	if err == nil {
+		t.Fatalf("expected error for nil root")
+	}
+
+	var rootErr *kernel.RootModuleNilError
+	if !errors.As(err, &rootErr) {
+		t.Fatalf("unexpected error type: %T", err)
+	}
+}
+
 func TestBuildGraphImportsFirst(t *testing.T) {
 	modD := mod("D", nil, nil, nil, nil)
 	modB := mod("B", []module.Module{modD}, nil, nil, nil)
