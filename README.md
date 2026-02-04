@@ -136,6 +136,7 @@ See [Architecture Guide](docs/architecture.md) for details.
 - [Error Handling](docs/guides/error-handling.md) — Error patterns and Problem Details
 - [Validation](docs/guides/validation.md) — Input validation patterns
 - [Authentication](docs/guides/authentication.md) — Auth middleware and guards
+- [Context Helpers](docs/guides/context-helpers.md) — Typed context keys and helper functions
 - [Testing](docs/guides/testing.md) — Testing patterns
 - [Comparison](docs/guides/comparison.md) — vs Wire, Fx, and others
 
