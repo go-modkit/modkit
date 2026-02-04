@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS users (
   PRIMARY KEY (id)
 );
 
-CREATE UNIQUE INDEX idx_users_email ON users (email);
+ALTER TABLE users ADD CONSTRAINT idx_users_email UNIQUE (email);

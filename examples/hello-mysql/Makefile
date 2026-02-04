@@ -24,7 +24,7 @@ migrate:
 seed:
 	go run ./cmd/seed
 
-run: compose-up-db migrate seed compose-up-app
+run: compose-up-db compose-up-app
 
 sqlc:
 	sqlc generate

@@ -24,15 +24,4 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    command: sh -c "go run ./cmd/api"
-  migrate:
-    build:
-      context: ../..
-      dockerfile: examples/hello-mysql/Dockerfile
-    environment:
-      MYSQL_DSN: "root:password@tcp(mysql:3306)/app?parseTime=true&multiStatements=true"
-    depends_on:
-      mysql:
-        condition: service_healthy
-    command: sh -c "go run ./cmd/migrate"
-    profiles: ["migrate"]
+    command: sh -c "go run ./cmd/migrate && go run ./cmd/seed && go run ./cmd/api"

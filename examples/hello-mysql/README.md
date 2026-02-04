@@ -56,8 +56,7 @@ make test
 
 ## Compose Services
 - `mysql` on `localhost:3306`
-- `app` on `localhost:8080`
-- `migrate` (profiled; not started by default)
+- `app` on `localhost:8080` (runs migrate + seed before starting)
 
 The compose services build from `examples/hello-mysql/Dockerfile`.
 
