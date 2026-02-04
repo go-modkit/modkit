@@ -132,6 +132,7 @@ See [Architecture Guide](docs/architecture.md) for details.
 - [Providers](docs/guides/providers.md) — Dependency injection and lifecycle
 - [Controllers](docs/guides/controllers.md) — HTTP handlers and routing
 - [Middleware](docs/guides/middleware.md) — Request/response middleware
+- [Interceptors](docs/guides/interceptors.md) — Request/response interception patterns
 - [Error Handling](docs/guides/error-handling.md) — Error patterns and Problem Details
 - [Validation](docs/guides/validation.md) — Input validation patterns
 - [Authentication](docs/guides/authentication.md) — Auth middleware and guards
