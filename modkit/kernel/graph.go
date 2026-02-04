@@ -37,7 +37,7 @@ func BuildGraph(root module.Module) (*Graph, error) {
 		def := m.Definition()
 		name := def.Name
 		if name == "" {
-			return &DuplicateModuleNameError{Name: name}
+			return &InvalidModuleNameError{Name: name}
 		}
 
 		id := uintptr(0)

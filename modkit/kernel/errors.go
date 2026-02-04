@@ -12,6 +12,14 @@ func (e *RootModuleNilError) Error() string {
 	return "root module is nil"
 }
 
+type InvalidModuleNameError struct {
+	Name string
+}
+
+func (e *InvalidModuleNameError) Error() string {
+	return "invalid module name"
+}
+
 type DuplicateModuleNameError struct {
 	Name string
 }

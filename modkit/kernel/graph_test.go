@@ -46,6 +46,20 @@ func TestBuildGraphRejectsNilRoot(t *testing.T) {
 	}
 }
 
+func TestBuildGraphRejectsEmptyModuleName(t *testing.T) {
+	root := mod("", nil, nil, nil, nil)
+
+	_, err := kernel.BuildGraph(root)
+	if err == nil {
+		t.Fatalf("expected error for empty module name")
+	}
+
+	var nameErr *kernel.InvalidModuleNameError
+	if !errors.As(err, &nameErr) {
+		t.Fatalf("unexpected error type: %T", err)
+	}
+}
+
 func TestBuildGraphImportsFirst(t *testing.T) {
 	modD := mod("D", nil, nil, nil, nil)
 	modB := mod("B", []module.Module{modD}, nil, nil, nil)
