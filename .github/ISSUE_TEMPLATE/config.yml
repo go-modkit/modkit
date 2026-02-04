@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & Discussions
+    url: https://github.com/aryeko/modkit/discussions
+    about: Ask questions and discuss ideas (don't open an issue)
+  - name: Security Vulnerabilities
+    url: https://github.com/aryeko/modkit/security/policy
+    about: Report security issues privately

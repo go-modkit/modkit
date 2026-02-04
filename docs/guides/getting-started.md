@@ -1,6 +1,10 @@
 # Getting Started
 
-This guide assumes you are comfortable with Go modules and `net/http`. The goal is to boot a minimal modkit app and expose a route.
+This guide walks you through building your first modkit app: a simple HTTP server with one module, one provider, and one controller.
+
+**What you'll build:** A `/greet` endpoint that returns a greeting message.
+
+**Prerequisites:** Go 1.25+ and familiarity with `net/http`.
 
 ## Install
 
@@ -8,9 +12,9 @@ This guide assumes you are comfortable with Go modules and `net/http`. The goal 
 go get github.com/aryeko/modkit
 ```
 
-## Define Tokens, Providers, and Controllers
+## Define Your Module
 
-Define tokens for your providers and create module metadata.
+Create a module with a provider (the greeting string) and a controller (the HTTP handler):
 
 ```go
 package app
@@ -22,22 +26,21 @@ import (
     "github.com/aryeko/modkit/modkit/module"
 )
 
-type Tokens struct{}
+// Token identifies the greeting provider
+const TokenGreeting module.Token = "greeting"
 
-const (
-    TokenGreeting module.Token = "greeting"
-)
-
+// Controller handles HTTP requests
 type GreetingController struct {
     greeting string
 }
 
 func (c *GreetingController) RegisterRoutes(r mkhttp.Router) {
     r.Handle(http.MethodGet, "/greet", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-        _, _ = w.Write([]byte(c.greeting))
+        w.Write([]byte(c.greeting))
     }))
 }
 
+// Module defines the app structure
 type AppModule struct{}
 
 func (m *AppModule) Definition() module.ModuleDef {
@@ -47,7 +50,7 @@ func (m *AppModule) Definition() module.ModuleDef {
             {
                 Token: TokenGreeting,
                 Build: func(r module.Resolver) (any, error) {
-                    return "hello", nil
+                    return "Hello, modkit!", nil
                 },
             },
         },
@@ -68,9 +71,14 @@ func (m *AppModule) Definition() module.ModuleDef {
 }
 ```
 
-Modules must be passed as pointers so shared imports have stable identities.
+**Key points:**
+- Modules must be passed as pointers (`&AppModule{}`) for stable identity
+- Controllers must implement `mkhttp.RouteRegistrar`
+- Providers are built on first access and cached as singletons
 
 ## Bootstrap and Serve
+
+Create your `main.go`:
 
 ```go
 package main
@@ -85,24 +93,44 @@ import (
 )
 
 func main() {
+    // Bootstrap the app
     appInstance, err := kernel.Bootstrap(&app.AppModule{})
     if err != nil {
         log.Fatal(err)
     }
 
+    // Create router and register controllers
     router := mkhttp.NewRouter()
     if err := mkhttp.RegisterRoutes(mkhttp.AsRouter(router), appInstance.Controllers); err != nil {
         log.Fatal(err)
     }
 
+    // Start server
+    log.Println("Listening on :8080")
     if err := mkhttp.Serve(":8080", router); err != nil {
         log.Fatal(err)
     }
 }
 ```
 
+## Verify It Works
+
+Run your app:
+
+```bash
+go run main.go
+```
+
+Test the endpoint:
+
+```bash
+curl http://localhost:8080/greet
+# Hello, modkit!
+```
+
 ## Next Steps
 
-- Read `docs/guides/modules.md` for module composition and visibility rules.
-- Read `docs/guides/testing.md` for testing patterns.
-- Review `docs/design/mvp.md` for architecture details.
+- [Modules Guide](modules.md) — Learn about imports, exports, and visibility
+- [Testing Guide](testing.md) — Testing patterns for modkit apps
+- [Architecture Guide](../architecture.md) — How modkit works under the hood
+- [Example App](../../examples/hello-mysql/) — Full CRUD API with MySQL, migrations, and Swagger

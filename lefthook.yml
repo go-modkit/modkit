@@ -1,0 +1,7 @@
+# Lefthook configuration for git hooks
+# Setup: make setup-hooks
+
+commit-msg:
+  commands:
+    commitlint:
+      run: '"${GOBIN:-$(go env GOPATH)/bin}/commitlint" lint --message "{1}"'
