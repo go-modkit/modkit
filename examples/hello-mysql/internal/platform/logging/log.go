@@ -141,6 +141,13 @@ func colorizeLevel(level slog.Level) string {
 	}
 }
 
+func padLevel(level string, width int) string {
+	if len(level) >= width {
+		return level
+	}
+	return level + strings.Repeat(" ", width-len(level))
+}
+
 type prettyHandler struct {
 	w      io.Writer
 	cfg    config
@@ -260,11 +267,16 @@ func (h *prettyHandler) formatTime(t time.Time) string {
 }
 
 func (h *prettyHandler) formatLevel(level slog.Level) string {
-	levelStr := strings.ToUpper(level.String())
+	raw := strings.ToUpper(level.String())
+	padded := padLevel(raw, 5)
 	if h.cfg.format == "text" && colorEnabled(h.cfg.color, h.w) {
-		return colorizeLevel(level)
+		colored := colorizeLevel(level)
+		if len(raw) < 5 {
+			return colored + strings.Repeat(" ", 5-len(raw))
+		}
+		return colored
 	}
-	return levelStr
+	return padded
 }
 
 func (h *prettyHandler) extractScope(record slog.Record) string {
