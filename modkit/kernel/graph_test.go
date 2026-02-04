@@ -54,6 +54,20 @@ func TestBuildGraphRejectsNilRoot(t *testing.T) {
 	}
 }
 
+func TestBuildGraphRejectsTypedNilRoot(t *testing.T) {
+	var root *testModule
+
+	_, err := kernel.BuildGraph(root)
+	if err == nil {
+		t.Fatalf("expected error for typed nil root")
+	}
+
+	var rootErr *kernel.RootModuleNilError
+	if !errors.As(err, &rootErr) {
+		t.Fatalf("unexpected error type: %T", err)
+	}
+}
+
 func TestBuildGraphRejectsEmptyModuleName(t *testing.T) {
 	root := mod("", nil, nil, nil, nil)
 
@@ -74,6 +88,27 @@ func TestBuildGraphRejectsNilImport(t *testing.T) {
 	_, err := kernel.BuildGraph(root)
 	if err == nil {
 		t.Fatalf("expected error for nil import")
+	}
+
+	var importErr *kernel.NilImportError
+	if !errors.As(err, &importErr) {
+		t.Fatalf("unexpected error type: %T", err)
+	}
+	if importErr.Module != "A" {
+		t.Fatalf("unexpected module: %q", importErr.Module)
+	}
+	if importErr.Index != 0 {
+		t.Fatalf("unexpected index: %d", importErr.Index)
+	}
+}
+
+func TestBuildGraphRejectsTypedNilImport(t *testing.T) {
+	var imp *testModule
+	root := mod("A", []module.Module{imp}, nil, nil, nil)
+
+	_, err := kernel.BuildGraph(root)
+	if err == nil {
+		t.Fatalf("expected error for typed nil import")
 	}
 
 	var importErr *kernel.NilImportError

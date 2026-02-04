@@ -23,6 +23,10 @@ func BuildGraph(root module.Module) (*Graph, error) {
 	if root == nil {
 		return nil, &RootModuleNilError{}
 	}
+	rootVal := reflect.ValueOf(root)
+	if rootVal.Kind() == reflect.Ptr && rootVal.IsNil() {
+		return nil, &RootModuleNilError{}
+	}
 
 	graph := &Graph{
 		Nodes: make(map[string]*ModuleNode),
@@ -37,6 +41,10 @@ func BuildGraph(root module.Module) (*Graph, error) {
 		if m == nil {
 			return &NilImportError{Module: "", Index: -1}
 		}
+		val := reflect.ValueOf(m)
+		if val.Kind() == reflect.Ptr && val.IsNil() {
+			return &NilImportError{Module: "", Index: -1}
+		}
 		def := m.Definition()
 		name := def.Name
 		if name == "" {
@@ -44,7 +52,6 @@ func BuildGraph(root module.Module) (*Graph, error) {
 		}
 
 		id := uintptr(0)
-		val := reflect.ValueOf(m)
 		if val.Kind() == reflect.Ptr {
 			id = val.Pointer()
 		}
@@ -85,6 +92,10 @@ func BuildGraph(root module.Module) (*Graph, error) {
 		imports := make([]string, 0, len(def.Imports))
 		for idx, imp := range def.Imports {
 			if imp == nil {
+				return &NilImportError{Module: name, Index: idx}
+			}
+			impVal := reflect.ValueOf(imp)
+			if impVal.Kind() == reflect.Ptr && impVal.IsNil() {
 				return &NilImportError{Module: name, Index: idx}
 			}
 			if err := visit(imp); err != nil {

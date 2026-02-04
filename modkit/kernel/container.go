@@ -140,13 +140,13 @@ func (r moduleResolver) Get(token module.Token) (any, error) {
 
 func detectsWaitCycle(waitingOn map[module.Token]module.Token, start module.Token) bool {
 	seen := map[module.Token]bool{start: true}
-	next := waitingOn[start]
-	for next != "" {
+	next, ok := waitingOn[start]
+	for ok {
 		if seen[next] {
 			return true
 		}
 		seen[next] = true
-		next = waitingOn[next]
+		next, ok = waitingOn[next]
 	}
 	return false
 }
