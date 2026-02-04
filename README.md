@@ -75,6 +75,7 @@ Guides:
 - Format: `make fmt` (uses `gofmt` and `goimports`)
 - Lint: `make lint` (uses `golangci-lint`)
 - Vulnerability scan: `make vuln` (uses `govulncheck`)
+- Details: `docs/tooling.md`
 
 ## Architecture Overview
 

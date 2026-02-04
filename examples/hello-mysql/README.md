@@ -16,6 +16,7 @@ Example consuming app for modkit using MySQL, sqlc, and migrations.
 - Testcontainers for integration smoke tests.
 - Migrations and sqlc-generated queries.
 - JSON request logging via `log/slog`.
+- Errors use RFC 7807 Problem Details (`application/problem+json`).
 
 ## Run (Docker Compose + Local Migrate)
 
@@ -34,8 +35,11 @@ curl http://localhost:8080/users
 curl http://localhost:8080/users/1
 curl -X PUT http://localhost:8080/users/1 -H 'Content-Type: application/json' -d '{"name":"Ada Lovelace","email":"ada@example.com"}'
 curl -X DELETE http://localhost:8080/users/1
+curl -X POST http://localhost:8080/users -H 'Content-Type: application/json' -d '{"name":"Ada","email":"ada@example.com"}'
 open http://localhost:8080/docs/index.html
 ```
+
+The duplicate create request returns `409 Conflict` with `application/problem+json`.
 
 You can seed separately with:
 
@@ -60,6 +64,7 @@ make test
 - `app` on `localhost:8080` (runs migrate + seed before starting)
 
 The compose services build from `examples/hello-mysql/Dockerfile`.
+`LOG_LEVEL` defaults to `info`, but compose sets it to `debug`.
 
 ## Configuration
 Environment variables:

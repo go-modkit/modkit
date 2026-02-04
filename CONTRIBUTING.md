@@ -14,6 +14,7 @@ go test ./...
 - Run `make fmt` before committing.
 - Run `make lint` for lint checks.
 - Run `make vuln` for Go vulnerability checks.
+- See `docs/tooling.md` for tool install and usage details.
 - Keep changes focused and aligned to the current phase docs under `docs/implementation/`.
 - Prefer small, reviewable PRs.
 

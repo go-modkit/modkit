@@ -12,6 +12,12 @@ Runs:
 - `gofmt -w .`
 - `goimports -w .`
 
+Install:
+
+```bash
+go install golang.org/x/tools/cmd/goimports@latest
+```
+
 ## Lint
 
 ```bash
@@ -23,6 +29,12 @@ Runs:
 
 See `.golangci.yml` for enabled linters and excluded paths.
 
+Install:
+
+```bash
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+```
+
 ## Vulnerability Scan
 
 ```bash
@@ -31,6 +43,12 @@ make vuln
 
 Runs:
 - `govulncheck ./...`
+
+Install:
+
+```bash
+go install golang.org/x/vuln/cmd/govulncheck@latest
+```
 
 ## Test
 
