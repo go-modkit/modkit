@@ -37,6 +37,10 @@ Example app:
 
 - See `docs/tooling.md`
 
+## Contributing
+
+Contributions are welcome via fork + pull request. Direct pushes to the main repo are restricted.
+
 ## Architecture Overview
 
 - **module**: metadata for imports/providers/controllers/exports.

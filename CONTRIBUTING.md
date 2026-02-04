@@ -10,6 +10,7 @@ go test ./...
 
 ## Guidelines
 
+- Contribute via fork + pull request (recommended). Direct pushes to the main repo are restricted.
 - Follow Go formatting with `gofmt`.
 - Run `make fmt` before committing.
 - Run `make lint` for lint checks.
