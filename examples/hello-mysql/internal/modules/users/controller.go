@@ -20,6 +20,15 @@ func (c *Controller) RegisterRoutes(router Router) {
 	router.Handle(http.MethodGet, "/users/{id}", http.HandlerFunc(c.handleGetUser))
 }
 
+// @Summary Get user
+// @Description Returns a user by id.
+// @Tags users
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} User
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /users/{id} [get]
 func (c *Controller) handleGetUser(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)

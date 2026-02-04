@@ -7,6 +7,7 @@ Example consuming app for modkit using MySQL, sqlc, and migrations.
 - Endpoints:
   - `GET /health` → `{ "status": "ok" }`
   - `GET /users/{id}` → user payload
+- Swagger UI at `GET /swagger/index.html`
 - MySQL via docker-compose for local runs.
 - Testcontainers for integration smoke tests.
 - Migrations and sqlc-generated queries.
@@ -24,6 +25,13 @@ Then hit:
 ```bash
 curl http://localhost:8080/health
 curl http://localhost:8080/users/1
+open http://localhost:8080/swagger/index.html
+```
+
+Swagger docs are checked in. To regenerate them, run:
+
+```bash
+make swagger
 ```
 
 ## Test
