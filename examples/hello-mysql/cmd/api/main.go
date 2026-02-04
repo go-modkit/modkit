@@ -6,6 +6,7 @@ import (
 	_ "github.com/aryeko/modkit/examples/hello-mysql/docs"
 	"github.com/aryeko/modkit/examples/hello-mysql/internal/httpserver"
 	"github.com/aryeko/modkit/examples/hello-mysql/internal/modules/app"
+	"github.com/aryeko/modkit/examples/hello-mysql/internal/platform/logging"
 	"github.com/aryeko/modkit/examples/hello-mysql/internal/platform/config"
 	modkithttp "github.com/aryeko/modkit/modkit/http"
 )
@@ -20,6 +21,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("bootstrap failed: %v", err)
 	}
+
+	logger := logging.New()
+	logStartup(logger, cfg.HTTPAddr)
 
 	if err := modkithttp.Serve(cfg.HTTPAddr, handler); err != nil {
 		log.Fatalf("server failed: %v", err)
