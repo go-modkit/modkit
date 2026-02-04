@@ -24,6 +24,10 @@ func BuildHandler(opts app.Options) (http.Handler, error) {
 		return nil, err
 	}
 	router.Get("/swagger/*", httpSwagger.WrapHandler)
+	router.Get("/docs/*", httpSwagger.WrapHandler)
+	router.Get("/docs", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/docs/index.html", http.StatusMovedPermanently)
+	}))
 
 	return router, nil
 }

@@ -11,7 +11,7 @@ Example consuming app for modkit using MySQL, sqlc, and migrations.
   - `GET /users/{id}` → user payload
   - `PUT /users/{id}` → update user
   - `DELETE /users/{id}` → delete user
-- Swagger UI at `GET /swagger/index.html`
+- Swagger UI at `GET /docs/index.html` (also available at `/swagger/index.html`)
 - MySQL via docker-compose for local runs.
 - Testcontainers for integration smoke tests.
 - Migrations and sqlc-generated queries.
@@ -34,7 +34,7 @@ curl http://localhost:8080/users
 curl http://localhost:8080/users/1
 curl -X PUT http://localhost:8080/users/1 -H 'Content-Type: application/json' -d '{"name":"Ada Lovelace","email":"ada@example.com"}'
 curl -X DELETE http://localhost:8080/users/1
-open http://localhost:8080/swagger/index.html
+open http://localhost:8080/docs/index.html
 ```
 
 You can seed separately with:
