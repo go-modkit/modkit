@@ -8,7 +8,7 @@ import (
 
 func logSeedComplete(logger modkitlogging.Logger) {
 	if logger == nil {
-		logger = modkitlogging.Nop()
+		logger = modkitlogging.NewNopLogger()
 	}
 	logger = logger.With(slog.String("scope", "seed"))
 	logger.Info("seed complete")

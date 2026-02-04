@@ -2,7 +2,7 @@ package logging
 
 type nopLogger struct{}
 
-func Nop() Logger {
+func NewNopLogger() Logger {
 	return nopLogger{}
 }
 

@@ -21,7 +21,7 @@ func (h *captureHandler) WithGroup(_ string) slog.Handler      { return h }
 func TestSlogAdapter_EmitsRecords(t *testing.T) {
 	ch := &captureHandler{}
 	base := slog.New(ch)
-	logger := NewSlog(base)
+	logger := NewSlogLogger(base)
 
 	logger.Info("hello", "k", "v")
 
@@ -51,7 +51,7 @@ func TestSlogAdapter_EmitsRecords(t *testing.T) {
 func TestSlogAdapter_WarnLevel(t *testing.T) {
 	ch := &captureHandler{}
 	base := slog.New(ch)
-	logger := NewSlog(base)
+	logger := NewSlogLogger(base)
 
 	logger.Warn("heads up")
 
@@ -64,7 +64,7 @@ func TestSlogAdapter_WarnLevel(t *testing.T) {
 }
 
 func TestNopLogger(t *testing.T) {
-	logger := Nop()
+	logger := NewNopLogger()
 
 	logger.Debug("debug")
 	logger.Info("info")

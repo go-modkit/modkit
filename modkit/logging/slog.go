@@ -6,9 +6,9 @@ type slogAdapter struct {
 	logger *slog.Logger
 }
 
-func NewSlog(logger *slog.Logger) Logger {
+func NewSlogLogger(logger *slog.Logger) Logger {
 	if logger == nil {
-		return Nop()
+		return NewNopLogger()
 	}
 	return slogAdapter{logger: logger}
 }

@@ -8,7 +8,7 @@ import (
 
 func logMigrateComplete(logger modkitlogging.Logger) {
 	if logger == nil {
-		logger = modkitlogging.Nop()
+		logger = modkitlogging.NewNopLogger()
 	}
 	logger = logger.With(slog.String("scope", "migrate"))
 	logger.Info("migrations complete")
