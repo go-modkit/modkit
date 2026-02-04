@@ -1,0 +1,7 @@
+# Lefthook configuration for git hooks
+# Setup: make setup-hooks
+
+commit-msg:
+  commands:
+    commitlint:
+      run: commitlint lint --message {1}

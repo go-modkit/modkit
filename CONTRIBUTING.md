@@ -8,6 +8,27 @@ Thanks for your interest in contributing. This project is in early MVP developme
 go test ./...
 ```
 
+### Setup Git Hooks
+
+After cloning the repository, run once to enable commit message validation:
+
+```bash
+make setup-hooks
+```
+
+This installs git hooks that validate commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) format:
+
+```
+<type>(<scope>): <short summary>
+```
+
+Examples:
+- `feat: add user authentication`
+- `fix(http): handle connection timeout`
+- `docs: update installation guide`
+
+Valid types: `feat`, `fix`, `docs`, `test`, `chore`, `refactor`, `perf`, `ci`
+
 ## Guidelines
 
 - Contribute via fork + pull request (recommended). Direct pushes to the main repo are restricted.
