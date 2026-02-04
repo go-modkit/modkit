@@ -18,6 +18,10 @@ func TestSeed_InsertsDefaultUsersIfEmpty(t *testing.T) {
 		_ = container.Terminate(ctx)
 	}()
 
+	if err := waitForMySQL(ctx, dsn); err != nil {
+		t.Fatalf("mysql not ready: %v", err)
+	}
+
 	db, err := mysql.Open(dsn)
 	if err != nil {
 		t.Fatalf("open db: %v", err)
@@ -87,4 +91,37 @@ func startMySQL(t *testing.T, ctx context.Context) (testcontainers.Container, st
 
 	dsn := "root:password@tcp(" + host + ":" + port.Port() + ")/app?parseTime=true&multiStatements=true"
 	return container, dsn
+}
+
+func waitForMySQL(ctx context.Context, dsn string) error {
+	deadline, ok := ctx.Deadline()
+	if !ok {
+		deadline = time.Now().Add(30 * time.Second)
+	}
+
+	for {
+		db, err := mysql.Open(dsn)
+		if err == nil {
+			pingCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+			pingErr := db.PingContext(pingCtx)
+			cancel()
+			_ = db.Close()
+			if pingErr == nil {
+				return nil
+			}
+		}
+
+		if time.Now().After(deadline) {
+			if err != nil {
+				return err
+			}
+			return context.DeadlineExceeded
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(500 * time.Millisecond):
+		}
+	}
 }

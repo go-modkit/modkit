@@ -6,6 +6,10 @@ modkit is a Go-idiomatic backend service framework built around an explicit modu
 
 This repository is in early MVP implementation. APIs and structure may change before v0.1.0.
 
+## API Stability
+
+Until `v0.1.0`, public APIs may change without notice. After `v0.1.0`, changes will follow semantic versioning.
+
 ## What Is modkit?
 
 modkit provides:
@@ -32,6 +36,10 @@ Example app:
 ## Tooling
 
 - See `docs/tooling.md`
+
+## Contributing
+
+Contributions are welcome via fork + pull request. Direct pushes to the main repo are restricted.
 
 ## Architecture Overview
 
