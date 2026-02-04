@@ -57,6 +57,12 @@ func LoggingMiddleware(logger *slog.Logger) func(http.Handler) http.Handler {
 Define a minimal cache interface and wrap `GET` responses:
 
 ```go
+import (
+    "net/http"
+    "net/http/httptest"
+    "time"
+)
+
 type Cache interface {
     Get(key string) ([]byte, bool)
     Set(key string, value []byte, ttl time.Duration)
