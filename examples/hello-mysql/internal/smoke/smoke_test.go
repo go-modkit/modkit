@@ -103,6 +103,10 @@ func startMySQL(t *testing.T, ctx context.Context) (testcontainers.Container, st
 }
 
 func migrate(ctx context.Context, dsn string) error {
+	if err := waitForMySQL(ctx, dsn); err != nil {
+		return err
+	}
+
 	db, err := mysql.Open(dsn)
 	if err != nil {
 		return err
@@ -113,6 +117,10 @@ func migrate(ctx context.Context, dsn string) error {
 }
 
 func seedUser(ctx context.Context, dsn string) error {
+	if err := waitForMySQL(ctx, dsn); err != nil {
+		return err
+	}
+
 	db, err := mysql.Open(dsn)
 	if err != nil {
 		return err
@@ -121,6 +129,39 @@ func seedUser(ctx context.Context, dsn string) error {
 
 	_, err = db.ExecContext(ctx, "INSERT INTO users (id, name, email) VALUES (1, 'Ada', 'ada@example.com')")
 	return err
+}
+
+func waitForMySQL(ctx context.Context, dsn string) error {
+	deadline, ok := ctx.Deadline()
+	if !ok {
+		deadline = time.Now().Add(30 * time.Second)
+	}
+
+	for {
+		db, err := mysql.Open(dsn)
+		if err == nil {
+			pingCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+			pingErr := db.PingContext(pingCtx)
+			cancel()
+			_ = db.Close()
+			if pingErr == nil {
+				return nil
+			}
+		}
+
+		if time.Now().After(deadline) {
+			if err != nil {
+				return err
+			}
+			return context.DeadlineExceeded
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(500 * time.Millisecond):
+		}
+	}
 }
 
 var _ *sql.DB
