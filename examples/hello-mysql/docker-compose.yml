@@ -24,4 +24,3 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    command: sh -c "go run ./cmd/migrate && go run ./cmd/seed && go run ./cmd/api"
