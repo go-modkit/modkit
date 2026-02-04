@@ -54,7 +54,7 @@ Configuration file at repository root:
 commit-msg:
   commands:
     commitlint:
-      run: commitlint --message {1}
+      run: '"$(go env GOPATH)/bin/commitlint" lint --message "{1}"'
 ```
 
 **Notes:**
@@ -103,7 +103,7 @@ setup-hooks: tools
 
 # Validate a commit message (for CI or manual testing)
 lint-commit:
-	@echo "$(MSG)" | commitlint
+	@echo "$(MSG)" | $(COMMITLINT) lint
 ```
 
 **Usage:**
@@ -157,7 +157,7 @@ Examples:
 
 1. **Header format**: `<type>(<scope>): <description>`
    - Scope is optional
-   - Max 100 characters for full header
+   - Max 50 characters for full header (per CONTRIBUTING.md)
 
 2. **Valid types**: 
    - `feat` - New feature
