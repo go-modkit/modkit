@@ -50,6 +50,42 @@ func TestBootstrapEnforcesVisibility(t *testing.T) {
 	}
 }
 
+func TestBootstrapAllowsReExportedTokens(t *testing.T) {
+	shared := module.Token("shared")
+
+	modC := mod("C", nil,
+		[]module.ProviderDef{{
+			Token: shared,
+			Build: func(r module.Resolver) (any, error) {
+				return "value", nil
+			},
+		}},
+		nil,
+		[]module.Token{shared},
+	)
+
+	modB := mod("B", []module.Module{modC}, nil, nil, []module.Token{shared})
+
+	modA := mod("A", []module.Module{modB}, nil,
+		[]module.ControllerDef{{
+			Name: "UsesShared",
+			Build: func(r module.Resolver) (any, error) {
+				return r.Get(shared)
+			},
+		}},
+		nil,
+	)
+
+	app, err := kernel.Bootstrap(modA)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if app.Controllers["UsesShared"] != "value" {
+		t.Fatalf("unexpected controller value: %v", app.Controllers["UsesShared"])
+	}
+}
+
 func TestBootstrapRejectsDuplicateProviderTokens(t *testing.T) {
 	shared := module.Token("shared")
 
@@ -82,5 +118,26 @@ func TestBootstrapRejectsDuplicateProviderTokens(t *testing.T) {
 	}
 	if dupErr.Token != shared {
 		t.Fatalf("unexpected token: %q", dupErr.Token)
+	}
+}
+
+func TestBootstrapRegistersControllers(t *testing.T) {
+	modA := mod("A", nil, nil,
+		[]module.ControllerDef{{
+			Name: "ControllerA",
+			Build: func(r module.Resolver) (any, error) {
+				return "controller", nil
+			},
+		}},
+		nil,
+	)
+
+	app, err := kernel.Bootstrap(modA)
+	if err != nil {
+		t.Fatalf("Bootstrap failed: %v", err)
+	}
+
+	if app.Controllers["ControllerA"] != "controller" {
+		t.Fatalf("expected controller instance to be registered")
 	}
 }

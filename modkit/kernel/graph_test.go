@@ -12,7 +12,7 @@ type testModule struct {
 	def module.ModuleDef
 }
 
-func (m testModule) Definition() module.ModuleDef {
+func (m *testModule) Definition() module.ModuleDef {
 	return m.def
 }
 
@@ -23,7 +23,7 @@ func mod(
 	controllers []module.ControllerDef,
 	exports []module.Token,
 ) module.Module {
-	return testModule{
+	return &testModule{
 		def: module.ModuleDef{
 			Name:        name,
 			Imports:     imports,
@@ -61,6 +61,18 @@ func TestBuildGraphImportsFirst(t *testing.T) {
 	}
 }
 
+func TestBuildGraphAllowsSharedImports(t *testing.T) {
+	shared := mod("Shared", nil, nil, nil, nil)
+	modB := mod("B", []module.Module{shared}, nil, nil, nil)
+	modC := mod("C", []module.Module{shared}, nil, nil, nil)
+	modA := mod("A", []module.Module{modB, modC}, nil, nil, nil)
+
+	_, err := kernel.BuildGraph(modA)
+	if err != nil {
+		t.Fatalf("BuildGraph failed: %v", err)
+	}
+}
+
 func TestBuildGraphRejectsDuplicateModuleNames(t *testing.T) {
 	modB1 := mod("B", nil, nil, nil, nil)
 	modB2 := mod("B", nil, nil, nil, nil)
@@ -83,7 +95,9 @@ func TestBuildGraphRejectsDuplicateModuleNames(t *testing.T) {
 func TestBuildGraphRejectsCycles(t *testing.T) {
 	modA := mod("A", nil, nil, nil, nil)
 	modB := mod("B", []module.Module{modA}, nil, nil, nil)
-	modA = mod("A", []module.Module{modB}, nil, nil, nil)
+
+	root := modA.(*testModule)
+	root.def.Imports = []module.Module{modB}
 
 	_, err := kernel.BuildGraph(modA)
 	if err == nil {

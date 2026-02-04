@@ -1,6 +1,10 @@
 package kernel
 
-import "github.com/aryeko/modkit/modkit/module"
+import (
+	"reflect"
+
+	"github.com/aryeko/modkit/modkit/module"
+)
 
 type ModuleNode struct {
 	Name    string
@@ -26,6 +30,7 @@ func BuildGraph(root module.Module) (*Graph, error) {
 
 	state := make(map[string]int)
 	stack := make([]string, 0)
+	identities := make(map[string]uintptr)
 
 	var visit func(m module.Module) error
 	visit = func(m module.Module) error {
@@ -33,6 +38,18 @@ func BuildGraph(root module.Module) (*Graph, error) {
 		name := def.Name
 		if name == "" {
 			return &DuplicateModuleNameError{Name: name}
+		}
+
+		id := uintptr(0)
+		val := reflect.ValueOf(m)
+		if val.Kind() == reflect.Ptr {
+			id = val.Pointer()
+		}
+
+		if existing, ok := identities[name]; ok {
+			if id == 0 || existing != id {
+				return &DuplicateModuleNameError{Name: name}
+			}
 		}
 
 		switch state[name] {
@@ -47,10 +64,13 @@ func BuildGraph(root module.Module) (*Graph, error) {
 			path := append(append([]string{}, stack[idx:]...), name)
 			return &ModuleCycleError{Path: path}
 		case 2:
-			return &DuplicateModuleNameError{Name: name}
+			return nil
 		}
 
 		state[name] = 1
+		if id != 0 {
+			identities[name] = id
+		}
 		stack = append(stack, name)
 
 		imports := make([]string, 0, len(def.Imports))
