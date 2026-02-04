@@ -17,7 +17,7 @@ type InvalidModuleNameError struct {
 }
 
 func (e *InvalidModuleNameError) Error() string {
-	return "invalid module name"
+	return fmt.Sprintf("invalid module name: %q", e.Name)
 }
 
 type DuplicateModuleNameError struct {
