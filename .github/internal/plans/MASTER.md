@@ -90,11 +90,95 @@ These are handled by Go-idiomatic patterns documented in guides, not framework a
 2. **D9-D10** — Each guide is standalone; can be done in any order
 3. **Testing** — Each guide should reference examples from `examples/hello-mysql`
 
-### Code Change Priority Order
+---
 
-1. **C2 (Router Group/Use)** — High priority; multiple guides depend on this API
-2. **C3 (Container Access)** — Docs fix only; quick win
-3. **C4 (Logger Interface)** — Aligns implementation with documented API
+## Dependency Analysis
+
+### Story Dependencies
+
+| Story | Can Start Immediately | Blocks | Blocked By |
+|-------|----------------------|--------|------------|
+| C1 | ✅ | — | — |
+| C2 | ✅ | D9 | — |
+| C3 | ✅ | — | — |
+| C4 | ✅ | C5 | — |
+| C5 | ❌ | — | C4 |
+| C6 | ✅ | — | — |
+| D9 | ❌ | — | C2 |
+| D10 | ✅ | — | — |
+
+### Sequential Dependencies
+
+```
+C4 (Logger Interface) ──► C5 (NewSlogLogger Rename)
+        │
+        └── Both modify modkit/logging/slog.go and logger_test.go
+            C5 must be done AFTER C4 to avoid conflicts
+
+C2 (Router Group/Use) ──► D9 (Interceptors Guide)
+        │
+        └── D9 documents middleware wrapper patterns using
+            Group() and Use() methods from C2
+```
+
+### Parallel Work Groups
+
+**Group A: Kernel** — isolated from http/logging
+- C1: Controller Registry Scoping
+
+**Group B: HTTP** — isolated from kernel/logging
+- C2: Router Group and Use
+- C6: Graceful Shutdown *(different files)*
+
+**Group C: Logging** — sequential internally
+- C4: Logger Interface Alignment *(first)*
+- C5: NewSlogLogger Rename *(after C4)*
+
+**Group D: Docs Only** — no code dependencies
+- C3: App Container Access
+- D10: Context Helpers
+
+**Group E: Depends on C2**
+- D9: Interceptors
+
+---
+
+## Execution Plan
+
+### Optimal Agent Assignment (4 concurrent agents)
+
+Sequential work stays within the same agent context — no cross-agent waiting required.
+
+| Agent | Work | Notes |
+|-------|------|-------|
+| Agent 1 | C1, C3 | Independent stories, parallel within agent |
+| Agent 2 | C2 → D9 | D9 continues immediately after C2 |
+| Agent 3 | C4 → C5 | C5 continues immediately after C4; same files |
+| Agent 4 | C6, D10 | Independent stories, parallel within agent |
+
+```
+Agent 1: ─── C1 ───┬─── C3 ───
+                   │
+Agent 2: ─── C2 ───────────────► D9 ───
+                   │
+Agent 3: ─── C4 ───────────────► C5 ───
+                   │
+Agent 4: ─── C6 ───┬─── D10 ───
+```
+
+**Why this works:**
+- Each agent runs to completion without waiting for other agents
+- Sequential dependencies (C4→C5, C2→D9) stay within same agent context
+- Agent has full knowledge of prior changes when continuing to dependent work
+- Same files stay together (C4/C5 both touch `logging/slog.go`)
+
+### Priority Order (single agent)
+
+1. **C2 (Router Group/Use)** — High priority; unblocks D9
+2. **C4 (Logger Interface)** — Unblocks C5
+3. **C3 (Container Access)** — Docs fix only; quick win
 4. **C6 (Graceful Shutdown)** — Docs promise feature that doesn't exist
 5. **C1 (Controller Scoping)** — Improves multi-module apps
-6. **C5 (NewSlogLogger)** — Simple rename; low priority
+6. **D10 (Context Helpers)** — Standalone doc
+7. **C5 (NewSlogLogger)** — Simple rename; requires C4
+8. **D9 (Interceptors)** — Requires C2
