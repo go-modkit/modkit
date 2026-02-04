@@ -1,36 +1,35 @@
 # Repository Guidelines
 
-## Project Structure & Module Organization
-- Root design source: `modkit_mvp_design_doc.md` (MVP scope and architecture).
-- Implementation phase docs: `docs/implementation/` (master index and per‑phase instructions).
-- Future code will live under `modkit/` for library packages and `examples/` for consumer apps (see `modkit_mvp_design_doc.md`).
+This file provides short, focused guidance for contributors and AI agents. Keep instructions concise and non-conflicting. For path-specific guidance, prefer scoped instruction files rather than growing this document.
 
-## Build, Test, and Development Commands
-- `go test ./...` runs the full test suite (library + examples once implemented).
-- `go test ./modkit/...` runs library package tests only.
-- `go test ./examples/...` runs example app tests.
+## Project Structure
+- Core library packages: `modkit/` (`module`, `kernel`, `http`, `logging`).
+- Example apps: `examples/` (see `examples/hello-mysql/README.md`).
+- Design and phase docs: `docs/design/` and `docs/implementation/`.
 
-## Coding Style & Naming Conventions
-- Go formatting is enforced with `gofmt` (tabs for indentation).
-- Package paths use lowercase, short names (e.g., `modkit/module`, `modkit/kernel`).
-- Exported types/functions use PascalCase; unexported use camelCase.
+## Tooling & Commands
+- Format: `make fmt` (runs `gofmt`, `goimports`).
+- Lint: `make lint` (runs `golangci-lint`).
+- Vulnerability scan: `make vuln` (runs `govulncheck`).
+- Tests: `make test` and `go test ./examples/hello-mysql/...`.
 
-## Testing Guidelines
-- Use Go’s standard testing package (`testing`).
-- Name tests `TestXxx` and keep them near the package under test.
-- Prefer table‑driven tests for validators and graph cases.
-- Run focused tests with `go test ./modkit/kernel -run TestName`.
+## Coding Conventions
+- Use `gofmt` formatting and standard Go naming.
+- Packages are lowercase, short, and stable.
+- Keep exported API minimal; prefer explicit errors over panics.
 
-## Commit & Pull Request Guidelines
-- Commit messages follow conventional prefixes seen in history (e.g., `chore: ...`, `docs: ...`, `feat: ...`).
-- One logical change per commit; phase docs require a single commit per phase after validation.
-- PRs should include a concise summary, validation commands run, and link to the relevant phase doc (if applicable).
+## Testing Guidance
+- Use Go’s `testing` package and keep tests close to code.
+- Name tests `TestXxx` and use table-driven tests where it clarifies cases.
+- Integration tests should be deterministic; keep external dependencies isolated.
 
-## Architecture Overview
-- `module` defines metadata (imports/providers/controllers/exports).
-- `kernel` builds the module graph, enforces visibility, and bootstraps the app.
-- `http` adapts controllers to routing without reflection.
+## Commit & PR Hygiene
+- Use conventional prefixes: `feat:`, `fix:`, `docs:`, `chore:`.
+- One logical change per commit.
+- PRs should include summary + validation commands run.
 
-## Agent-Specific Instructions
-- Follow `docs/implementation/master.md` and the phase docs in order.
-- Avoid duplicating design text; reference `modkit_mvp_design_doc.md` instead.
+## Agent Instruction Layout
+- Repository-wide instructions can live in `.github/copilot-instructions.md`.
+- Path-scoped instructions can live in `.github/instructions/*.instructions.md` with YAML frontmatter and `applyTo` globs; you can use `excludeAgent` to target specific Copilot agents.
+- Agent instructions can be stored in `AGENTS.md` files; the closest `AGENTS.md` in the directory tree takes precedence.
+- Repository-wide and path-scoped instructions can both apply; avoid conflicting guidance because Copilot may resolve conflicts non-deterministically.
