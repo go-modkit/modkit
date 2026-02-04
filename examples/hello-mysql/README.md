@@ -65,3 +65,7 @@ The compose services build from `examples/hello-mysql/Dockerfile`.
 Environment variables:
 - `HTTP_ADDR` (default `:8080`)
 - `MYSQL_DSN` (default `root:password@tcp(localhost:3306)/app?parseTime=true&multiStatements=true`)
+- `LOG_FORMAT` (`text` or `json`, default `text`)
+- `LOG_LEVEL` (`debug`, `info`, `warn`, `error`, default `info`)
+- `LOG_COLOR` (`auto`, `on`, `off`, default `auto`)
+- `LOG_TIME` (`local`, `utc`, `none`, default `local`)
