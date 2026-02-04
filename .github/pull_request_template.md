@@ -1,6 +1,6 @@
 ## Type
 
-<!-- Check ONE that applies -->
+<!-- Check ALL that apply -->
 - [ ] `feat` — New feature
 - [ ] `fix` — Bug fix
 - [ ] `refactor` — Code restructure (no behavior change)
