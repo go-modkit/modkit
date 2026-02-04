@@ -18,7 +18,7 @@ func TestRegisterRoutes_InvokesControllers(t *testing.T) {
 	router := NewRouter()
 	ctrl := &testController{}
 
-	err := RegisterRoutes(router, map[string]any{"Test": ctrl})
+	err := RegisterRoutes(AsRouter(router), map[string]any{"Test": ctrl})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -31,7 +31,7 @@ func TestRegisterRoutes_InvokesControllers(t *testing.T) {
 func TestRegisterRoutes_ErrsOnMissingRegistrar(t *testing.T) {
 	router := NewRouter()
 
-	err := RegisterRoutes(router, map[string]any{"Test": struct{}{}})
+	err := RegisterRoutes(AsRouter(router), map[string]any{"Test": struct{}{}})
 	if err == nil {
 		t.Fatalf("expected error")
 	}

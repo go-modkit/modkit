@@ -17,21 +17,26 @@ type RouteRegistrar interface {
 	RegisterRoutes(router Router)
 }
 
-type chiRouter struct {
+type routerAdapter struct {
 	chi.Router
 }
 
-func (r *chiRouter) Handle(method string, pattern string, handler http.Handler) {
+func (r routerAdapter) Handle(method string, pattern string, handler http.Handler) {
 	r.Method(method, pattern, handler)
 }
 
+// AsRouter adapts a chi router to the minimal Router interface.
+func AsRouter(router chi.Router) Router {
+	return routerAdapter{Router: router}
+}
+
 // NewRouter creates a chi router with baseline middleware for the HTTP adapter.
-func NewRouter() Router {
+func NewRouter() chi.Router {
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
 	router.Use(middleware.RealIP)
 	router.Use(middleware.Recoverer)
-	return &chiRouter{Router: router}
+	return router
 }
 
 // RegisterRoutes invokes controller route registration functions.
