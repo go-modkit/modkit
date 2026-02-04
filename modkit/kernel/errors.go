@@ -79,11 +79,12 @@ func (e *DuplicateProviderTokenError) Error() string {
 }
 
 type DuplicateControllerNameError struct {
-	Name string
+	Module string
+	Name   string
 }
 
 func (e *DuplicateControllerNameError) Error() string {
-	return fmt.Sprintf("duplicate controller name: %s", e.Name)
+	return fmt.Sprintf("duplicate controller name in module %q: %s", e.Module, e.Name)
 }
 
 type TokenNotVisibleError struct {

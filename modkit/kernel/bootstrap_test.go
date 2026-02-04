@@ -103,8 +103,8 @@ func TestBootstrapAllowsReExportedTokens(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if app.Controllers["UsesShared"] != "value" {
-		t.Fatalf("unexpected controller value: %v", app.Controllers["UsesShared"])
+	if app.Controllers["A:UsesShared"] != "value" {
+		t.Fatalf("unexpected controller value: %v", app.Controllers["A:UsesShared"])
 	}
 }
 
@@ -171,6 +171,9 @@ func TestBootstrapRejectsDuplicateControllerNames(t *testing.T) {
 	if dupErr.Name != "ControllerA" {
 		t.Fatalf("unexpected controller name: %q", dupErr.Name)
 	}
+	if dupErr.Module != "A" {
+		t.Fatalf("unexpected module name: %q", dupErr.Module)
+	}
 }
 
 func TestBootstrapRegistersControllers(t *testing.T) {
@@ -189,7 +192,110 @@ func TestBootstrapRegistersControllers(t *testing.T) {
 		t.Fatalf("Bootstrap failed: %v", err)
 	}
 
-	if app.Controllers["ControllerA"] != "controller" {
+	if app.Controllers["A:ControllerA"] != "controller" {
 		t.Fatalf("expected controller instance to be registered")
 	}
+}
+
+func TestBootstrapAllowsSameControllerNameAcrossModules(t *testing.T) {
+	modB := mod("B", nil, nil,
+		[]module.ControllerDef{{
+			Name: "Shared",
+			Build: func(r module.Resolver) (any, error) {
+				return "controller-from-B", nil
+			},
+		}},
+		nil,
+	)
+
+	modA := mod("A", []module.Module{modB}, nil,
+		[]module.ControllerDef{{
+			Name: "Shared",
+			Build: func(r module.Resolver) (any, error) {
+				return "controller-from-A", nil
+			},
+		}},
+		nil,
+	)
+
+	app, err := kernel.Bootstrap(modA)
+	if err != nil {
+		t.Fatalf("expected no error, got: %v", err)
+	}
+
+	if len(app.Controllers) != 2 {
+		t.Fatalf("expected 2 controllers, got %d", len(app.Controllers))
+	}
+
+	if app.Controllers["A:Shared"] != "controller-from-A" {
+		t.Errorf("controller A:Shared has wrong value: %v", app.Controllers["A:Shared"])
+	}
+	if app.Controllers["B:Shared"] != "controller-from-B" {
+		t.Errorf("controller B:Shared has wrong value: %v", app.Controllers["B:Shared"])
+	}
+}
+
+func TestBootstrapRejectsDuplicateControllerInSameModule(t *testing.T) {
+	modA := mod("A", nil, nil,
+		[]module.ControllerDef{
+			{
+				Name: "Dup",
+				Build: func(r module.Resolver) (any, error) {
+					return "one", nil
+				},
+			},
+			{
+				Name: "Dup",
+				Build: func(r module.Resolver) (any, error) {
+					return "two", nil
+				},
+			},
+		},
+		nil,
+	)
+
+	_, err := kernel.Bootstrap(modA)
+	if err == nil {
+		t.Fatalf("expected duplicate controller error")
+	}
+
+	var dupErr *kernel.DuplicateControllerNameError
+	if !errors.As(err, &dupErr) {
+		t.Fatalf("unexpected error type: %T", err)
+	}
+	if dupErr.Name != "Dup" {
+		t.Fatalf("unexpected controller name: %q", dupErr.Name)
+	}
+	if dupErr.Module != "A" {
+		t.Fatalf("unexpected module name: %q", dupErr.Module)
+	}
+}
+
+func TestControllerKeyFormat(t *testing.T) {
+	modA := mod("users", nil, nil,
+		[]module.ControllerDef{{
+			Name: "Controller",
+			Build: func(r module.Resolver) (any, error) {
+				return nil, nil
+			},
+		}},
+		nil,
+	)
+
+	app, err := kernel.Bootstrap(modA)
+	if err != nil {
+		t.Fatalf("Bootstrap failed: %v", err)
+	}
+
+	if _, ok := app.Controllers["users:Controller"]; !ok {
+		t.Fatalf("expected key 'users:Controller', got keys: %v", controllerKeys(app.Controllers))
+	}
+}
+
+func controllerKeys(m map[string]any) []string {
+	keys := make([]string, 0, len(m))
+	for key := range m {
+		keys = append(keys, key)
+	}
+	return keys
 }

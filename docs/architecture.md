@@ -182,14 +182,14 @@ Cycles are detected at build time and return a `ProviderCycleError`.
 
 ## Controllers
 
-Controllers are built after providers and returned in `App.Controllers`:
+Controllers are built after providers and returned in `App.Controllers`. Keys are namespaced as `module:controller`:
 
 ```go
 app, _ := kernel.Bootstrap(&AppModule{})
 
 // Controllers are ready to use
 for name, controller := range app.Controllers {
-    fmt.Println(name)  // e.g., "UsersController"
+    fmt.Println(name)  // e.g., "users:UsersController"
 }
 ```
 

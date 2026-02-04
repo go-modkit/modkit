@@ -8,6 +8,10 @@ type App struct {
 	Controllers map[string]any
 }
 
+func controllerKey(moduleName, controllerName string) string {
+	return moduleName + ":" + controllerName
+}
+
 func Bootstrap(root module.Module) (*App, error) {
 	graph, err := BuildGraph(root)
 	if err != nil {
@@ -25,17 +29,22 @@ func Bootstrap(root module.Module) (*App, error) {
 	}
 
 	controllers := make(map[string]any)
+	perModule := make(map[string]map[string]bool)
 	for _, node := range graph.Modules {
+		if perModule[node.Name] == nil {
+			perModule[node.Name] = make(map[string]bool)
+		}
 		resolver := container.resolverFor(node.Name)
 		for _, controller := range node.Def.Controllers {
-			if _, exists := controllers[controller.Name]; exists {
-				return nil, &DuplicateControllerNameError{Name: controller.Name}
+			if perModule[node.Name][controller.Name] {
+				return nil, &DuplicateControllerNameError{Module: node.Name, Name: controller.Name}
 			}
+			perModule[node.Name][controller.Name] = true
 			instance, err := controller.Build(resolver)
 			if err != nil {
 				return nil, &ControllerBuildError{Module: node.Name, Controller: controller.Name, Err: err}
 			}
-			controllers[controller.Name] = instance
+			controllers[controllerKey(node.Name, controller.Name)] = instance
 		}
 	}
 

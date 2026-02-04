@@ -114,7 +114,7 @@ type App struct {
 
 | Field | Description |
 |-------|-------------|
-| `Controllers` | Map of controller name → controller instance |
+| `Controllers` | Map of controller key (`module:controller`) → controller instance |
 | `Container` | Access to the provider container |
 
 ### Container
