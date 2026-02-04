@@ -18,6 +18,8 @@ type Module struct {
 	opts Options
 }
 
+type AppModule = Module
+
 func NewModule(opts Options) module.Module {
 	return Module{opts: opts}
 }

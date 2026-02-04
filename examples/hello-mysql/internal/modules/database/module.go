@@ -15,6 +15,8 @@ type Module struct {
 	opts Options
 }
 
+type DatabaseModule = Module
+
 func NewModule(opts Options) module.Module {
 	return &Module{opts: opts}
 }

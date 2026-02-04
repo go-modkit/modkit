@@ -23,6 +23,8 @@ type Module struct {
 	opts Options
 }
 
+type UsersModule = Module
+
 func NewModule(opts Options) module.Module {
 	return &Module{opts: opts}
 }
