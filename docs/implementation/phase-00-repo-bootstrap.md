@@ -6,6 +6,7 @@
 - `modkit_mvp_design_doc.md` exists at repo root and is committed.
 
 ## Requirements
+- Add a placeholder test package so `go test ./...` runs in an empty repo.
 - Initialize Go module at `github.com/aryeko/modkit`.
 - Add baseline repository files:
   - `README.md` (MVP summary + quickstart stub)
