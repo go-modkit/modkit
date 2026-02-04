@@ -5,7 +5,8 @@ This file provides short, focused guidance for contributors and AI agents. Keep 
 ## Project Structure
 - Core library packages: `modkit/` (`module`, `kernel`, `http`, `logging`).
 - Example apps: `examples/` (see `examples/hello-mysql/README.md`).
-- Design and phase docs: `docs/design/` and `docs/implementation/`.
+- Documentation: `docs/guides/` (user guides), `docs/reference/` (API reference).
+- Internal plans: `.github/internal/plans/` (roadmap and implementation tracking).
 
 ## Tooling & Commands
 - Format: `make fmt` (runs `gofmt`, `goimports`).

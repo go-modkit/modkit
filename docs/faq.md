@@ -16,7 +16,7 @@ modkit is in **early development**. APIs may change before v0.1.0. Use it for pr
 
 ### What Go version is required?
 
-Go 1.22 or later.
+Go 1.25 or later.
 
 ---
 
@@ -179,7 +179,7 @@ func (c *Controller) RegisterRoutes(r mkhttp.Router) {
 
 ### Does modkit support gRPC?
 
-Not yet. A gRPC adapter is planned for post-MVP. See the [roadmap](.github/internal/plans/docs/99-post-mvp-roadmap.md).
+Not yet. A gRPC adapter is planned for post-MVP.
 
 ### How do I handle graceful shutdown?
 

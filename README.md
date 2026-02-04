@@ -72,7 +72,7 @@ func main() {
 go get github.com/aryeko/modkit
 ```
 
-Requires Go 1.22+
+Requires Go 1.25+
 
 ## Features
 
@@ -133,6 +133,8 @@ See [Architecture Guide](docs/architecture.md) for details.
 - [Controllers](docs/guides/controllers.md) — HTTP handlers and routing
 - [Middleware](docs/guides/middleware.md) — Request/response middleware
 - [Error Handling](docs/guides/error-handling.md) — Error patterns and Problem Details
+- [Validation](docs/guides/validation.md) — Input validation patterns
+- [Authentication](docs/guides/authentication.md) — Auth middleware and guards
 - [Testing](docs/guides/testing.md) — Testing patterns
 - [Comparison](docs/guides/comparison.md) — vs Wire, Fx, and others
 
