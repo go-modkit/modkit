@@ -14,7 +14,7 @@ fmt: tools
 	$(GOIMPORTS) -w .
 
 lint:
-	$(GOLANGCI_LINT) run --tests=false
+	$(GOLANGCI_LINT) run
 
 vuln:
 	$(GOVULNCHECK) ./...
