@@ -1,23 +1,34 @@
-# Controller Registry Scoping Implementation Plan
+# C1: Controller Registry Scoping
 
-> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
-
-**Goal:** Allow controllers with the same name in different modules without collisions by namespacing controller keys at bootstrap.
-
-**Architecture:** Keep `App` as the single controller registry, but compute map keys using `moduleName + ":" + controllerName` and only enforce duplicate names within the same module. This preserves existing HTTP adapter usage while removing a global uniqueness constraint.
-
-**Tech Stack:** Go, `testing`, existing `modkit/kernel` and `modkit/http`.
+**Status:** 🔴 Not started  
+**Type:** Code change  
+**Priority:** Independent (can be done anytime)
 
 ---
 
-### Task 1: Namespace controller keys in bootstrap
+## Goal
+
+Allow controllers with the same name in different modules without collisions by namespacing controller keys at bootstrap.
+
+## Architecture
+
+Keep `App` as the single controller registry, but compute map keys using `moduleName + ":" + controllerName` and only enforce duplicate names within the same module. This preserves existing HTTP adapter usage while removing a global uniqueness constraint.
+
+## Tech Stack
+
+Go, `testing`, existing `modkit/kernel` and `modkit/http`.
+
+---
+
+## Task 1: Namespace controller keys in bootstrap
 
 **Files:**
 - Modify: `modkit/kernel/bootstrap.go`
 
-**Step 1: Write the failing test**
+### Step 1: Write the failing test
 
 Add a new test to allow duplicate controller names across modules:
+
 ```go
 func TestBootstrapAllowsSameControllerNameAcrossModules(t *testing.T) {
     modB := mod("B", nil, nil,
@@ -51,14 +62,18 @@ func TestBootstrapAllowsSameControllerNameAcrossModules(t *testing.T) {
 }
 ```
 
-**Step 2: Run test to verify it fails**
+### Step 2: Run test to verify it fails
 
-Run: `go test ./modkit/kernel -run TestBootstrapAllowsSameControllerNameAcrossModules`
+```bash
+go test ./modkit/kernel -run TestBootstrapAllowsSameControllerNameAcrossModules
+```
+
 Expected: FAIL with `DuplicateControllerNameError`
 
-**Step 3: Write minimal implementation**
+### Step 3: Write minimal implementation
 
 Update bootstrap to namespace controller keys and only error on duplicates within the same module:
+
 ```go
 func controllerKey(moduleName, controllerName string) string {
     return moduleName + ":" + controllerName
@@ -86,33 +101,41 @@ for _, node := range graph.Modules {
 }
 ```
 
-**Step 4: Run test to verify it passes**
+### Step 4: Run test to verify it passes
 
-Run: `go test ./modkit/kernel -run TestBootstrapAllowsSameControllerNameAcrossModules`
+```bash
+go test ./modkit/kernel -run TestBootstrapAllowsSameControllerNameAcrossModules
+```
+
 Expected: PASS
 
-**Step 5: Commit**
+### Step 5: Commit
 
 ```bash
 git add modkit/kernel/bootstrap.go modkit/kernel/bootstrap_test.go
 git commit -m "feat: namespace controller registry keys"
 ```
 
-### Task 2: Update existing bootstrap tests
+---
+
+## Task 2: Update existing bootstrap tests
 
 **Files:**
 - Modify: `modkit/kernel/bootstrap_test.go`
 
-**Step 1: Update the duplicate controller test**
+### Step 1: Update the duplicate controller test
 
 Keep the duplicate-name test but ensure it only checks duplication within the same module. No additional code change is required if it already uses the same module.
 
-**Step 2: Run tests**
+### Step 2: Run tests
 
-Run: `go test ./modkit/kernel -run TestBootstrapRejectsDuplicateControllerNames`
+```bash
+go test ./modkit/kernel -run TestBootstrapRejectsDuplicateControllerNames
+```
+
 Expected: PASS
 
-**Step 3: Commit**
+### Step 3: Commit
 
 ```bash
 git add modkit/kernel/bootstrap_test.go
