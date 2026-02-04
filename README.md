@@ -21,61 +21,17 @@ See `docs/design/mvp.md` for the canonical architecture and scope.
 go get github.com/aryeko/modkit
 ```
 
-Minimal sketch (omitting error handling details):
-
-```go
-package main
-
-import (
-    "log"
-
-    mkhttp "github.com/aryeko/modkit/modkit/http"
-    "github.com/aryeko/modkit/modkit/kernel"
-    "github.com/aryeko/modkit/modkit/module"
-)
-
-type AppModule struct{}
-
-func (m AppModule) Definition() module.ModuleDef {
-    return module.ModuleDef{
-        Name: "app",
-        Providers: []module.ProviderDef{
-            // ...
-        },
-        Controllers: []module.ControllerDef{
-            // ...
-        },
-    }
-}
-
-func main() {
-    app, err := kernel.Bootstrap(AppModule{})
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    router := mkhttp.NewRouter()
-    if err := mkhttp.RegisterRoutes(mkhttp.AsRouter(router), app.Controllers); err != nil {
-        log.Fatal(err)
-    }
-
-    if err := mkhttp.Serve(":8080", router); err != nil {
-        log.Fatal(err)
-    }
-}
-```
-
 Guides:
 - `docs/guides/getting-started.md`
 - `docs/guides/modules.md`
 - `docs/guides/testing.md`
 
+Example app:
+- `examples/hello-mysql/README.md`
+
 ## Tooling
 
-- Format: `make fmt` (uses `gofmt` and `goimports`)
-- Lint: `make lint` (uses `golangci-lint`)
-- Vulnerability scan: `make vuln` (uses `govulncheck`)
-- Details: `docs/tooling.md`
+- See `docs/tooling.md`
 
 ## Architecture Overview
 
