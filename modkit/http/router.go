@@ -41,12 +41,18 @@ func NewRouter() chi.Router {
 
 // RegisterRoutes invokes controller route registration functions.
 func RegisterRoutes(router Router, controllers map[string]any) error {
+	registrars := make([]RouteRegistrar, 0, len(controllers))
 	for name, controller := range controllers {
 		registrar, ok := controller.(RouteRegistrar)
 		if !ok {
 			return &RouteRegistrationError{Name: name}
 		}
+		registrars = append(registrars, registrar)
+	}
+
+	for _, registrar := range registrars {
 		registrar.RegisterRoutes(router)
 	}
+
 	return nil
 }

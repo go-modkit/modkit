@@ -7,11 +7,17 @@ import (
 
 type testController struct{ called bool }
 
+type testControllerB struct{ called bool }
+
 func (c *testController) RegisterRoutes(router Router) {
 	c.called = true
 	router.Handle(http.MethodGet, "/ping", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
+}
+
+func (c *testControllerB) RegisterRoutes(router Router) {
+	c.called = true
 }
 
 func TestRegisterRoutes_InvokesControllers(t *testing.T) {
@@ -34,5 +40,24 @@ func TestRegisterRoutes_ErrsOnMissingRegistrar(t *testing.T) {
 	err := RegisterRoutes(AsRouter(router), map[string]any{"Test": struct{}{}})
 	if err == nil {
 		t.Fatalf("expected error")
+	}
+}
+
+func TestRegisterRoutes_DoesNotPartiallyRegister(t *testing.T) {
+	router := NewRouter()
+	ctrlA := &testController{}
+	ctrlB := &testControllerB{}
+
+	err := RegisterRoutes(AsRouter(router), map[string]any{
+		"A": ctrlA,
+		"B": struct{}{},
+		"C": ctrlB,
+	})
+	if err == nil {
+		t.Fatalf("expected error")
+	}
+
+	if ctrlA.called || ctrlB.called {
+		t.Fatalf("expected no controllers to be registered on error")
 	}
 }
