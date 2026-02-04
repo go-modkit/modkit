@@ -108,24 +108,28 @@ Entry point for bootstrapping your application. Returns an `App` with built cont
 ```go
 type App struct {
     Controllers map[string]any
-    Container   Container
 }
 ```
 
 | Field | Description |
 |-------|-------------|
 | `Controllers` | Map of controller key (`module:controller`) → controller instance |
-| `Container` | Access to the provider container |
 
-### Container
+### App.Get
 
 ```go
-type Container interface {
-    Get(token Token) (any, error)
-}
+func (a *App) Get(token Token) (any, error)
 ```
 
-Provides access to built providers. Used for manual resolution or cleanup.
+Resolves a token from the root module scope.
+
+### App.Resolver
+
+```go
+func (a *App) Resolver() Resolver
+```
+
+Returns a root-scoped resolver that enforces module visibility.
 
 ### Errors
 
