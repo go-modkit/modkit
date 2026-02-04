@@ -54,7 +54,7 @@ Configuration file at repository root:
 commit-msg:
   commands:
     commitlint:
-      run: '"$(go env GOPATH)/bin/commitlint" lint --message "{1}"'
+      run: '"${GOBIN:-$(go env GOPATH)/bin}/commitlint" lint --message "{1}"'
 ```
 
 **Notes:**
