@@ -7,13 +7,13 @@ SWAG ?= $(GOPATH)/bin/swag
 TEST_PACKAGES ?= ./...
 
 compose-up:
-	docker compose up -d mysql app
+	docker compose up -d --build mysql app
 
 compose-up-db:
 	docker compose up -d mysql
 
 compose-up-app:
-	docker compose up -d app
+	docker compose up -d --build app
 
 compose-down:
 	docker compose down -v

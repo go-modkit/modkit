@@ -59,6 +59,8 @@ make test
 - `app` on `localhost:8080`
 - `migrate` (profiled; not started by default)
 
+The compose services build from `examples/hello-mysql/Dockerfile`.
+
 ## Configuration
 Environment variables:
 - `HTTP_ADDR` (default `:8080`)
