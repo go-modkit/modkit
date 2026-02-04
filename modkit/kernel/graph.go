@@ -1,0 +1,144 @@
+package kernel
+
+import (
+	"reflect"
+
+	"github.com/aryeko/modkit/modkit/module"
+)
+
+type ModuleNode struct {
+	Name    string
+	Module  module.Module
+	Def     module.ModuleDef
+	Imports []string
+}
+
+type Graph struct {
+	Root    string
+	Modules []ModuleNode
+	Nodes   map[string]*ModuleNode
+}
+
+func BuildGraph(root module.Module) (*Graph, error) {
+	if root == nil {
+		return nil, &RootModuleNilError{}
+	}
+	rootVal := reflect.ValueOf(root)
+	if rootVal.Kind() == reflect.Ptr && rootVal.IsNil() {
+		return nil, &RootModuleNilError{}
+	}
+
+	graph := &Graph{
+		Nodes: make(map[string]*ModuleNode),
+	}
+
+	state := make(map[string]int)
+	stack := make([]string, 0)
+	identities := make(map[string]uintptr)
+
+	var visit func(m module.Module) error
+	visit = func(m module.Module) error {
+		if m == nil {
+			return &NilImportError{Module: "", Index: -1}
+		}
+		val := reflect.ValueOf(m)
+		if val.Kind() == reflect.Ptr && val.IsNil() {
+			return &NilImportError{Module: "", Index: -1}
+		}
+		def := m.Definition()
+		name := def.Name
+		if name == "" {
+			return &InvalidModuleNameError{Name: name}
+		}
+
+		id := uintptr(0)
+		if val.Kind() == reflect.Ptr {
+			id = val.Pointer()
+		}
+
+		if id == 0 {
+			if _, ok := identities[name]; ok {
+				return &DuplicateModuleNameError{Name: name}
+			}
+		} else if existing, ok := identities[name]; ok {
+			if existing != id {
+				return &DuplicateModuleNameError{Name: name}
+			}
+		}
+
+		switch state[name] {
+		case 1:
+			idx := 0
+			for i, n := range stack {
+				if n == name {
+					idx = i
+					break
+				}
+			}
+			path := append(append([]string{}, stack[idx:]...), name)
+			return &ModuleCycleError{Path: path}
+		case 2:
+			return nil
+		}
+
+		state[name] = 1
+		if id == 0 {
+			identities[name] = 0
+		} else {
+			identities[name] = id
+		}
+		stack = append(stack, name)
+
+		imports := make([]string, 0, len(def.Imports))
+		for idx, imp := range def.Imports {
+			if imp == nil {
+				return &NilImportError{Module: name, Index: idx}
+			}
+			impVal := reflect.ValueOf(imp)
+			if impVal.Kind() == reflect.Ptr && impVal.IsNil() {
+				return &NilImportError{Module: name, Index: idx}
+			}
+			if err := visit(imp); err != nil {
+				return err
+			}
+			imports = append(imports, imp.Definition().Name)
+		}
+
+		stack = stack[:len(stack)-1]
+		state[name] = 2
+
+		if _, exists := graph.Nodes[name]; exists {
+			return &DuplicateModuleNameError{Name: name}
+		}
+
+		graph.Modules = append(graph.Modules, ModuleNode{
+			Name:    name,
+			Module:  m,
+			Def:     def,
+			Imports: imports,
+		})
+		graph.Nodes[name] = &graph.Modules[len(graph.Modules)-1]
+		return nil
+	}
+
+	if err := visit(root); err != nil {
+		return nil, err
+	}
+
+	graph.Root = root.Definition().Name
+
+	providerTokens := make(map[module.Token]string)
+	for _, node := range graph.Modules {
+		for _, provider := range node.Def.Providers {
+			if existing, ok := providerTokens[provider.Token]; ok {
+				return nil, &DuplicateProviderTokenError{
+					Token:   provider.Token,
+					Modules: []string{existing, node.Name},
+				}
+			}
+			providerTokens[provider.Token] = node.Name
+		}
+	}
+
+	return graph, nil
+}

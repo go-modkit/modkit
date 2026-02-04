@@ -1,0 +1,195 @@
+basePath: /
+definitions:
+  users.CreateUserInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+    type: object
+  users.Problem:
+    properties:
+      detail:
+        type: string
+      instance:
+        type: string
+      status:
+        type: integer
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  users.UpdateUserInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+    type: object
+  users.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Example modkit service with MySQL.
+  title: hello-mysql API
+  version: "0.1"
+paths:
+  /health:
+    get:
+      description: Returns service health status.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health check
+      tags:
+      - health
+  /users:
+    get:
+      description: Returns all users.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/users.User'
+            type: array
+      summary: List users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user.
+      parameters:
+      - description: User payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/users.CreateUserInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/users.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/users.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/users.Problem'
+      summary: Create user
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      description: Deletes a user by id.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/users.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/users.Problem'
+      summary: Delete user
+      tags:
+      - users
+    get:
+      description: Returns a user by id.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/users.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/users.Problem'
+      summary: Get user
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Updates a user by id.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/users.UpdateUserInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/users.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/users.Problem'
+      summary: Update user
+      tags:
+      - users
+swagger: "2.0"

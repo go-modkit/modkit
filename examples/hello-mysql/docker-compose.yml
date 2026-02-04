@@ -1,0 +1,27 @@
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: app
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  app:
+    build:
+      context: ../..
+      dockerfile: examples/hello-mysql/Dockerfile
+    environment:
+      HTTP_ADDR: ":8080"
+      MYSQL_DSN: "root:password@tcp(mysql:3306)/app?parseTime=true&multiStatements=true"
+      LOG_LEVEL: "debug"
+      LOG_COLOR: "on"
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy

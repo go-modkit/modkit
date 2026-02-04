@@ -1,0 +1,51 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.x"
+          cache: true
+      - name: Install tools
+        run: |
+          go install golang.org/x/tools/cmd/goimports@latest
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - name: Lint
+        run: make lint
+
+  vuln:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.x"
+          cache: true
+      - name: Install tools
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+      - name: Vulnerability scan
+        run: make vuln
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.x"
+          cache: true
+      - name: Docker info
+        run: docker info
+      - name: Test
+        run: |
+          make test
+          go test ./examples/hello-mysql/...
