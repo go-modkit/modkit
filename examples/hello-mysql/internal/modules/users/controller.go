@@ -75,7 +75,9 @@ func (c *Controller) handleGetUser(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	var input CreateUserInput
 	if err := decodeJSON(r, &input); err != nil {
-		httpapi.WriteProblem(w, r, http.StatusBadRequest, "invalid body")
+		var errs validation.ValidationErrors
+		errs.Add("body", "invalid")
+		validation.WriteProblemDetails(w, r, errs)
 		return
 	}
 	if input.Name == "" || input.Email == "" {
@@ -132,13 +134,17 @@ func (c *Controller) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		httpapi.WriteProblem(w, r, http.StatusBadRequest, "invalid id")
+		var errs validation.ValidationErrors
+		errs.Add("id", "must be a number")
+		validation.WriteProblemDetails(w, r, errs)
 		return
 	}
 
 	var input UpdateUserInput
 	if err := decodeJSON(r, &input); err != nil {
-		httpapi.WriteProblem(w, r, http.StatusBadRequest, "invalid body")
+		var errs validation.ValidationErrors
+		errs.Add("body", "invalid")
+		validation.WriteProblemDetails(w, r, errs)
 		return
 	}
 	if input.Name == "" || input.Email == "" {
