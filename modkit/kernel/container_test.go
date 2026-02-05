@@ -425,8 +425,12 @@ func TestAppCloseReverseOrder(t *testing.T) {
 		t.Fatalf("Bootstrap failed: %v", err)
 	}
 
-	_, _ = app.Get("closer.a")
-	_, _ = app.Get("closer.b")
+	if _, err := app.Get("closer.a"); err != nil {
+		t.Fatalf("Get closer.a failed: %v", err)
+	}
+	if _, err := app.Get("closer.b"); err != nil {
+		t.Fatalf("Get closer.b failed: %v", err)
+	}
 
 	if err := app.Close(); err != nil {
 		t.Fatalf("Close failed: %v", err)
@@ -513,8 +517,12 @@ func TestAppCloseContinuesAfterError(t *testing.T) {
 		t.Fatalf("Bootstrap failed: %v", err)
 	}
 
-	_, _ = app.Get("closer.a")
-	_, _ = app.Get("closer.b")
+	if _, err := app.Get("closer.a"); err != nil {
+		t.Fatalf("Get closer.a failed: %v", err)
+	}
+	if _, err := app.Get("closer.b"); err != nil {
+		t.Fatalf("Get closer.b failed: %v", err)
+	}
 	_, _ = app.Get("closer.c")
 
 	if err := app.Close(); !errors.Is(err, errB) {

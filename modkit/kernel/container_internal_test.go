@@ -57,8 +57,12 @@ func TestContainerRecordsProviderBuildOrder(t *testing.T) {
 		t.Fatalf("Bootstrap failed: %v", err)
 	}
 
-	_, _ = app.Get(second)
-	_, _ = app.Get(first)
+	if _, err := app.Get(second); err != nil {
+		t.Fatalf("Get second failed: %v", err)
+	}
+	if _, err := app.Get(first); err != nil {
+		t.Fatalf("Get first failed: %v", err)
+	}
 
 	order := app.container.providerBuildOrder()
 	if len(order) != 2 {
