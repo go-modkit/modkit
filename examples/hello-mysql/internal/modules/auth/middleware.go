@@ -13,22 +13,26 @@ func NewJWTMiddleware(cfg Config) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			tokenStr := bearerToken(r.Header.Get("Authorization"))
 			if tokenStr == "" {
+				w.Header().Set("WWW-Authenticate", "Bearer")
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
 
 			token, err := parseToken(tokenStr, cfg, time.Now())
 			if err != nil {
+				w.Header().Set("WWW-Authenticate", "Bearer")
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
 			claims, ok := token.Claims.(jwt.MapClaims)
 			if !ok {
+				w.Header().Set("WWW-Authenticate", "Bearer")
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
 			user, ok := userFromClaims(claims)
 			if !ok {
+				w.Header().Set("WWW-Authenticate", "Bearer")
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
@@ -41,11 +45,11 @@ func NewJWTMiddleware(cfg Config) func(http.Handler) http.Handler {
 
 func bearerToken(header string) string {
 	const prefix = "Bearer "
-	if !strings.HasPrefix(header, prefix) {
+	if len(header) < len(prefix) || !strings.EqualFold(header[:len(prefix)], prefix) {
 		return ""
 	}
 
-	token := strings.TrimSpace(strings.TrimPrefix(header, prefix))
+	token := strings.TrimSpace(header[len(prefix):])
 	if token == "" {
 		return ""
 	}

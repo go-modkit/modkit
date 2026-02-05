@@ -1,12 +1,20 @@
 package auth
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 func IssueToken(cfg Config, user User) (string, error) {
+	if cfg.Secret == "" {
+		return "", fmt.Errorf("auth: missing jwt secret")
+	}
+	if cfg.TTL <= 0 {
+		return "", fmt.Errorf("auth: invalid jwt ttl")
+	}
+
 	subject := user.ID
 	if subject == "" {
 		subject = user.Email

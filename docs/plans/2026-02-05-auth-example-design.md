@@ -2,7 +2,7 @@
 
 **Goal:** Add a runnable, example-focused JWT authentication module to hello-mysql with a login endpoint, middleware validation, and typed context helpers.
 
-**Architecture:** A dedicated `auth` module provides a login handler and a JWT middleware provider. Configuration is explicit via example config/env. The middleware validates tokens and stores user info in a typed context helper, which handlers can read. The users module stays unchanged until route protection is applied in later tasks.
+**Architecture:** A dedicated `auth` module provides a login handler and a JWT middleware provider. Configuration is explicit via example config/env. The middleware validates tokens and stores user info in a typed context helper, which handlers can read. User write routes (`POST /users`, `PUT /users/{id}`, `DELETE /users/{id}`) are protected by the auth middleware, while the list route (`GET /users`) remains public.
 
 **Tech Stack:** Go, chi router via modkit http adapter, standard library + minimal JWT dependency.
 

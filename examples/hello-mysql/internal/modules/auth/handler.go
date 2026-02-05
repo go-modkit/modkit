@@ -29,6 +29,7 @@ type tokenResponse struct {
 }
 
 func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
 	var input loginRequest
 	if err := decodeJSON(r, &input); err != nil {
 		httpapi.WriteProblem(w, r, http.StatusBadRequest, "invalid body")

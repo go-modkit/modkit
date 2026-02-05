@@ -70,6 +70,7 @@ func TestSmoke_HealthAndUsers(t *testing.T) {
 	if err != nil {
 		t.Fatalf("login request failed: %v", err)
 	}
+	defer loginResp.Body.Close()
 	if loginResp.StatusCode != http.StatusOK {
 		t.Fatalf("expected login 200, got %d", loginResp.StatusCode)
 	}
@@ -92,6 +93,7 @@ func TestSmoke_HealthAndUsers(t *testing.T) {
 	if err != nil {
 		t.Fatalf("users request failed: %v", err)
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("expected 200, got %d", resp.StatusCode)
 	}
