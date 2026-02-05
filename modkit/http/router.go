@@ -24,7 +24,7 @@ type routerAdapter struct {
 	chi.Router
 }
 
-func (r routerAdapter) Handle(method string, pattern string, handler http.Handler) {
+func (r routerAdapter) Handle(method, pattern string, handler http.Handler) {
 	r.Method(method, pattern, handler)
 }
 

@@ -25,7 +25,7 @@ func TestRequestLogger_LogsRequests(t *testing.T) {
 	})
 
 	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/health", nil)
+	req := httptest.NewRequest(http.MethodGet, "/health", http.NoBody)
 	router.ServeHTTP(rec, req)
 
 	if len(logger.messages) == 0 {

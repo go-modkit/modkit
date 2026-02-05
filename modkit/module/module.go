@@ -1,6 +1,10 @@
 package module
 
-// ModuleDef declares metadata for a module.
+// ModuleDef declares metadata for a module, including its dependencies,
+// providers, controllers, and exported tokens. The name should be unique
+// within the module graph.
+//
+//nolint:revive // Intentional API name for clarity
 type ModuleDef struct {
 	Name        string
 	Imports     []Module

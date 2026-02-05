@@ -10,11 +10,11 @@ import (
 
 func TestNewRouter_AllowsRoute(t *testing.T) {
 	router := NewRouter()
-	router.Method(http.MethodGet, "/ping", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	router.Method(http.MethodGet, "/ping", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 
-	req := httptest.NewRequest(http.MethodGet, "/ping", nil)
+	req := httptest.NewRequest(http.MethodGet, "/ping", http.NoBody)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -29,12 +29,12 @@ func TestRouterGroup_RegistersGroupedRoutes(t *testing.T) {
 
 	called := false
 	r.Group("/api", func(sub Router) {
-		sub.Handle(http.MethodGet, "/users", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sub.Handle(http.MethodGet, "/users", http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			called = true
 		}))
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "/api/users", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/users", http.NoBody)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -55,9 +55,9 @@ func TestRouterUse_AttachesMiddleware(t *testing.T) {
 		})
 	})
 
-	r.Handle(http.MethodGet, "/test", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	r.Handle(http.MethodGet, "/test", http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {}))
 
-	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req := httptest.NewRequest(http.MethodGet, "/test", http.NoBody)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -73,7 +73,7 @@ func TestRouterGroup_MiddlewareScopedToGroup(t *testing.T) {
 	groupMiddlewareCalled := false
 	groupHandlerCalled := false
 
-	r.Handle(http.MethodGet, "/public", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	r.Handle(http.MethodGet, "/public", http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {}))
 
 	r.Group("/protected", func(sub Router) {
 		sub.Use(func(next http.Handler) http.Handler {
@@ -82,19 +82,19 @@ func TestRouterGroup_MiddlewareScopedToGroup(t *testing.T) {
 				next.ServeHTTP(w, req)
 			})
 		})
-		sub.Handle(http.MethodGet, "/resource", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sub.Handle(http.MethodGet, "/resource", http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			groupHandlerCalled = true
 		}))
 	})
 
-	reqPublic := httptest.NewRequest(http.MethodGet, "/public", nil)
+	reqPublic := httptest.NewRequest(http.MethodGet, "/public", http.NoBody)
 	router.ServeHTTP(httptest.NewRecorder(), reqPublic)
 
 	if groupMiddlewareCalled {
 		t.Fatal("group middleware should not affect routes outside group")
 	}
 
-	reqProtected := httptest.NewRequest(http.MethodGet, "/protected/resource", nil)
+	reqProtected := httptest.NewRequest(http.MethodGet, "/protected/resource", http.NoBody)
 	router.ServeHTTP(httptest.NewRecorder(), reqProtected)
 
 	if !groupMiddlewareCalled || !groupHandlerCalled {

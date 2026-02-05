@@ -11,8 +11,10 @@ type captureHandler struct {
 }
 
 func (h *captureHandler) Enabled(_ context.Context, _ slog.Level) bool { return true }
-func (h *captureHandler) Handle(_ context.Context, r slog.Record) error {
-	h.records = append(h.records, r)
+
+//nolint:gocritic // slog.Record is standard library signature
+func (h *captureHandler) Handle(_ context.Context, record slog.Record) error {
+	h.records = append(h.records, record)
 	return nil
 }
 func (h *captureHandler) WithAttrs(_ []slog.Attr) slog.Handler { return h }
@@ -63,7 +65,7 @@ func TestSlogAdapter_WarnLevel(t *testing.T) {
 	}
 }
 
-func TestNopLogger(t *testing.T) {
+func TestNopLogger(_ *testing.T) {
 	logger := NewNopLogger()
 
 	logger.Debug("debug")

@@ -4,10 +4,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/chi/v5/middleware" //nolint:goimports // False positive
 	"github.com/go-modkit/modkit/modkit/logging"
 )
 
+// RequestLogger returns an HTTP middleware that logs each request with method, path, status, and duration.
 func RequestLogger(logger logging.Logger) func(http.Handler) http.Handler {
 	if logger == nil {
 		logger = logging.NewNopLogger()

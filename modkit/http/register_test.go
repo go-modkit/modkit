@@ -12,12 +12,12 @@ type testControllerB struct{ called bool }
 
 func (c *testController) RegisterRoutes(router Router) {
 	c.called = true
-	router.Handle(http.MethodGet, "/ping", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	router.Handle(http.MethodGet, "/ping", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 }
 
-func (c *testControllerB) RegisterRoutes(router Router) {
+func (c *testControllerB) RegisterRoutes(_ Router) {
 	c.called = true
 }
 
@@ -26,7 +26,7 @@ type orderedController struct {
 	order *[]string
 }
 
-func (c *orderedController) RegisterRoutes(router Router) {
+func (c *orderedController) RegisterRoutes(_ Router) {
 	*c.order = append(*c.order, c.name)
 }
 

@@ -14,6 +14,8 @@ type providerEntry struct {
 	cleanup    func(ctx context.Context) error
 }
 
+// Container is the dependency injection container that manages provider instances,
+// enforces visibility rules, and tracks cleanup hooks.
 type Container struct {
 	providers    map[module.Token]providerEntry
 	instances    map[module.Token]any
@@ -28,7 +30,8 @@ type Container struct {
 
 func newContainer(graph *Graph, visibility Visibility) (*Container, error) {
 	providers := make(map[module.Token]providerEntry)
-	for _, node := range graph.Modules {
+	for i := range graph.Modules {
+		node := &graph.Modules[i]
 		for _, provider := range node.Def.Providers {
 			if existing, exists := providers[provider.Token]; exists {
 				return nil, &DuplicateProviderTokenError{

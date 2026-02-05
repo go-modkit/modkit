@@ -65,7 +65,7 @@ func TestContainerSingletonConcurrent(t *testing.T) {
 	modA := mod("A", nil,
 		[]module.ProviderDef{{
 			Token: shared,
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				if atomic.AddInt32(&calls, 1) == 1 {
 					close(started)
 				}
@@ -233,7 +233,7 @@ func TestContainerGetWrapsProviderBuildError(t *testing.T) {
 	modA := mod("A", nil,
 		[]module.ProviderDef{{
 			Token: badToken,
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return nil, sentinel
 			},
 		}},
@@ -310,7 +310,7 @@ func TestContainerGetSingletonBehavior(t *testing.T) {
 	modA := mod("A", nil,
 		[]module.ProviderDef{{
 			Token: token,
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				buildCount++
 				return &cachedInstance{}, nil
 			},
@@ -365,10 +365,10 @@ func TestContainerGetRegistersCleanupHooks(t *testing.T) {
 	modA := mod("A", nil,
 		[]module.ProviderDef{{
 			Token: token,
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return "instance", nil
 			},
-			Cleanup: func(ctx context.Context) error {
+			Cleanup: func(_ context.Context) error {
 				cleanupCalled = true
 				return nil
 			},
@@ -407,12 +407,12 @@ func TestAppCloseReverseOrder(t *testing.T) {
 	modA := mod("A", nil,
 		[]module.ProviderDef{{
 			Token: "closer.a",
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return &recordingCloser{name: "a", closed: &closed}, nil
 			},
 		}, {
 			Token: "closer.b",
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return &recordingCloser{name: "b", closed: &closed}, nil
 			},
 		}},
@@ -447,7 +447,7 @@ func TestAppCloseOrderWithDependencies(t *testing.T) {
 	modA := mod("A", nil,
 		[]module.ProviderDef{{
 			Token: "closer.a",
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return &recordingCloser{name: "a", closed: &closed}, nil
 			},
 		}, {
@@ -494,17 +494,17 @@ func TestAppCloseContinuesAfterError(t *testing.T) {
 	modA := mod("A", nil,
 		[]module.ProviderDef{{
 			Token: "closer.a",
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return &recordingCloser{name: "a", closed: &closed}, nil
 			},
 		}, {
 			Token: "closer.b",
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return &erroringCloser{name: "b", closed: &closed, err: errB}, nil
 			},
 		}, {
 			Token: "closer.c",
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return &recordingCloser{name: "c", closed: &closed}, nil
 			},
 		}},

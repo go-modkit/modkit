@@ -7,7 +7,7 @@ import (
 )
 
 // Compile-only assertions for exported types and errors.
-func TestExports(t *testing.T) {
+func TestExports(_ *testing.T) {
 	var _ module.Token
 	var _ module.Resolver
 	var _ module.ProviderDef

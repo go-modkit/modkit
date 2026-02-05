@@ -69,3 +69,21 @@ issues:
         - funlen
         - gocyclo
         - lll
+    
+    # Intentional API design choices
+    - path: modkit/module/module\.go
+      text: "type name will be used as module.ModuleDef"
+      linters:
+        - revive
+    
+    # Test helpers that intentionally use value receivers
+    - path: modkit/kernel/mod_helper_test\.go
+      text: "hugeParam.*valueModule"
+      linters:
+        - gocritic
+    
+    # Standard library types passed by value
+    - path: modkit/logging/logger_test\.go
+      text: "hugeParam.*slog.Record"
+      linters:
+        - gocritic

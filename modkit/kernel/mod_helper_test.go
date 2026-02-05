@@ -14,6 +14,7 @@ type valueModule struct {
 	def module.ModuleDef
 }
 
+//nolint:gocritic // Intentionally uses value receiver to test module validation
 func (m valueModule) Definition() module.ModuleDef {
 	return m.def
 }

@@ -28,7 +28,7 @@ func TestServe_ReturnsErrorWhenServerFailsToStart(t *testing.T) {
 		gotHandler = server.Handler
 		return errors.New("boom")
 	}
-	shutdownServer = func(ctx context.Context, server *http.Server) error {
+	shutdownServer = func(_ context.Context, _ *http.Server) error {
 		return nil
 	}
 
@@ -65,12 +65,12 @@ func TestServe_HandlesSignals_ReturnsNil(t *testing.T) {
 			serveStarted := make(chan struct{})
 			shutdownRequested := make(chan struct{})
 
-			listenAndServe = func(server *http.Server) error {
+			listenAndServe = func(_ *http.Server) error {
 				close(serveStarted)
 				<-shutdownRequested
 				return http.ErrServerClosed
 			}
-			shutdownServer = func(ctx context.Context, server *http.Server) error {
+			shutdownServer = func(_ context.Context, _ *http.Server) error {
 				close(shutdownRequested)
 				return nil
 			}
@@ -120,7 +120,7 @@ func TestServe_ShutdownWaitsForInFlightRequest(t *testing.T) {
 	requestStarted := make(chan struct{})
 	releaseRequest := make(chan struct{})
 
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		close(requestStarted)
 		<-releaseRequest
 		w.WriteHeader(http.StatusOK)

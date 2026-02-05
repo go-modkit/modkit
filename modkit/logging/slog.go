@@ -6,6 +6,8 @@ type slogAdapter struct {
 	logger *slog.Logger
 }
 
+// NewSlogLogger wraps a standard library slog.Logger to implement the modkit Logger interface.
+// Returns a NopLogger if the provided logger is nil.
 func NewSlogLogger(logger *slog.Logger) Logger {
 	if logger == nil {
 		return NewNopLogger()

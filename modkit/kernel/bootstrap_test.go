@@ -15,7 +15,7 @@ func TestBootstrapEnforcesVisibility(t *testing.T) {
 	modB := mod("B", nil,
 		[]module.ProviderDef{{
 			Token: secretToken,
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return "shh", nil
 			},
 		}},
@@ -79,7 +79,7 @@ func TestBootstrapAllowsReExportedTokens(t *testing.T) {
 	modC := mod("C", nil,
 		[]module.ProviderDef{{
 			Token: shared,
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return "value", nil
 			},
 		}},
@@ -115,7 +115,7 @@ func TestBootstrapRejectsDuplicateProviderTokens(t *testing.T) {
 	modB := mod("B", nil,
 		[]module.ProviderDef{{
 			Token: shared,
-			Build: func(r module.Resolver) (any, error) { return "b", nil },
+			Build: func(_ module.Resolver) (any, error) { return "b", nil },
 		}},
 		nil,
 		nil,
@@ -124,7 +124,7 @@ func TestBootstrapRejectsDuplicateProviderTokens(t *testing.T) {
 	modA := mod("A", []module.Module{modB},
 		[]module.ProviderDef{{
 			Token: shared,
-			Build: func(r module.Resolver) (any, error) { return "a", nil },
+			Build: func(_ module.Resolver) (any, error) { return "a", nil },
 		}},
 		nil,
 		nil,
@@ -148,12 +148,12 @@ func TestBootstrapRejectsDuplicateControllerNames(t *testing.T) {
 	modA := mod("A", nil, nil,
 		[]module.ControllerDef{{
 			Name: "ControllerA",
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return "one", nil
 			},
 		}, {
 			Name: "ControllerA",
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return "two", nil
 			},
 		}},
@@ -185,10 +185,10 @@ func TestBootstrap_CollectsCleanupHooksInLIFO(t *testing.T) {
 	modA := mod("A", nil,
 		[]module.ProviderDef{{
 			Token: tokenB,
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return "b", nil
 			},
-			Cleanup: func(ctx context.Context) error {
+			Cleanup: func(_ context.Context) error {
 				calls = append(calls, "B")
 				return nil
 			},
@@ -201,7 +201,7 @@ func TestBootstrap_CollectsCleanupHooksInLIFO(t *testing.T) {
 				}
 				return "a", nil
 			},
-			Cleanup: func(ctx context.Context) error {
+			Cleanup: func(_ context.Context) error {
 				calls = append(calls, "A")
 				return nil
 			},
@@ -242,7 +242,7 @@ func TestBootstrapRegistersControllers(t *testing.T) {
 	modA := mod("A", nil, nil,
 		[]module.ControllerDef{{
 			Name: "ControllerA",
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return "controller", nil
 			},
 		}},
@@ -263,7 +263,7 @@ func TestBootstrapAllowsSameControllerNameAcrossModules(t *testing.T) {
 	modB := mod("B", nil, nil,
 		[]module.ControllerDef{{
 			Name: "Shared",
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return "controller-from-B", nil
 			},
 		}},
@@ -273,7 +273,7 @@ func TestBootstrapAllowsSameControllerNameAcrossModules(t *testing.T) {
 	modA := mod("A", []module.Module{modB}, nil,
 		[]module.ControllerDef{{
 			Name: "Shared",
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return "controller-from-A", nil
 			},
 		}},
@@ -302,13 +302,13 @@ func TestBootstrapRejectsDuplicateControllerInSameModule(t *testing.T) {
 		[]module.ControllerDef{
 			{
 				Name: "Dup",
-				Build: func(r module.Resolver) (any, error) {
+				Build: func(_ module.Resolver) (any, error) {
 					return "one", nil
 				},
 			},
 			{
 				Name: "Dup",
-				Build: func(r module.Resolver) (any, error) {
+				Build: func(_ module.Resolver) (any, error) {
 					return "two", nil
 				},
 			},
@@ -337,7 +337,7 @@ func TestControllerKeyFormat(t *testing.T) {
 	modA := mod("users", nil, nil,
 		[]module.ControllerDef{{
 			Name: "Controller",
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return nil, nil
 			},
 		}},

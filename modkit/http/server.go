@@ -25,8 +25,9 @@ var shutdownServer = func(ctx context.Context, server *http.Server) error {
 // It handles SIGINT and SIGTERM for graceful shutdown.
 func Serve(addr string, handler http.Handler) error {
 	server := &http.Server{
-		Addr:    addr,
-		Handler: handler,
+		Addr:              addr,
+		Handler:           handler,
+		ReadHeaderTimeout: 15 * time.Second,
 	}
 
 	sigCh := make(chan os.Signal, 1)

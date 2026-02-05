@@ -39,12 +39,12 @@ func TestContainerRecordsProviderBuildOrder(t *testing.T) {
 	modA := modInternal("A", nil,
 		[]module.ProviderDef{{
 			Token: first,
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return "first", nil
 			},
 		}, {
 			Token: second,
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return "second", nil
 			},
 		}},
@@ -80,12 +80,12 @@ func TestContainerRecordsClosersInBuildOrder(t *testing.T) {
 	modA := modInternal("A", nil,
 		[]module.ProviderDef{{
 			Token: closerA,
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return &testCloser{name: "a"}, nil
 			},
 		}, {
 			Token: closerB,
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return &testCloser{name: "b"}, nil
 			},
 		}},

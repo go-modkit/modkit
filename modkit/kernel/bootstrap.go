@@ -1,3 +1,4 @@
+// Package kernel provides the dependency injection container and module bootstrapping logic.
 package kernel
 
 import (
@@ -7,6 +8,8 @@ import (
 	"github.com/go-modkit/modkit/modkit/module"
 )
 
+// App represents a bootstrapped modkit application with its dependency graph,
+// container, and instantiated controllers.
 type App struct {
 	Graph       *Graph
 	container   *Container
@@ -17,6 +20,9 @@ func controllerKey(moduleName, controllerName string) string {
 	return moduleName + ":" + controllerName
 }
 
+// Bootstrap constructs a modkit application from a root module.
+// It builds the module graph, validates dependencies, creates the DI container,
+// and instantiates all controllers.
 func Bootstrap(root module.Module) (*App, error) {
 	graph, err := BuildGraph(root)
 	if err != nil {
@@ -35,7 +41,8 @@ func Bootstrap(root module.Module) (*App, error) {
 
 	controllers := make(map[string]any)
 	perModule := make(map[string]map[string]bool)
-	for _, node := range graph.Modules {
+	for i := range graph.Modules {
+		node := &graph.Modules[i]
 		if perModule[node.Name] == nil {
 			perModule[node.Name] = make(map[string]bool)
 		}

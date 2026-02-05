@@ -2,6 +2,8 @@ package logging
 
 type nopLogger struct{}
 
+// NewNopLogger returns a Logger that discards all log messages.
+// Useful for testing or when logging is not needed.
 func NewNopLogger() Logger {
 	return nopLogger{}
 }
