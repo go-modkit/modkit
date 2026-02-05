@@ -6,6 +6,8 @@ import "github.com/go-modkit/modkit/modkit/module"
 // The outer map key is the module name, the inner map contains visible tokens.
 type Visibility map[string]map[module.Token]bool
 
+// BuildVisibility constructs the visibility map for all modules in the graph,
+// ensuring exports are valid and detecting ambiguous re-exports.
 func BuildVisibility(graph *Graph) (Visibility, error) {
 	if graph == nil {
 		return nil, ErrNilGraph

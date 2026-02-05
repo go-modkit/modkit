@@ -7,7 +7,10 @@ import (
 	"github.com/go-modkit/modkit/modkit/module"
 )
 
+// ErrExportAmbiguous is returned when a module tries to re-export a token that multiple imports provide.
 var ErrExportAmbiguous = errors.New("export token is ambiguous across imports")
+
+// ErrNilGraph is returned when BuildVisibility is called with a nil graph.
 var ErrNilGraph = errors.New("graph is nil")
 
 // RootModuleNilError is returned when Bootstrap is called with a nil root module.
@@ -120,6 +123,7 @@ func (e *ExportNotVisibleError) Error() string {
 	return fmt.Sprintf("export not visible: module=%q token=%q", e.Module, e.Token)
 }
 
+// ExportAmbiguousError is returned when a module re-exports a token that multiple imports provide.
 type ExportAmbiguousError struct {
 	Module  string
 	Token   module.Token
