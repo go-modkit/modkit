@@ -111,6 +111,24 @@ func TestBuildHandler_UsesMiddlewareProviders(t *testing.T) {
 	}
 }
 
+func TestBuildHandler_DocsRedirect(t *testing.T) {
+	h, err := BuildHandler(testAppOptions())
+	if err != nil {
+		t.Fatalf("build handler: %v", err)
+	}
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/docs", nil)
+	h.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusMovedPermanently {
+		t.Fatalf("expected status 301, got %d", rec.Code)
+	}
+	if got := rec.Header().Get("Location"); got != "/docs/index.html" {
+		t.Fatalf("expected redirect to /docs/index.html, got %q", got)
+	}
+}
+
 func testAppOptions() app.Options {
 	return app.Options{
 		HTTPAddr: ":8080",

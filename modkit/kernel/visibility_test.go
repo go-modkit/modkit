@@ -27,6 +27,45 @@ func TestVisibilityAllowsReExportFromImport(t *testing.T) {
 	}
 }
 
+func TestBuildVisibility_IncludesImportedExport(t *testing.T) {
+	token := module.Token("shared.token")
+	imported := mod("Imported", nil, []module.ProviderDef{{Token: token, Build: buildNoop}}, nil, []module.Token{token})
+	reexporter := mod("Reexporter", []module.Module{imported}, nil, nil, nil)
+
+	g, err := kernel.BuildGraph(reexporter)
+	if err != nil {
+		t.Fatalf("BuildGraph failed: %v", err)
+	}
+
+	vis, err := kernel.BuildVisibility(g)
+	if err != nil {
+		t.Fatalf("BuildVisibility failed: %v", err)
+	}
+	if !vis["Reexporter"][token] {
+		t.Fatalf("expected token to be visible in Reexporter")
+	}
+}
+
+func TestBuildVisibility_TransitiveReExportsAreVisible(t *testing.T) {
+	token := module.Token("shared.token")
+	base := mod("Base", nil, []module.ProviderDef{{Token: token, Build: buildNoop}}, nil, []module.Token{token})
+	middle := mod("Middle", []module.Module{base}, nil, nil, []module.Token{token})
+	root := mod("Root", []module.Module{middle}, nil, nil, []module.Token{token})
+
+	g, err := kernel.BuildGraph(root)
+	if err != nil {
+		t.Fatalf("BuildGraph failed: %v", err)
+	}
+
+	vis, err := kernel.BuildVisibility(g)
+	if err != nil {
+		t.Fatalf("BuildVisibility failed: %v", err)
+	}
+	if !vis["Root"][token] {
+		t.Fatalf("expected token to be visible in Root")
+	}
+}
+
 func TestVisibilityRejectsReExportOfNonExportedImportToken(t *testing.T) {
 	token := module.Token("private.token")
 	imported := mod("Imported", nil, []module.ProviderDef{{Token: token, Build: buildNoop}}, nil, nil)

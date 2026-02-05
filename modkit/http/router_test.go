@@ -23,6 +23,37 @@ func TestNewRouter_AllowsRoute(t *testing.T) {
 	}
 }
 
+func TestRouter_InvalidMethodReturns405(t *testing.T) {
+	router := NewRouter()
+	router.Method(http.MethodGet, "/ping", http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
+
+	req := httptest.NewRequest(http.MethodPost, "/ping", http.NoBody)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("expected 405, got %d", rec.Code)
+	}
+}
+
+func TestRouter_DuplicateRouteLastWins(t *testing.T) {
+	router := NewRouter()
+	router.Method(http.MethodGet, "/dup", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusAccepted)
+	}))
+	router.Method(http.MethodGet, "/dup", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusCreated)
+	}))
+
+	req := httptest.NewRequest(http.MethodGet, "/dup", http.NoBody)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("expected last handler to win, got %d", rec.Code)
+	}
+}
+
 func TestRouterGroup_RegistersGroupedRoutes(t *testing.T) {
 	router := chi.NewRouter()
 	r := AsRouter(router)

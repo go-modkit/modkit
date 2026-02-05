@@ -56,6 +56,43 @@ func TestCORS_AddsHeaders(t *testing.T) {
 	}
 }
 
+func TestCORS_PreflightShortCircuits(t *testing.T) {
+	cors := NewCORS(CORSConfig{
+		AllowedOrigins: []string{"http://localhost:3000"},
+		AllowedMethods: []string{"GET", "POST"},
+		AllowedHeaders: []string{"Content-Type"},
+	})
+
+	called := false
+	handler := cors(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		called = true
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	req := httptest.NewRequest(http.MethodOptions, "/api/v1/health", nil)
+	req.Header.Set("Origin", "http://localhost:3000")
+	req.Header.Set("Access-Control-Request-Method", http.MethodGet)
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if called {
+		t.Fatal("expected preflight to short-circuit without calling next")
+	}
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("expected status 204, got %d", rec.Code)
+	}
+	if got := rec.Header().Get("Access-Control-Allow-Origin"); got != "http://localhost:3000" {
+		t.Fatalf("expected Access-Control-Allow-Origin header, got %q", got)
+	}
+	if got := rec.Header().Get("Access-Control-Allow-Methods"); got != "GET, POST" {
+		t.Fatalf("expected Access-Control-Allow-Methods header, got %q", got)
+	}
+	if got := rec.Header().Get("Access-Control-Allow-Headers"); got != "Content-Type" {
+		t.Fatalf("expected Access-Control-Allow-Headers header, got %q", got)
+	}
+}
+
 func TestRateLimit_BlocksAfterBurst(t *testing.T) {
 	limiter := NewRateLimit(RateLimitConfig{
 		RequestsPerSecond: 1,

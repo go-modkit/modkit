@@ -4,7 +4,8 @@ This guide walks you through building your first modkit app: a simple HTTP serve
 
 **What you'll build:** A `/greet` endpoint that returns a greeting message.
 
-**Prerequisites:** Go 1.25+ and familiarity with `net/http`.
+**Prerequisites:** Go 1.25.7+ and familiarity with `net/http`.
+We pin the patch level to 1.25.7 in CI to align with vulnerability scanning and keep a consistent security posture.
 
 ## Install
 

@@ -6,9 +6,11 @@ Thanks for your interest in contributing! modkit is in early development, so the
 
 ### Prerequisites
 
-- Go 1.25+
+- Go 1.25.7+
 - Docker (for running the example app)
 - Make
+
+We pin the patch level to 1.25.7 in CI to align with vulnerability scanning and keep a consistent security posture.
 
 ### Clone and Test
 

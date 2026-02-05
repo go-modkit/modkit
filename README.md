@@ -74,7 +74,8 @@ func main() {
 go get github.com/go-modkit/modkit
 ```
 
-Requires Go 1.25+
+Requires Go 1.25.7+
+We pin the patch level to 1.25.7 in CI to align with vulnerability scanning and keep a consistent security posture.
 
 ## Features
 

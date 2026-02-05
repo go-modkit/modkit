@@ -16,7 +16,8 @@ modkit is in **early development**. APIs may change before v0.1.0. Use it for pr
 
 ### What Go version is required?
 
-Go 1.25 or later.
+Go 1.25.7+.
+We pin the patch level to 1.25.7 in CI to align with vulnerability scanning and keep a consistent security posture.
 
 ---
 
