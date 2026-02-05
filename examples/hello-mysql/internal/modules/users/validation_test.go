@@ -20,7 +20,7 @@ func TestController_CreateUser_Validation(t *testing.T) {
 		deleteFn: func(ctx context.Context, id int64) error { return nil },
 	}
 
-	controller := NewController(svc)
+	controller := NewController(svc, allowAll)
 	router := modkithttp.NewRouter()
 	controller.RegisterRoutes(modkithttp.AsRouter(router))
 
@@ -52,7 +52,7 @@ func TestController_CreateUser_Validation_Whitespace(t *testing.T) {
 		deleteFn: func(ctx context.Context, id int64) error { return nil },
 	}
 
-	controller := NewController(svc)
+	controller := NewController(svc, allowAll)
 	router := modkithttp.NewRouter()
 	controller.RegisterRoutes(modkithttp.AsRouter(router))
 
@@ -81,7 +81,7 @@ func TestController_UpdateUser_Validation(t *testing.T) {
 		deleteFn: func(ctx context.Context, id int64) error { return nil },
 	}
 
-	controller := NewController(svc)
+	controller := NewController(svc, allowAll)
 	router := modkithttp.NewRouter()
 	controller.RegisterRoutes(modkithttp.AsRouter(router))
 
@@ -113,7 +113,7 @@ func TestController_UpdateUser_Validation_Whitespace(t *testing.T) {
 		deleteFn: func(ctx context.Context, id int64) error { return nil },
 	}
 
-	controller := NewController(svc)
+	controller := NewController(svc, allowAll)
 	router := modkithttp.NewRouter()
 	controller.RegisterRoutes(modkithttp.AsRouter(router))
 
@@ -142,7 +142,7 @@ func TestController_CreateUser_InvalidJSONBody(t *testing.T) {
 		deleteFn: func(ctx context.Context, id int64) error { return nil },
 	}
 
-	controller := NewController(svc)
+	controller := NewController(svc, allowAll)
 	router := modkithttp.NewRouter()
 	controller.RegisterRoutes(modkithttp.AsRouter(router))
 
@@ -170,7 +170,7 @@ func TestController_UpdateUser_InvalidID(t *testing.T) {
 		deleteFn: func(ctx context.Context, id int64) error { return nil },
 	}
 
-	controller := NewController(svc)
+	controller := NewController(svc, allowAll)
 	router := modkithttp.NewRouter()
 	controller.RegisterRoutes(modkithttp.AsRouter(router))
 
@@ -198,7 +198,7 @@ func TestController_UpdateUser_InvalidJSONBody(t *testing.T) {
 		deleteFn: func(ctx context.Context, id int64) error { return nil },
 	}
 
-	controller := NewController(svc)
+	controller := NewController(svc, allowAll)
 	router := modkithttp.NewRouter()
 	controller.RegisterRoutes(modkithttp.AsRouter(router))
 
@@ -226,7 +226,7 @@ func TestController_ListUsers_Validation(t *testing.T) {
 		deleteFn: func(ctx context.Context, id int64) error { return nil },
 	}
 
-	controller := NewController(svc)
+	controller := NewController(svc, allowAll)
 	router := modkithttp.NewRouter()
 	controller.RegisterRoutes(modkithttp.AsRouter(router))
 
@@ -254,7 +254,7 @@ func TestController_ListUsers_Validation_NonInteger(t *testing.T) {
 		deleteFn: func(ctx context.Context, id int64) error { return nil },
 	}
 
-	controller := NewController(svc)
+	controller := NewController(svc, allowAll)
 	router := modkithttp.NewRouter()
 	controller.RegisterRoutes(modkithttp.AsRouter(router))
 
