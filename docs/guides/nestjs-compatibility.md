@@ -138,10 +138,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 **Alternative:** Use a `Build` function that fetches and returns the existing provider.
 
 ```go
-import "fmt"
-
 module.ProviderDef{
     Token: "users.reader",
+    // Note: requires fmt for error formatting.
     Build: func(r module.Resolver) (any, error) {
         v, err := r.Get("users.service")
         if err != nil {
