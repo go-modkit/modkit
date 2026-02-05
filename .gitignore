@@ -3,6 +3,10 @@
 # Coverage files
 coverage.out
 coverage-examples.out
+coverage-patch.out
+
+# Build cache
+.cache/
 
 # Internal planning files
 .plans/
