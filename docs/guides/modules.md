@@ -179,8 +179,6 @@ Rules:
 A module can re-export tokens it can already access by listing them in its own `Exports`. This is useful for passing through shared dependencies or creating a public facade.
 
 ```go
-import "fmt"
-
 type UsersModule struct {
     db *DatabaseModule
 }
