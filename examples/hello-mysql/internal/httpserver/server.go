@@ -22,7 +22,7 @@ func BuildAppHandler(opts app.Options) (*kernel.App, http.Handler, error) {
 	router := modkithttp.NewRouter()
 	router.Use(modkithttp.RequestLogger(logger))
 	if err := modkithttp.RegisterRoutes(modkithttp.AsRouter(router), boot.Controllers); err != nil {
-		return nil, nil, err
+		return boot, nil, err
 	}
 	router.Get("/swagger/*", httpSwagger.WrapHandler)
 	router.Get("/docs/*", httpSwagger.WrapHandler)

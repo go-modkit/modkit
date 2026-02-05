@@ -45,6 +45,9 @@ type shutdowner interface {
 func ShutdownServer(ctx context.Context, server shutdowner, hooks []CleanupHook) error {
 	shutdownErr := server.Shutdown(ctx)
 	cleanupErr := RunCleanup(ctx, hooks)
+	if shutdownErr != nil && cleanupErr != nil {
+		return errors.Join(shutdownErr, cleanupErr)
+	}
 	if shutdownErr != nil {
 		return shutdownErr
 	}

@@ -178,8 +178,8 @@ func TestBootstrapRejectsDuplicateControllerNames(t *testing.T) {
 }
 
 func TestBootstrap_CollectsCleanupHooksInLIFO(t *testing.T) {
-	tokenB := module.Token("token-b")
-	tokenA := module.Token("token-a")
+	tokenB := module.Token("test.tokenB")
+	tokenA := module.Token("test.tokenA")
 	calls := make([]string, 0, 2)
 
 	modA := mod("A", nil,
