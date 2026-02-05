@@ -61,7 +61,8 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), modkithttp.ShutdownTimeout)
 		defer cancel()
 
-		shutdownErr := lifecycle.ShutdownServer(ctx, server, boot.CleanupHooks())
+		hooks := lifecycle.FromFuncs(boot.CleanupHooks())
+		shutdownErr := lifecycle.ShutdownServer(ctx, server, hooks)
 
 		err := <-errCh
 		if err == http.ErrServerClosed {

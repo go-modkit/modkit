@@ -31,6 +31,10 @@ func (s stubUsersService) DeleteUser(ctx context.Context, id int64) error {
 	return nil
 }
 
+func (s stubUsersService) LongOperation(ctx context.Context) error {
+	return nil
+}
+
 func TestAuditService_FormatsEntry(t *testing.T) {
 	svc := NewService(stubUsersService{user: users.User{ID: 3, Name: "Jo", Email: "jo@example.com"}})
 

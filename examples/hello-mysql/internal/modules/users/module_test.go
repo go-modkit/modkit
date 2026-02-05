@@ -60,6 +60,10 @@ func (serviceStub) DeleteUser(ctx context.Context, id int64) error {
 	return nil
 }
 
+func (serviceStub) LongOperation(ctx context.Context) error {
+	return nil
+}
+
 func TestUsersModule_ControllerBuildErrors(t *testing.T) {
 	mod := NewModule(Options{Database: &database.Module{}, Auth: auth.NewModule(auth.Options{})})
 	def := mod.(*Module).Definition()

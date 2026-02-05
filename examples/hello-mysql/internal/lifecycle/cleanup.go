@@ -23,6 +23,21 @@ func RunCleanup(ctx context.Context, hooks []CleanupHook) error {
 	return joined
 }
 
+// FromFuncs wraps raw cleanup functions into CleanupHook values.
+func FromFuncs(funcs []func(context.Context) error) []CleanupHook {
+	if len(funcs) == 0 {
+		return nil
+	}
+	hooks := make([]CleanupHook, len(funcs))
+	for i, fn := range funcs {
+		if fn == nil {
+			continue
+		}
+		hooks[i] = CleanupHook(fn)
+	}
+	return hooks
+}
+
 // ShutdownServer shuts down the server, then runs cleanup hooks.
 func ShutdownServer(ctx context.Context, server *http.Server, hooks []CleanupHook) error {
 	shutdownErr := server.Shutdown(ctx)
