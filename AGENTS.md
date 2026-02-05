@@ -77,6 +77,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for commit format (Conventional Commits) 
 - Valid types: `feat`, `fix`, `docs`, `test`, `chore`, `refactor`, `perf`, `ci`
 - Run `make fmt && make lint && make test` before submitting
 
+**Issue Linking:**
+- When implementing a GitHub issue, include `Resolves #<issue>` in the PR description
+- For sub-issues, add separate `Resolves #<sub-issue>` lines
+- If work is not tied to an issue, omit Resolves lines
+
 ## Documentation
 
 - User guides: `docs/guides/*.md`

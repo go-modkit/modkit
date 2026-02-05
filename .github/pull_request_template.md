@@ -39,9 +39,13 @@ make fmt && make lint && make test
 - [ ] Documentation updated (if applicable)
 - [ ] Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/)
 
-## Related Issues
+## Resolves
 
-<!-- Link issues: "Closes #123" or "Relates to #456" -->
+<!-- If implementing a GitHub issue, add "Resolves #<number>" for each issue -->
+<!-- For sub-issues, add separate "Resolves #<sub-issue>" lines -->
+<!-- If work is not tied to an issue, delete this section -->
+
+Resolves #
 
 ## Notes
 
