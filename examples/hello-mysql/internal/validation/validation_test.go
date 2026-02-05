@@ -16,3 +16,20 @@ func TestValidationErrors_AddAndHasErrors(t *testing.T) {
 		t.Fatalf("unexpected field error: %+v", errs.Fields[0])
 	}
 }
+
+func TestProblemDetails_FromValidationErrors(t *testing.T) {
+	err := ValidationErrors{}
+	err.Add("email", "is required")
+
+	pd := NewProblemDetails("/users", err)
+
+	if pd.Status != 400 {
+		t.Fatalf("expected status 400, got %d", pd.Status)
+	}
+	if len(pd.InvalidParams) != 1 {
+		t.Fatalf("expected 1 invalid param, got %d", len(pd.InvalidParams))
+	}
+	if pd.InvalidParams[0].Name != "email" {
+		t.Fatalf("unexpected invalid param: %+v", pd.InvalidParams[0])
+	}
+}

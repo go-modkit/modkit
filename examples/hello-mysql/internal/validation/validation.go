@@ -6,7 +6,7 @@ type FieldError struct {
 }
 
 type ValidationErrors struct {
-	Fields []FieldError
+	Fields []FieldError `json:"fields"`
 }
 
 func (v *ValidationErrors) Add(name, reason string) {
