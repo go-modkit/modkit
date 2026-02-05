@@ -18,12 +18,12 @@ Each item links to its detailed implementation plan.
 
 | # | Topic | Status | Plan | Priority | Summary |
 |---|-------|--------|------|----------|---------|
-| C1 | Controller Registry Scoping | 🔴 | [code/01-controller-registry-scoping.md](code/01-controller-registry-scoping.md) | Medium | Namespace controller keys to allow same name across modules |
-| C2 | Router Group and Use | 🔴 | [code/02-router-group-use.md](code/02-router-group-use.md) | High | Add `Group()` and `Use()` to Router interface (docs describe but not implemented) |
-| C3 | App Container Access | 🔴 | [code/03-app-container-access.md](code/03-app-container-access.md) | Medium | Fix docs to use `App.Get()` instead of unexported `app.Container` |
-| C4 | Logger Interface Alignment | 🔴 | [code/04-logger-interface-alignment.md](code/04-logger-interface-alignment.md) | Medium | Align Logger interface with docs: `...any` args, add `Warn` method |
-| C5 | NewSlogLogger Rename | 🔴 | [code/05-newsloglogger-rename.md](code/05-newsloglogger-rename.md) | Low | Rename `NewSlog` → `NewSlogLogger` to match docs |
-| C6 | Graceful Shutdown | 🔴 | [code/06-graceful-shutdown.md](code/06-graceful-shutdown.md) | Medium | Implement SIGINT/SIGTERM handling in `Serve()` (docs claim but not implemented) |
+| C1 | Controller Registry Scoping | 🟢 | [code/01-controller-registry-scoping.md](code/01-controller-registry-scoping.md) | Medium | Namespace controller keys to allow same name across modules |
+| C2 | Router Group and Use | 🟢 | [code/02-router-group-use.md](code/02-router-group-use.md) | High | Add `Group()` and `Use()` to Router interface (docs describe but not implemented) |
+| C3 | App Container Access | 🟢 | [code/03-app-container-access.md](code/03-app-container-access.md) | Medium | Fix docs to use `App.Get()` instead of unexported `app.Container` |
+| C4 | Logger Interface Alignment | 🟢 | [code/04-logger-interface-alignment.md](code/04-logger-interface-alignment.md) | Medium | Align Logger interface with docs: `...any` args, add `Warn` method |
+| C5 | NewSlogLogger Rename | 🟢 | [code/05-newsloglogger-rename.md](code/05-newsloglogger-rename.md) | Low | Rename `NewSlog` → `NewSlogLogger` to match docs |
+| C6 | Graceful Shutdown | 🟢 | [code/06-graceful-shutdown.md](code/06-graceful-shutdown.md) | Medium | Implement SIGINT/SIGTERM handling in `Serve()` (docs claim but not implemented) |
 
 ---
 
@@ -53,8 +53,8 @@ Ordered by logical implementation sequence. Complete earlier items before later 
 | D6 | Error Handling | 🟢 | [docs/06-error-handling.md](docs/06-error-handling.md) | Exception Filters | New guide: handler errors + middleware |
 | D7 | Validation | 🟢 | [docs/07-validation.md](docs/07-validation.md) | Pipes | New guide: explicit decode/validate |
 | D8 | Auth & Guards | 🟢 | [docs/08-auth-guards.md](docs/08-auth-guards.md) | Guards | New guide: auth middleware + context |
-| D9 | Interceptors | 🔴 | [docs/09-interceptors.md](docs/09-interceptors.md) | Interceptors | New guide: middleware wrappers |
-| D10 | Context Helpers | 🔴 | [docs/10-context-helpers.md](docs/10-context-helpers.md) | Custom Decorators | New guide: typed context keys |
+| D9 | Interceptors | 🟢 | [docs/09-interceptors.md](docs/09-interceptors.md) | Interceptors | New guide: middleware wrappers |
+| D10 | Context Helpers | 🟢 | [docs/10-context-helpers.md](docs/10-context-helpers.md) | Custom Decorators | New guide: typed context keys |
 
 ---
 
@@ -86,9 +86,9 @@ These are handled by Go-idiomatic patterns documented in guides, not framework a
 
 ## Implementation Notes
 
-1. **D1-D8 complete** — Existing guides in `docs/guides/` cover all planned content
-2. **D9-D10** — Each guide is standalone; can be done in any order
-3. **Testing** — Each guide should reference examples from `examples/hello-mysql`
+1. **D1-D10 complete** — All documentation guides in `docs/guides/` are complete
+2. **C1-C6 complete** — All code changes implemented and merged
+3. **Testing** — Each guide references examples from `examples/hello-mysql`
 
 ---
 
