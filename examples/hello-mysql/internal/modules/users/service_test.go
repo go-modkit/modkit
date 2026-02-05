@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+	"errors"
 	"testing"
 )
 
@@ -97,5 +98,16 @@ func TestService_DeleteUser(t *testing.T) {
 	}
 	if repo.deleteID != 9 {
 		t.Fatalf("expected delete id 9, got %d", repo.deleteID)
+	}
+}
+
+func TestService_LongOperation_RespectsContextCancel(t *testing.T) {
+	svc := NewService(&stubRepo{}, nil)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	err := svc.LongOperation(ctx)
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected context.Canceled, got %v", err)
 	}
 }

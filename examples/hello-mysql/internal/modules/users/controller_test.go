@@ -49,6 +49,10 @@ func (s stubService) DeleteUser(ctx context.Context, id int64) error {
 	return s.deleteFn(ctx, id)
 }
 
+func (s stubService) LongOperation(ctx context.Context) error {
+	return nil
+}
+
 func TestController_CreateUser(t *testing.T) {
 	svc := stubService{
 		createFn: func(ctx context.Context, input CreateUserInput) (User, error) {

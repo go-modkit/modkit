@@ -3,6 +3,7 @@ package users
 import (
 	"context"
 	"log/slog"
+	"time"
 
 	modkitlogging "github.com/go-modkit/modkit/modkit/logging"
 )
@@ -13,6 +14,7 @@ type Service interface {
 	ListUsers(ctx context.Context) ([]User, error)
 	UpdateUser(ctx context.Context, id int64, input UpdateUserInput) (User, error)
 	DeleteUser(ctx context.Context, id int64) error
+	LongOperation(ctx context.Context) error
 }
 
 type service struct {
@@ -51,4 +53,14 @@ func (s *service) UpdateUser(ctx context.Context, id int64, input UpdateUserInpu
 func (s *service) DeleteUser(ctx context.Context, id int64) error {
 	s.logger.Debug("delete user", slog.Int64("id", id))
 	return s.repo.DeleteUser(ctx, id)
+}
+
+func (s *service) LongOperation(ctx context.Context) error {
+	s.logger.Debug("long operation")
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-time.After(2 * time.Second):
+		return nil
+	}
 }
