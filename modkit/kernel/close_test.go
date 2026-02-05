@@ -128,3 +128,56 @@ func TestAppCloseContextCanceledWithNoClosers(t *testing.T) {
 		t.Fatalf("expected context canceled error, got %v", err)
 	}
 }
+
+func TestAppCloseContextCanceledWithClosers(t *testing.T) {
+	tokenB := module.Token("close.ctx.b")
+	tokenA := module.Token("close.ctx.a")
+	calls := make([]string, 0, 2)
+
+	modA := mod("A", nil,
+		[]module.ProviderDef{{
+			Token: tokenB,
+			Build: func(r module.Resolver) (any, error) {
+				return &recorder{id: "B", calls: &calls}, nil
+			},
+		}, {
+			Token: tokenA,
+			Build: func(r module.Resolver) (any, error) {
+				_, err := r.Get(tokenB)
+				if err != nil {
+					return nil, err
+				}
+				return &recorder{id: "A", calls: &calls}, nil
+			},
+		}},
+		nil,
+		nil,
+	)
+
+	app, err := kernel.Bootstrap(modA)
+	if err != nil {
+		t.Fatalf("Bootstrap failed: %v", err)
+	}
+
+	if _, err := app.Get(tokenA); err != nil {
+		t.Fatalf("Get failed: %v", err)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	err = app.CloseContext(ctx)
+	if err == nil {
+		t.Fatalf("expected close error")
+	}
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected context canceled error, got %v", err)
+	}
+
+	if len(calls) != 1 {
+		t.Fatalf("expected 1 close call, got %d", len(calls))
+	}
+	if calls[0] != "A" {
+		t.Fatalf("unexpected close order: %v", calls)
+	}
+}

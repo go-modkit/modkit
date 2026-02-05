@@ -99,13 +99,13 @@ func (a *App) Close() error {
 // CloseContext closes providers implementing io.Closer in reverse build order.
 func (a *App) CloseContext(ctx context.Context) error {
 	a.closeOnce.Do(func() {
+		closers := a.container.closersLIFO()
 		var errs []error
-		if ctx != nil && ctx.Err() != nil {
-			errs = append(errs, ctx.Err())
-			a.closeErr = errors.Join(errs...)
+		if ctx != nil && ctx.Err() != nil && len(closers) == 0 {
+			a.closeErr = errors.Join(ctx.Err())
 			return
 		}
-		for _, closer := range a.container.closersLIFO() {
+		for _, closer := range closers {
 			if err := closer.Close(); err != nil {
 				errs = append(errs, err)
 			}
