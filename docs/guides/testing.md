@@ -202,6 +202,16 @@ func TestSmoke(t *testing.T) {
 
 See `examples/hello-mysql/internal/smoke/smoke_test.go` for a complete example.
 
+## Example Test Files
+
+The `examples/hello-mysql` app includes current patterns for auth, validation, middleware, lifecycle, and routing. Keep this guide aligned with the following tests:
+
+- Auth: `examples/hello-mysql/internal/modules/auth/handler_test.go`, `examples/hello-mysql/internal/modules/auth/middleware_test.go`, `examples/hello-mysql/internal/modules/auth/integration_test.go`
+- Validation: `examples/hello-mysql/internal/validation/validation_test.go`, `examples/hello-mysql/internal/modules/users/validation_test.go`
+- Middleware: `examples/hello-mysql/internal/middleware/middleware_test.go`, `examples/hello-mysql/internal/modules/app/app_test.go`
+- Lifecycle: `examples/hello-mysql/internal/lifecycle/lifecycle_test.go`, `examples/hello-mysql/cmd/api/main_test.go`
+- Routing: `examples/hello-mysql/internal/httpserver/server_test.go`, `examples/hello-mysql/internal/modules/app/controller_test.go`, `examples/hello-mysql/internal/modules/users/controller_test.go`
+
 ## Running Tests
 
 Run all tests:
