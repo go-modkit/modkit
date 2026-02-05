@@ -20,6 +20,23 @@ definitions:
       type:
         type: string
     type: object
+  users.ProblemDetails:
+    properties:
+      detail:
+        type: string
+      instance:
+        type: string
+      invalidParams:
+        items:
+          $ref: '#/definitions/validation.InvalidParam'
+        type: array
+      status:
+        type: integer
+      title:
+        type: string
+      type:
+        type: string
+    type: object
   users.UpdateUserInput:
     properties:
       email:
@@ -38,6 +55,13 @@ definitions:
       name:
         type: string
       updated_at:
+        type: string
+    type: object
+  validation.InvalidParam:
+    properties:
+      name:
+        type: string
+      reason:
         type: string
     type: object
 info:
@@ -97,7 +121,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/users.Problem'
+            $ref: '#/definitions/users.ProblemDetails'
         "409":
           description: Conflict
           schema:
@@ -184,7 +208,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/users.Problem'
+            $ref: '#/definitions/users.ProblemDetails'
         "404":
           description: Not Found
           schema:
