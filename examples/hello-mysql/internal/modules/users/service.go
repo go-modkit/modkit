@@ -18,8 +18,8 @@ type Service interface {
 }
 
 type service struct {
-	repo              Repository
-	logger            modkitlogging.Logger
+	repo               Repository
+	logger             modkitlogging.Logger
 	longOperationDelay time.Duration
 }
 
