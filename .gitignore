@@ -4,6 +4,7 @@
 coverage.out
 coverage-examples.out
 coverage-patch.out
+coverage-patch-filtered.out
 
 # Build cache
 .cache/

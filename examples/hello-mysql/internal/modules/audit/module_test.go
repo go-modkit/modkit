@@ -2,6 +2,7 @@ package audit
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/users"
@@ -74,5 +75,23 @@ func TestAuditModule_ProviderBuildInvokesUsersService(t *testing.T) {
 	}
 	if _, ok := res.(Service); !ok {
 		t.Fatalf("expected Service, got %T", res)
+	}
+}
+
+func TestAuditModule_ProviderBuildError(t *testing.T) {
+	mod := NewModule(Options{Users: &users.Module{}})
+	def := mod.(*Module).Definition()
+	provider := def.Providers[0]
+
+	_, err := provider.Build(stubResolver{
+		errors: map[module.Token]error{
+			users.TokenService: errors.New("users service not found"),
+		},
+	})
+	if err == nil {
+		t.Fatal("expected error for missing users service")
+	}
+	if err.Error() != "users service not found" {
+		t.Fatalf("expected 'users service not found' error, got %q", err.Error())
 	}
 }

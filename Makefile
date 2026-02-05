@@ -36,7 +36,13 @@ test-patch-coverage:
 	echo "Running patch coverage for packages:"; \
 	echo "$$pkgs" | tr ' ' '\n'; \
 	go test -race -coverprofile=coverage-patch.out -covermode=atomic $$pkgs; \
-	go tool cover -func=coverage-patch.out
+	exclude_pattern=$$(awk '/^ignore:/{flag=1; next} /^[a-z]/ && !/^ignore:/{flag=0} flag && /^  -/{gsub(/^[[:space:]]*-[[:space:]]*"/,""); gsub(/"$$/,""); print}' codecov.yml 2>/dev/null | tr '\n' '|' | sed 's/|$$//'); \
+	if [ -n "$$exclude_pattern" ]; then \
+		grep -vE "$$exclude_pattern" coverage-patch.out > coverage-patch-filtered.out || cp coverage-patch.out coverage-patch-filtered.out; \
+		go tool cover -func=coverage-patch-filtered.out; \
+	else \
+		go tool cover -func=coverage-patch.out; \
+	fi
 
 # Install all development tools (tracked in tools/tools.go)
 tools:

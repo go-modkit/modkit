@@ -43,3 +43,18 @@ func TestDatabaseModule_Definition_ProvidesDB(t *testing.T) {
 		t.Fatal("expected cleanup hook")
 	}
 }
+
+func TestDatabaseModule_ProviderBuildError(t *testing.T) {
+	mod := NewModule(Options{DSN: ""})
+	def := mod.(*Module).Definition()
+	provider := def.Providers[0]
+
+	// Use a stub resolver - the error will come from mysql.Open with empty DSN
+	_, err := provider.Build(nil)
+	if err == nil {
+		t.Fatal("expected error for empty DSN")
+	}
+	if err.Error() != "mysql dsn is required" {
+		t.Fatalf("expected 'mysql dsn is required' error, got %q", err.Error())
+	}
+}

@@ -100,3 +100,39 @@ func TestUsersModule_ControllerBuildErrors(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
+
+func TestUsersModule_RepositoryBuildError(t *testing.T) {
+	mod := NewModule(Options{Database: &database.Module{}, Auth: auth.NewModule(auth.Options{})})
+	def := mod.(*Module).Definition()
+	provider := def.Providers[0] // TokenRepository
+
+	_, err := provider.Build(stubResolver{
+		errors: map[module.Token]error{
+			database.TokenDB: errors.New("database connection failed"),
+		},
+	})
+	if err == nil {
+		t.Fatal("expected error for missing database")
+	}
+	if err.Error() != "database connection failed" {
+		t.Fatalf("expected 'database connection failed' error, got %q", err.Error())
+	}
+}
+
+func TestUsersModule_ServiceBuildError(t *testing.T) {
+	mod := NewModule(Options{Database: &database.Module{}, Auth: auth.NewModule(auth.Options{})})
+	def := mod.(*Module).Definition()
+	provider := def.Providers[1] // TokenService
+
+	_, err := provider.Build(stubResolver{
+		errors: map[module.Token]error{
+			TokenRepository: errors.New("repository not found"),
+		},
+	})
+	if err == nil {
+		t.Fatal("expected error for missing repository")
+	}
+	if err.Error() != "repository not found" {
+		t.Fatalf("expected 'repository not found' error, got %q", err.Error())
+	}
+}
