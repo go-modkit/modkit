@@ -3,6 +3,8 @@ package middleware
 import (
 	"net/http"
 	"net/http/httptest"
+	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -31,5 +33,47 @@ func TestCORS_AddsHeaders(t *testing.T) {
 	}
 	if _, ok := rec.Header()["Access-Control-Allow-Headers"]; !ok {
 		t.Fatalf("expected allow headers header to be set")
+	}
+}
+
+func TestRateLimit_BlocksAfterBurst(t *testing.T) {
+	limiter := NewRateLimit(RateLimitConfig{
+		RequestsPerSecond: 1,
+		Burst:             2,
+	})
+
+	handler := limiter(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/health", nil)
+
+	for i := 0; i < 2; i++ {
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("expected request %d to pass, got %d", i+1, rec.Code)
+		}
+	}
+
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusTooManyRequests {
+		t.Fatalf("expected status %d, got %d", http.StatusTooManyRequests, rec.Code)
+	}
+	if rec.Header().Get("Content-Type") != "application/problem+json" {
+		t.Fatalf("expected application/problem+json content type")
+	}
+	if !strings.Contains(rec.Body.String(), "rate limit exceeded") {
+		t.Fatalf("expected rate limit detail message")
+	}
+	retryAfter := rec.Header().Get("Retry-After")
+	if retryAfter == "" {
+		t.Fatalf("expected Retry-After header to be set")
+	}
+	seconds, err := strconv.Atoi(retryAfter)
+	if err != nil || seconds < 1 {
+		t.Fatalf("expected Retry-After to be a positive integer, got %q", retryAfter)
 	}
 }

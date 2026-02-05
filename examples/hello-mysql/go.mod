@@ -11,6 +11,7 @@ require (
 	github.com/swaggo/swag v1.16.6
 	github.com/testcontainers/testcontainers-go v0.40.0
 	golang.org/x/term v0.39.0
+	golang.org/x/time v0.11.0
 )
 
 require (
