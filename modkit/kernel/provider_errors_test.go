@@ -37,8 +37,7 @@ func mod(
 	}
 }
 
-// NewContainer constructs a test container with visibility enforced.
-func NewContainer(t *testing.T, graph *Graph) *testContainer {
+func newTestContainer(t *testing.T, graph *Graph) *testContainer {
 	t.Helper()
 	visibility, err := BuildVisibility(graph)
 	if err != nil {
@@ -71,7 +70,7 @@ func TestContainerGet_ReturnsProviderBuildErrorOnBuildFailure(t *testing.T) {
 	if err != nil {
 		t.Fatalf("BuildGraph: %v", err)
 	}
-	c := NewContainer(t, g)
+	c := newTestContainer(t, g)
 
 	_, err = c.Get("Mod", provider.Token)
 	if err == nil {
@@ -108,7 +107,7 @@ func TestContainerGet_ReturnsProviderBuildErrorOnMissingDependency(t *testing.T)
 	if err != nil {
 		t.Fatalf("BuildGraph: %v", err)
 	}
-	c := NewContainer(t, g)
+	c := newTestContainer(t, g)
 
 	_, err = c.Get("Mod", provider.Token)
 	if err == nil {

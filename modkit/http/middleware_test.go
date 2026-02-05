@@ -25,12 +25,12 @@ func TestMiddlewareStopsChainWhenHandlingResponse(t *testing.T) {
 	router := NewRouter()
 	handled := false
 
-	router.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	router.Use(func(_ http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusTeapot)
 		})
 	})
-	router.Method(http.MethodGet, "/teapot", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	router.Method(http.MethodGet, "/teapot", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		handled = true
 		w.WriteHeader(http.StatusOK)
 	}))
