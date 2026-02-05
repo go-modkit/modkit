@@ -283,13 +283,14 @@ func TestContainerGetMissingTokenError(t *testing.T) {
 func TestContainerGetSingletonBehavior(t *testing.T) {
 	token := module.Token("cached")
 	var buildCount int32
+	type cachedInstance struct{}
 
 	modA := mod("A", nil,
 		[]module.ProviderDef{{
 			Token: token,
 			Build: func(r module.Resolver) (any, error) {
 				buildCount++
-				return "instance", nil
+				return &cachedInstance{}, nil
 			},
 		}},
 		nil,
@@ -306,6 +307,10 @@ func TestContainerGetSingletonBehavior(t *testing.T) {
 	if err != nil {
 		t.Fatalf("first Get failed: %v", err)
 	}
+	instance1, ok := val1.(*cachedInstance)
+	if !ok {
+		t.Fatalf("expected *cachedInstance, got %T", val1)
+	}
 	if buildCount != 1 {
 		t.Fatalf("expected 1 build call, got %d", buildCount)
 	}
@@ -315,12 +320,16 @@ func TestContainerGetSingletonBehavior(t *testing.T) {
 	if err != nil {
 		t.Fatalf("second Get failed: %v", err)
 	}
+	instance2, ok := val2.(*cachedInstance)
+	if !ok {
+		t.Fatalf("expected *cachedInstance, got %T", val2)
+	}
 	if buildCount != 1 {
 		t.Fatalf("expected still 1 build call (cached), got %d", buildCount)
 	}
 
 	// Both should be the same instance
-	if val1 != val2 {
+	if instance1 != instance2 {
 		t.Fatalf("expected same cached instance")
 	}
 }
