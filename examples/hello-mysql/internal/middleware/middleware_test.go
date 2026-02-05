@@ -183,3 +183,35 @@ func TestGroupScope_OnlyAppliesMiddlewareToGroup(t *testing.T) {
 		t.Fatalf("expected timing log for /api/v1, got %d", len(logger.infoMessages))
 	}
 }
+
+func TestMiddlewareOrdering_CORSBeforeRateLimit(t *testing.T) {
+	cors := NewCORS(CORSConfig{
+		AllowedOrigins: []string{"http://localhost:3000"},
+		AllowedMethods: []string{"GET"},
+		AllowedHeaders: nil,
+	})
+	limiter := NewRateLimit(RateLimitConfig{
+		RequestsPerSecond: 1,
+		Burst:             1,
+	})
+
+	handler := cors(limiter(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})))
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/health", nil)
+	req.Header.Set("Origin", "http://localhost:3000")
+
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	rec = httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusTooManyRequests {
+		t.Fatalf("expected status %d, got %d", http.StatusTooManyRequests, rec.Code)
+	}
+	if got := rec.Header().Get("Access-Control-Allow-Origin"); got != "http://localhost:3000" {
+		t.Fatalf("expected Access-Control-Allow-Origin header, got %q", got)
+	}
+}
