@@ -69,7 +69,7 @@ func (c *Controller) handleGetUser(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param body body CreateUserInput true "User payload"
 // @Success 201 {object} User
-// @Failure 400 {object} Problem
+// @Failure 400 {object} ProblemDetails
 // @Failure 409 {object} Problem
 // @Router /users [post]
 func (c *Controller) handleCreateUser(w http.ResponseWriter, r *http.Request) {
@@ -125,7 +125,7 @@ func (c *Controller) handleListUsers(w http.ResponseWriter, r *http.Request) {
 // @Param id path int true "User ID"
 // @Param body body UpdateUserInput true "User payload"
 // @Success 200 {object} User
-// @Failure 400 {object} Problem
+// @Failure 400 {object} ProblemDetails
 // @Failure 404 {object} Problem
 // @Router /users/{id} [put]
 func (c *Controller) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
