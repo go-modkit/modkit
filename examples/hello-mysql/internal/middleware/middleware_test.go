@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	modkithttp "github.com/go-modkit/modkit/modkit/http"
 	modkitlogging "github.com/go-modkit/modkit/modkit/logging"
 )
 
@@ -141,5 +142,44 @@ func TestTiming_LogsDuration(t *testing.T) {
 	}
 	if duration < minDuration {
 		t.Fatalf("expected duration to be >= %v, got %v", minDuration, duration)
+	}
+}
+
+func TestGroupScope_OnlyAppliesMiddlewareToGroup(t *testing.T) {
+	logger := &testLogger{}
+	timing := NewTiming(logger)
+
+	router := modkithttp.NewRouter()
+	root := modkithttp.AsRouter(router)
+
+	router.Get("/docs", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	root.Group("/api/v1", func(r modkithttp.Router) {
+		r.Use(timing)
+		r.Handle(http.MethodGet, "/health", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		}))
+	})
+
+	docsRec := httptest.NewRecorder()
+	docsReq := httptest.NewRequest(http.MethodGet, "/docs", nil)
+	router.ServeHTTP(docsRec, docsReq)
+	if docsRec.Code != http.StatusOK {
+		t.Fatalf("expected docs status 200, got %d", docsRec.Code)
+	}
+	if len(logger.infoMessages) != 0 {
+		t.Fatalf("expected no timing logs for /docs, got %d", len(logger.infoMessages))
+	}
+
+	apiRec := httptest.NewRecorder()
+	apiReq := httptest.NewRequest(http.MethodGet, "/api/v1/health", nil)
+	router.ServeHTTP(apiRec, apiReq)
+	if apiRec.Code != http.StatusOK {
+		t.Fatalf("expected api status 200, got %d", apiRec.Code)
+	}
+	if len(logger.infoMessages) != 1 {
+		t.Fatalf("expected timing log for /api/v1, got %d", len(logger.infoMessages))
 	}
 }
