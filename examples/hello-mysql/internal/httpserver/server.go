@@ -1,10 +1,10 @@
 package httpserver
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 
-	"github.com/go-modkit/modkit/examples/hello-mysql/internal/middleware"
 	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/app"
 	"github.com/go-modkit/modkit/examples/hello-mysql/internal/platform/logging"
 	modkithttp "github.com/go-modkit/modkit/modkit/http"
@@ -26,18 +26,38 @@ func BuildAppHandler(opts app.Options) (*kernel.App, http.Handler, error) {
 	root := modkithttp.AsRouter(router)
 	root.Use(modkithttp.RequestLogger(logger))
 
+	corsAny, err := boot.Get(app.CorsMiddlewareToken)
+	if err != nil {
+		return nil, err
+	}
+	cors, ok := corsAny.(func(http.Handler) http.Handler)
+	if !ok {
+		return nil, fmt.Errorf("cors middleware: expected func(http.Handler) http.Handler, got %T", corsAny)
+	}
+
+	rateLimitAny, err := boot.Get(app.RateLimitMiddlewareToken)
+	if err != nil {
+		return nil, err
+	}
+	rateLimit, ok := rateLimitAny.(func(http.Handler) http.Handler)
+	if !ok {
+		return nil, fmt.Errorf("rate limit middleware: expected func(http.Handler) http.Handler, got %T", rateLimitAny)
+	}
+
+	timingAny, err := boot.Get(app.TimingMiddlewareToken)
+	if err != nil {
+		return nil, err
+	}
+	timing, ok := timingAny.(func(http.Handler) http.Handler)
+	if !ok {
+		return nil, fmt.Errorf("timing middleware: expected func(http.Handler) http.Handler, got %T", timingAny)
+	}
+
 	var registerErr error
 	root.Group("/api/v1", func(r modkithttp.Router) {
-		r.Use(middleware.NewCORS(middleware.CORSConfig{
-			AllowedOrigins: opts.CORSAllowedOrigins,
-			AllowedMethods: opts.CORSAllowedMethods,
-			AllowedHeaders: nil,
-		}))
-		r.Use(middleware.NewRateLimit(middleware.RateLimitConfig{
-			RequestsPerSecond: opts.RateLimitPerSecond,
-			Burst:             opts.RateLimitBurst,
-		}))
-		r.Use(middleware.NewTiming(logger))
+		r.Use(cors)
+		r.Use(rateLimit)
+		r.Use(timing)
 		if err := registerRoutes(r, boot.Controllers); err != nil {
 			registerErr = err
 		}

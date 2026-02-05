@@ -63,7 +63,7 @@ func TestBuildAppHandler_ReturnsAppAndHandler(t *testing.T) {
 		t.Fatal("expected handler, got nil")
 	}
 	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/health", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/health", nil)
 	handler.ServeHTTP(rec, req)
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected status 200, got %d", rec.Code)
@@ -86,6 +86,28 @@ func TestBuildAppHandler_ReturnsBootOnRouteError(t *testing.T) {
 	}
 	if handler != nil {
 		t.Fatal("expected nil handler on error")
+	}
+}
+
+func TestBuildHandler_UsesMiddlewareProviders(t *testing.T) {
+	opts := testAppOptions()
+	opts.CORSAllowedMethods = []string{"GET"}
+
+	h, err := BuildHandler(opts)
+	if err != nil {
+		t.Fatalf("build handler: %v", err)
+	}
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/health", nil)
+	req.Header.Set("Origin", "http://localhost:3000")
+	h.ServeHTTP(rec, req)
+
+	if got := rec.Header().Get("Access-Control-Allow-Origin"); got != "http://localhost:3000" {
+		t.Fatalf("expected Access-Control-Allow-Origin header, got %q", got)
+	}
+	if got := rec.Header().Get("Access-Control-Allow-Methods"); got == "" {
+		t.Fatalf("expected Access-Control-Allow-Methods header, got empty")
 	}
 }
 
