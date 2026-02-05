@@ -45,8 +45,8 @@ test-coverage:
 
 test-patch-coverage: test-coverage
 	@echo "Comparing against origin/main..."
-	@git diff origin/main...HEAD > .coverage/diff.patch
-	@$(GO_PATCH_COVER) -cov .coverage/coverage.out -diff .coverage/diff.patch -o .coverage/patch_coverage.out
+	@git diff -U0 --no-color origin/main...HEAD > .coverage/diff.patch
+	@$(GO_PATCH_COVER) .coverage/coverage.out .coverage/diff.patch > .coverage/patch_coverage.out
 	@echo "Patch Coverage Report:"
 	@cat .coverage/patch_coverage.out
 

@@ -7,6 +7,7 @@ require (
 	github.com/evilmartians/lefthook/v2 v2.1.0
 	github.com/go-chi/chi/v5 v5.2.4
 	github.com/golangci/golangci-lint v1.64.8
+	github.com/seriousben/go-patch-cover v0.2.0
 	golang.org/x/tools v0.41.0
 	golang.org/x/vuln v1.1.4
 )
@@ -37,6 +38,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bkielbasa/cyclop v1.2.3 // indirect
 	github.com/blizzy78/varnamelen v0.8.0 // indirect
+	github.com/bluekeyes/go-gitdiff v0.6.0 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.9.1 // indirect
 	github.com/bombsimon/wsl/v4 v4.5.0 // indirect
 	github.com/breml/bidichk v0.3.2 // indirect
