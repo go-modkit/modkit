@@ -290,16 +290,6 @@ authMW, _ := app.Get("middleware.auth")
 router.Use(authMW.(func(http.Handler) http.Handler))
 ```
 
-## Comparison with NestJS
-
-| NestJS | modkit |
-|--------|--------|
-| `@UseGuards(AuthGuard)` | `r.Use(authMiddleware)` |
-| `NestMiddleware` class | `func(http.Handler) http.Handler` |
-| `app.use()` | `router.Use()` |
-| `@UseInterceptors()` | Middleware that wraps before/after |
-| Global vs route-scoped | Same pattern, different placement |
-
 ## Tips
 
 - Keep middleware focused on a single responsibility

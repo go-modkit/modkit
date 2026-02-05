@@ -250,19 +250,7 @@ func (c *UsersController) RegisterRoutes(r mkhttp.Router) {
 
 ## Error Types
 
-The kernel returns typed errors for debugging:
-
-| Error | Cause |
-|-------|-------|
-| `RootModuleNilError` | Bootstrap called with nil |
-| `DuplicateModuleNameError` | Two modules share a name |
-| `ModuleCycleError` | Import cycle detected |
-| `DuplicateProviderTokenError` | Token registered twice |
-| `ProviderNotFoundError` | `Get()` for unknown token |
-| `TokenNotVisibleError` | Token not exported to requester |
-| `ProviderCycleError` | Provider depends on itself |
-| `ProviderBuildError` | Provider's Build function failed |
-| `ControllerBuildError` | Controller's Build function failed |
+The kernel returns typed errors for debugging. See the [API Reference](reference/api.md#errors) for the complete list of error types.
 
 ## Key Design Decisions
 

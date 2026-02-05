@@ -257,19 +257,7 @@ func (c *UsersController) Create(w http.ResponseWriter, r *http.Request) {
 
 ## Kernel Bootstrap Errors
 
-modkit returns typed errors during bootstrap:
-
-| Error | Cause |
-|-------|-------|
-| `RootModuleNilError` | Bootstrap called with nil |
-| `DuplicateModuleNameError` | Two modules share a name |
-| `ModuleCycleError` | Import cycle detected |
-| `DuplicateProviderTokenError` | Token registered twice |
-| `ProviderNotFoundError` | `Get()` for unknown token |
-| `TokenNotVisibleError` | Token not exported to requester |
-| `ProviderCycleError` | Provider depends on itself |
-| `ProviderBuildError` | Provider's Build function failed |
-| `ControllerBuildError` | Controller's Build function failed |
+modkit returns typed errors during bootstrap. See the [API Reference](../reference/api.md#errors) for the complete list.
 
 Handle these at startup:
 
@@ -283,16 +271,6 @@ if err != nil {
     log.Fatalf("bootstrap failed: %v", err)
 }
 ```
-
-## Comparison with NestJS
-
-| NestJS | modkit |
-|--------|--------|
-| `throw new NotFoundException()` | `return nil, ErrNotFound` |
-| `@Catch()` exception filter | Recovery middleware |
-| `HttpException` hierarchy | Sentinel errors + Problem Details |
-| Global exception filter | Global middleware |
-| `ValidationPipe` | Explicit validation in handlers |
 
 ## Tips
 

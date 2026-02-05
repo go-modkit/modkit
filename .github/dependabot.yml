@@ -8,3 +8,7 @@ updates:
     directory: "/examples/hello-mysql"
     schedule:
       interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/examples/hello-simple"
+    schedule:
+      interval: "weekly"

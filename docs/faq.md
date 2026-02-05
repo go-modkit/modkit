@@ -16,7 +16,7 @@ modkit is in **early development**. APIs may change before v0.1.0. Use it for pr
 
 ### What Go version is required?
 
-Go 1.25 or later.
+Go 1.22 or later.
 
 ---
 
@@ -59,13 +59,9 @@ Modules provide:
 
 ## Comparison
 
-### How does modkit compare to google/wire?
+### How does modkit compare to other frameworks?
 
-Wire uses code generation for compile-time DI. modkit uses runtime wiring with explicit modules. See [Comparison Guide](guides/comparison.md#googlewire).
-
-### How does modkit compare to uber-go/fx?
-
-Fx uses reflection for automatic injection. modkit uses explicit `Build` functions. See [Comparison Guide](guides/comparison.md#uber-gofx).
+modkit compares with google/wire, uber-go/fx, samber/do, manual DI, and NestJS. For a detailed comparison, see the [Comparison Guide](guides/comparison.md).
 
 ### Should I use modkit or just wire dependencies manually?
 
@@ -73,6 +69,8 @@ For small services, manual DI in `main()` is fine. modkit helps when:
 - You have multiple feature modules
 - You want visibility enforcement between modules
 - You're building a larger service with a team
+
+See [Comparison Guide](guides/comparison.md#no-framework-manual-di) for a detailed analysis.
 
 ---
 
