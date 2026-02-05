@@ -33,8 +33,8 @@ stateDiagram-v2
     end note
     
     note right of Cleanup
-        Manual cleanup required
-        (no automatic hooks)
+        Call App.Close/CloseContext
+        (closes io.Closer providers)
     end note
 ```
 
@@ -133,40 +133,34 @@ fmt.Println(svc1 == svc2)  // true
 
 ## Cleanup and Shutdown
 
-modkit does not provide automatic cleanup hooks. You must manage cleanup manually:
+modkit provides explicit shutdown via `App.Close()` / `App.CloseContext(ctx)`. Providers that implement
+`io.Closer` are closed in reverse build order when you call these methods.
 
-### App.Close and CloseContext
-
-If providers implement `io.Closer`, you can shut down the app explicitly:
+### Primary Pattern: App.Close/CloseContext
 
 ```go
-// Close all io.Closer providers in reverse build order.
-if err := app.Close(); err != nil {
-    log.Printf("shutdown error: %v", err)
+func main() {
+    app, err := kernel.Bootstrap(&AppModule{})
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    router := mkhttp.NewRouter()
+    mkhttp.RegisterRoutes(mkhttp.AsRouter(router), app.Controllers)
+    if err := mkhttp.Serve(":8080", router); err != nil {
+        log.Printf("server error: %v", err)
+    }
+    if err := app.CloseContext(context.Background()); err != nil {
+        log.Printf("shutdown error: %v", err)
+    }
 }
 ```
 
-`Close()` is idempotent: once it completes successfully (even with aggregated errors),
-subsequent calls return `nil` and do not re-close providers.
+`CloseContext` will return `ctx.Err()` if the context is canceled, but it does not interrupt
+closing providers once shutdown begins. Context timeouts are reported as errors; they do not
+bound the close duration. Use `App.Close()` if you don't need context-aware errors.
 
-For context-aware shutdown, use `CloseContext(ctx)`:
-
-```go
-ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-defer cancel()
-
-if err := app.CloseContext(ctx); err != nil {
-    // Returns ctx.Err() if canceled or timed out
-    log.Printf("shutdown error: %v", err)
-}
-```
-
-`CloseContext` checks `ctx.Err()` before closing and before each closer. If the context
-is canceled mid-close, it returns the context error and leaves the app eligible for
-a later `Close()` retry. While a close is in progress, concurrent close calls are
-no-ops.
-
-### Pattern 1: Cleanup in main()
+### Alternative 1: Cleanup in main()
 
 ```go
 func main() {
@@ -191,7 +185,7 @@ func main() {
 }
 ```
 
-### Pattern 2: Cleanup Provider
+### Alternative 2: Cleanup Provider
 
 Create a provider that tracks resources needing cleanup:
 
@@ -242,7 +236,7 @@ func main() {
 }
 ```
 
-### Pattern 3: Context-Based Shutdown
+### Alternative 3: Context-Based Shutdown
 
 Use context cancellation for coordinated shutdown:
 
@@ -257,10 +251,13 @@ func main() {
     // Set up signal handling
     sigCh := make(chan os.Signal, 1)
     signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
-    
+
     go func() {
         <-sigCh
         cancel()  // Signal shutdown
+        if err := app.CloseContext(ctx); err != nil {
+            log.Printf("shutdown error: %v", err)
+        }
     }()
     
     // Start server
@@ -304,9 +301,9 @@ See [Context Helpers Guide](context-helpers.md) for typed context patterns.
 
 | Aspect | Fx | modkit |
 |--------|-----|--------|
-| Lifecycle hooks | `OnStart`/`OnStop` | Manual cleanup |
+| Lifecycle hooks | `OnStart`/`OnStop` | `App.Close()` / `CloseContext` |
 | Scopes | Singleton, request, custom | Singleton only |
-| Automatic cleanup | Yes | No |
+| Automatic cleanup | Yes | Explicit close |
 
 ### vs NestJS
 
@@ -314,7 +311,7 @@ See [Context Helpers Guide](context-helpers.md) for typed context patterns.
 |--------|--------|--------|
 | Scopes | Singleton, Request, Transient | Singleton only |
 | `onModuleInit` | Provider hook | Not supported |
-| `onModuleDestroy` | Provider hook | Manual cleanup |
+| `onModuleDestroy` | Provider hook | `App.Close()` / `CloseContext` |
 | Request-scoped | Framework-managed | Use `context.Context` |
 
 ## Best Practices
@@ -328,8 +325,8 @@ See [Context Helpers Guide](context-helpers.md) for typed context patterns.
    - Let providers build when first needed
 
 3. **Track resources that need cleanup**
-   - Use defer in `main()`
-   - Or create a cleanup provider pattern
+   - Implement `io.Closer` and call `app.Close()` / `CloseContext`
+   - Or use manual patterns for custom cleanup
 
 4. **Use context for request-scoped data**
    - Don't try to make request-scoped providers
