@@ -1,6 +1,6 @@
 # Implementation Plan - Refactor Http Adapter
 
-## Phase 1: Analysis & API Design
+## Phase 1: Analysis & API Design [checkpoint: cb31277]
 - [x] Task: Analyze current `modkit/http` implementation and identify extension points. 80aea26
 - [x] Task: Design the new Middleware API and Server Options pattern. c968a9d
     - [x] Create a design document or prototype snippet in `docs/specs/rfc_http_refactor.md`. c968a9d
