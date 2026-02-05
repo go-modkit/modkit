@@ -262,7 +262,7 @@ func TestContainerGetMissingTokenError(t *testing.T) {
 
 	missingToken := module.Token("missing")
 	// Try to get a missing token from a non-root module context
-	// This should trigger ProviderNotFoundError, not visibility error
+	// This should trigger TokenNotVisibleError for a token outside visibility
 	resolver := app.Resolver()
 	_, err = resolver.Get(missingToken)
 	if err == nil {

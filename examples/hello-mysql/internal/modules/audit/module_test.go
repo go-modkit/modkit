@@ -9,6 +9,8 @@ import (
 	"github.com/go-modkit/modkit/modkit/module"
 )
 
+var errUsersServiceNotFound = errors.New("users service not found")
+
 type stubResolver struct {
 	values map[module.Token]any
 	errors map[module.Token]error
@@ -85,13 +87,13 @@ func TestAuditModule_ProviderBuildError(t *testing.T) {
 
 	_, err := provider.Build(stubResolver{
 		errors: map[module.Token]error{
-			users.TokenService: errors.New("users service not found"),
+			users.TokenService: errUsersServiceNotFound,
 		},
 	})
 	if err == nil {
 		t.Fatal("expected error for missing users service")
 	}
-	if err.Error() != "users service not found" {
-		t.Fatalf("expected 'users service not found' error, got %q", err.Error())
+	if !errors.Is(err, errUsersServiceNotFound) {
+		t.Fatalf("expected users service error, got %v", err)
 	}
 }

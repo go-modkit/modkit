@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"errors"
 	"testing"
 )
 
@@ -22,7 +23,7 @@ func TestModuleDefinition_ProviderCleanupHook_CanceledContext(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	if err := cleanup(ctx); err != context.Canceled {
+	if err := cleanup(ctx); !errors.Is(err, context.Canceled) {
 		t.Fatalf("expected context.Canceled, got %v", err)
 	}
 }
