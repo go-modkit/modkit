@@ -2,8 +2,8 @@
 
 ## Phase 1: Analysis & API Design
 - [x] Task: Analyze current `modkit/http` implementation and identify extension points. 80aea26
-- [~] Task: Design the new Middleware API and Server Options pattern.
-    - [ ] Create a design document or prototype snippet in `docs/specs/rfc_http_refactor.md`.
+- [x] Task: Design the new Middleware API and Server Options pattern. c968a9d
+    - [x] Create a design document or prototype snippet in `docs/specs/rfc_http_refactor.md`. c968a9d
 - [ ] Task: Conductor - User Manual Verification 'Analysis & API Design' (Protocol in workflow.md)
 
 ## Phase 2: Core Refactoring (TDD)
