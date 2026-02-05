@@ -174,6 +174,30 @@ Rules:
 - A module can access tokens exported by modules it imports
 - Accessing non-visible tokens returns `TokenNotVisibleError`
 
+## Re-exporting Tokens
+
+You can re-export tokens from imported modules to create a public facade:
+
+```go
+const TokenDB module.Token = "database.connection"
+const TokenUsersService module.Token = "users.service"
+
+type AppModule struct {
+    db    *DatabaseModule
+    users *UsersModule
+}
+
+func (m *AppModule) Definition() module.ModuleDef {
+    return module.ModuleDef{
+        Name:    "app",
+        Imports: []module.Module{m.db, m.users},
+        Exports: []module.Token{TokenDB, TokenUsersService},
+    }
+}
+```
+
+Visibility still applies: a module can only re-export tokens that are exported by its imports (or its own providers). Re-exporting does not bypass visibility rules.
+
 ## Common Patterns
 
 ### Shared Database Module
