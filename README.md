@@ -2,7 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/go-modkit/modkit.svg)](https://pkg.go.dev/github.com/go-modkit/modkit)
 [![CI](https://github.com/go-modkit/modkit/actions/workflows/ci.yml/badge.svg)](https://github.com/go-modkit/modkit/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/aryeko/modkit/branch/main/graph/badge.svg)](https://codecov.io/gh/aryeko/modkit)
+[![codecov](https://codecov.io/gh/go-modkit/modkit/branch/main/graph/badge.svg?token=OICSEIEWSD)](https://codecov.io/gh/go-modkit/modkit)
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-modkit/modkit)](https://goreportcard.com/report/github.com/go-modkit/modkit)
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/go-modkit/modkit?utm_source=oss&utm_medium=github&utm_campaign=go-modkit%2Fmodkit&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
