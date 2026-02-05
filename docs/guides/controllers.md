@@ -263,7 +263,7 @@ import (
     "net/http"
 
     "github.com/go-chi/chi/v5"
-    mkhttp "github.com/aryeko/modkit/modkit/http"
+    mkhttp "github.com/go-modkit/modkit/modkit/http"
 )
 
 type Controller struct {

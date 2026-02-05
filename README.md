@@ -1,9 +1,9 @@
 # modkit
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/aryeko/modkit.svg)](https://pkg.go.dev/github.com/aryeko/modkit)
-[![CI](https://github.com/aryeko/modkit/actions/workflows/ci.yml/badge.svg)](https://github.com/aryeko/modkit/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/go-modkit/modkit.svg)](https://pkg.go.dev/github.com/go-modkit/modkit)
+[![CI](https://github.com/go-modkit/modkit/actions/workflows/ci.yml/badge.svg)](https://github.com/go-modkit/modkit/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/aryeko/modkit/branch/main/graph/badge.svg)](https://codecov.io/gh/aryeko/modkit)
-[![Go Report Card](https://goreportcard.com/badge/github.com/aryeko/modkit)](https://goreportcard.com/report/github.com/aryeko/modkit)
+[![Go Report Card](https://goreportcard.com/badge/github.com/go-modkit/modkit)](https://goreportcard.com/report/github.com/go-modkit/modkit)
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/aryeko/modkit?utm_source=oss&utm_medium=github&utm_campaign=aryeko%2Fmodkit&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -71,7 +71,7 @@ func main() {
 ## Installation
 
 ```bash
-go get github.com/aryeko/modkit
+go get github.com/go-modkit/modkit
 ```
 
 Requires Go 1.25+
@@ -170,7 +170,7 @@ After v0.1.0, changes will follow semantic versioning.
 
 ## Community
 
-Questions? Start a [Discussion](https://github.com/aryeko/modkit/discussions).
+Questions? Start a [Discussion](https://github.com/go-modkit/modkit/discussions).
 
 ## Contributing
 

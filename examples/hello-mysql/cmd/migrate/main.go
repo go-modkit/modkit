@@ -5,9 +5,9 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/platform/config"
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/platform/logging"
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/platform/mysql"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/platform/config"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/platform/logging"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/platform/mysql"
 )
 
 func main() {

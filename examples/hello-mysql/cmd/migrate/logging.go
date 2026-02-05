@@ -3,7 +3,7 @@ package main
 import (
 	"log/slog"
 
-	modkitlogging "github.com/aryeko/modkit/modkit/logging"
+	modkitlogging "github.com/go-modkit/modkit/modkit/logging"
 )
 
 func logMigrateComplete(logger modkitlogging.Logger) {

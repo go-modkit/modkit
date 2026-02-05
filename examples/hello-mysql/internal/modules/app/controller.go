@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	modkithttp "github.com/aryeko/modkit/modkit/http"
+	modkithttp "github.com/go-modkit/modkit/modkit/http"
 )
 
 type Controller struct{}

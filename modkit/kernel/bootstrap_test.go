@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/aryeko/modkit/modkit/kernel"
-	"github.com/aryeko/modkit/modkit/module"
+	"github.com/go-modkit/modkit/modkit/kernel"
+	"github.com/go-modkit/modkit/modkit/module"
 )
 
 func TestBootstrapEnforcesVisibility(t *testing.T) {

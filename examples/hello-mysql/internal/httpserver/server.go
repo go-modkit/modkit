@@ -4,10 +4,10 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/modules/app"
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/platform/logging"
-	modkithttp "github.com/aryeko/modkit/modkit/http"
-	"github.com/aryeko/modkit/modkit/kernel"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/app"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/platform/logging"
+	modkithttp "github.com/go-modkit/modkit/modkit/http"
+	"github.com/go-modkit/modkit/modkit/kernel"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 

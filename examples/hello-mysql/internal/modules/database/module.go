@@ -1,8 +1,8 @@
 package database
 
 import (
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/platform/mysql"
-	"github.com/aryeko/modkit/modkit/module"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/platform/mysql"
+	"github.com/go-modkit/modkit/modkit/module"
 )
 
 const TokenDB module.Token = "database.db"

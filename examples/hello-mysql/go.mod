@@ -1,9 +1,9 @@
-module github.com/aryeko/modkit/examples/hello-mysql
+module github.com/go-modkit/modkit/examples/hello-mysql
 
 go 1.24.0
 
 require (
-	github.com/aryeko/modkit v0.0.0
+	github.com/go-modkit/modkit v0.0.0
 	github.com/go-chi/chi/v5 v5.2.4
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/swaggo/http-swagger/v2 v2.0.2
@@ -79,4 +79,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/aryeko/modkit => ../..
+replace github.com/go-modkit/modkit => ../..

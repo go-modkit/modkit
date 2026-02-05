@@ -3,7 +3,7 @@ package module_test
 import (
 	"testing"
 
-	"github.com/aryeko/modkit/modkit/module"
+	"github.com/go-modkit/modkit/modkit/module"
 )
 
 // Compile-only assertions for exported types and errors.

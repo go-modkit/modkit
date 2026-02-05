@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	modkitlogging "github.com/aryeko/modkit/modkit/logging"
+	modkitlogging "github.com/go-modkit/modkit/modkit/logging"
 	"golang.org/x/term"
 )
 

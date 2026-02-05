@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/httpapi"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/httpapi"
 )
 
 type Controller struct {

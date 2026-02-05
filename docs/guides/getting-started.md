@@ -9,7 +9,7 @@ This guide walks you through building your first modkit app: a simple HTTP serve
 ## Install
 
 ```bash
-go get github.com/aryeko/modkit
+go get github.com/go-modkit/modkit
 ```
 
 ## Define Your Module
@@ -22,8 +22,8 @@ package app
 import (
     "net/http"
 
-    mkhttp "github.com/aryeko/modkit/modkit/http"
-    "github.com/aryeko/modkit/modkit/module"
+    mkhttp "github.com/go-modkit/modkit/modkit/http"
+    "github.com/go-modkit/modkit/modkit/module"
 )
 
 // Token identifies the greeting provider
@@ -86,8 +86,8 @@ package main
 import (
     "log"
 
-    mkhttp "github.com/aryeko/modkit/modkit/http"
-    "github.com/aryeko/modkit/modkit/kernel"
+    mkhttp "github.com/go-modkit/modkit/modkit/http"
+    "github.com/go-modkit/modkit/modkit/kernel"
 
     "your/module/app"
 )

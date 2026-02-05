@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/sqlc"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/sqlc"
 	"github.com/go-sql-driver/mysql"
 )
 

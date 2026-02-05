@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/aryeko/modkit/modkit/logging"
+	"github.com/go-modkit/modkit/modkit/logging"
 )
 
 type captureLogger struct{ messages []string }

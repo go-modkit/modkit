@@ -1,6 +1,6 @@
 package kernel
 
-import "github.com/aryeko/modkit/modkit/module"
+import "github.com/go-modkit/modkit/modkit/module"
 
 type Visibility map[string]map[module.Token]bool
 

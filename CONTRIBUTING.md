@@ -13,7 +13,7 @@ Thanks for your interest in contributing! modkit is in early development, so the
 ### Clone and Test
 
 ```bash
-git clone https://github.com/aryeko/modkit.git
+git clone https://github.com/go-modkit/modkit.git
 cd modkit
 go test ./...
 ```
@@ -146,7 +146,7 @@ This project follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Good First Issues
 
-New to modkit? Look for issues labeled [`good first issue`](https://github.com/aryeko/modkit/labels/good%20first%20issue) for beginner-friendly tasks:
+New to modkit? Look for issues labeled [`good first issue`](https://github.com/go-modkit/modkit/labels/good%20first%20issue) for beginner-friendly tasks:
 
 - Documentation improvements
 - Test coverage
@@ -183,6 +183,6 @@ modkit follows [Semantic Versioning](https://semver.org/):
 ### Using a Specific Version
 
 ```bash
-go get github.com/aryeko/modkit@v0.1.0
-go get github.com/aryeko/modkit@latest
+go get github.com/go-modkit/modkit@v0.1.0
+go get github.com/go-modkit/modkit@latest
 ```
