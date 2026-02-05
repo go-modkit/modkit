@@ -5,8 +5,11 @@
 ignore:
   # Integration-only code (requires real database)
   - "examples/hello-mysql/internal/modules/users/repo_mysql.go"
-  # Untestable entry point
-  - "examples/hello-mysql/cmd/api/main.go"
+  # Untestable entry points (robust pattern)
+  - "**/cmd/**/main.go"
+  # Mocks and generated code (best practice)
+  - "**/*_mock.go"
+  - "**/mocks/**"
 
 coverage:
   status:
