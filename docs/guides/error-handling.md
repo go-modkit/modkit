@@ -272,6 +272,23 @@ if err != nil {
 }
 ```
 
+## Shutdown Errors
+
+`App.Close()` aggregates multiple close failures into a single error using
+`errors.Join`. You can still test for specific errors with `errors.Is` or
+`errors.As`:
+
+```go
+if err := app.Close(); err != nil {
+    if errors.Is(err, errDBClose) {
+        log.Printf("db close failed: %v", err)
+    }
+    if errors.Is(err, errCacheClose) {
+        log.Printf("cache close failed: %v", err)
+    }
+}
+```
+
 ## Tips
 
 - Return errors, don't panic (except for truly unrecoverable situations)

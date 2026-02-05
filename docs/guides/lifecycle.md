@@ -135,6 +135,37 @@ fmt.Println(svc1 == svc2)  // true
 
 modkit does not provide automatic cleanup hooks. You must manage cleanup manually:
 
+### App.Close and CloseContext
+
+If providers implement `io.Closer`, you can shut down the app explicitly:
+
+```go
+// Close all io.Closer providers in reverse build order.
+if err := app.Close(); err != nil {
+    log.Printf("shutdown error: %v", err)
+}
+```
+
+`Close()` is idempotent: once it completes successfully (even with aggregated errors),
+subsequent calls return `nil` and do not re-close providers.
+
+For context-aware shutdown, use `CloseContext(ctx)`:
+
+```go
+ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+defer cancel()
+
+if err := app.CloseContext(ctx); err != nil {
+    // Returns ctx.Err() if canceled or timed out
+    log.Printf("shutdown error: %v", err)
+}
+```
+
+`CloseContext` checks `ctx.Err()` before closing and before each closer. If the context
+is canceled mid-close, it returns the context error and leaves the app eligible for
+a later `Close()` retry. While a close is in progress, concurrent close calls are
+no-ops.
+
 ### Pattern 1: Cleanup in main()
 
 ```go
