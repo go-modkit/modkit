@@ -115,7 +115,7 @@ func TestBootstrapRejectsReExportOfNonExportedToken(t *testing.T) {
 	modB := mod("B", nil,
 		[]module.ProviderDef{{
 			Token: token,
-			Build: func(r module.Resolver) (any, error) { return "value", nil },
+			Build: func(_ module.Resolver) (any, error) { return "value", nil },
 		}},
 		nil,
 		nil,
