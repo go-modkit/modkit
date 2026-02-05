@@ -19,6 +19,28 @@ type stubServer struct {
 	shutdownCh     chan struct{}
 }
 
+type stubApp struct {
+	closeCalled   bool
+	cleanupCalled bool
+	order         []string
+}
+
+func (s *stubApp) CleanupHooks() []func(context.Context) error {
+	return []func(context.Context) error{
+		func(ctx context.Context) error {
+			s.cleanupCalled = true
+			s.order = append(s.order, "cleanup")
+			return nil
+		},
+	}
+}
+
+func (s *stubApp) CloseContext(ctx context.Context) error {
+	s.closeCalled = true
+	s.order = append(s.order, "close")
+	return nil
+}
+
 func (s *stubServer) ListenAndServe() error {
 	return nil
 }
@@ -59,6 +81,29 @@ func TestRunServer_ShutdownPath(t *testing.T) {
 	}
 	if !cleanupCalled {
 		t.Fatal("expected cleanup to be called")
+	}
+}
+
+func TestBuildShutdownHooks_AppCloseRunsLast(t *testing.T) {
+	app := &stubApp{}
+
+	hooks := buildShutdownHooks(app)
+	if len(hooks) != 2 {
+		t.Fatalf("expected 2 hooks, got %d", len(hooks))
+	}
+
+	if err := lifecycle.RunCleanup(context.Background(), hooks); err != nil {
+		t.Fatalf("unexpected cleanup error: %v", err)
+	}
+
+	if !app.cleanupCalled {
+		t.Fatal("expected cleanup hook to run")
+	}
+	if !app.closeCalled {
+		t.Fatal("expected CloseContext to run")
+	}
+	if len(app.order) != 2 || app.order[0] != "cleanup" || app.order[1] != "close" {
+		t.Fatalf("expected cleanup then close, got %v", app.order)
 	}
 }
 

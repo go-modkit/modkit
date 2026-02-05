@@ -54,7 +54,7 @@ func main() {
 		errCh <- server.ListenAndServe()
 	}()
 
-	hooks := lifecycle.FromFuncs(boot.CleanupHooks())
+	hooks := buildShutdownHooks(boot)
 	if err := runServer(modkithttp.ShutdownTimeout, server, sigCh, errCh, hooks); err != nil {
 		log.Fatalf("server failed: %v", err)
 	}
@@ -99,6 +99,16 @@ func parseJWTTTL(raw string) time.Duration {
 type shutdownServer interface {
 	ListenAndServe() error
 	Shutdown(context.Context) error
+}
+
+type appLifecycle interface {
+	CleanupHooks() []func(context.Context) error
+	CloseContext(context.Context) error
+}
+
+func buildShutdownHooks(app appLifecycle) []lifecycle.CleanupHook {
+	hooks := lifecycle.FromFuncs(app.CleanupHooks())
+	return append([]lifecycle.CleanupHook{app.CloseContext}, hooks...)
 }
 
 func runServer(shutdownTimeout time.Duration, server shutdownServer, sigCh <-chan os.Signal, errCh <-chan error, hooks []lifecycle.CleanupHook) error {
