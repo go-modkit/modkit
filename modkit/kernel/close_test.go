@@ -174,10 +174,10 @@ func TestAppCloseContextCanceledWithClosers(t *testing.T) {
 		t.Fatalf("expected context canceled error, got %v", err)
 	}
 
-	if len(calls) != 1 {
-		t.Fatalf("expected 1 close call, got %d", len(calls))
+	if len(calls) != 2 {
+		t.Fatalf("expected 2 close calls, got %d", len(calls))
 	}
-	if calls[0] != "A" {
+	if calls[0] != "A" || calls[1] != "B" {
 		t.Fatalf("unexpected close order: %v", calls)
 	}
 }
