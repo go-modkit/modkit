@@ -3,3 +3,7 @@
 # Coverage files
 coverage.out
 coverage-examples.out
+
+# Internal planning files
+.plans/
+.cursor/
