@@ -7,7 +7,7 @@
 - [ ] Task: Conductor - User Manual Verification 'Analysis & API Design' (Protocol in workflow.md)
 
 ## Phase 2: Core Refactoring (TDD)
-- [ ] Task: Refactor `Server` to use Functional Options.
+- [~] Task: Refactor `Server` to use Functional Options.
     - [ ] Create `server_options_test.go` to test configuration injection.
     - [ ] Implement `NewServer(opts ...Option)`.
 - [ ] Task: Implement Global Middleware support.
