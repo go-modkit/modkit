@@ -138,14 +138,18 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 **Alternative:** Use a `Build` function that fetches and returns the existing provider.
 
 ```go
-module.Provider{
+module.ProviderDef{
     Token: "users.reader",
     Build: func(r module.Resolver) (any, error) {
         v, err := r.Get("users.service")
         if err != nil {
             return nil, err
         }
-        return v, nil
+        svc, ok := v.(*UsersService)
+        if !ok {
+            return nil, fmt.Errorf("users.service: expected *UsersService, got %T", v)
+        }
+        return svc, nil
     },
 }
 ```
@@ -156,7 +160,7 @@ module.Provider{
 
 **modkit:** Different.
 
-**Justification:** Go initialization is synchronous. If you need concurrency, you launch goroutines explicitly and return when ready.
+**Justification:** Go initialization is synchronous. If you need concurrency, you launch goroutines explicitly and either return immediately with a readiness signal or block until ready before returning.
 
 **Alternative:** Start background work in a goroutine and return a ready object.
 
@@ -195,7 +199,9 @@ defer stop()
 
 go func() {
     <-ctx.Done()
-    app.Close()
+    if err := app.Close(); err != nil {
+        log.Printf("app close: %v", err)
+    }
 }()
 ```
 
