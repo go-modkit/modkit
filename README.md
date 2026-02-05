@@ -168,6 +168,10 @@ modkit is in **early development**. APIs may change before v0.1.0.
 
 After v0.1.0, changes will follow semantic versioning.
 
+## Community
+
+Questions? Start a [Discussion](https://github.com/aryeko/modkit/discussions).
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). We welcome issues, discussions, and PRs.

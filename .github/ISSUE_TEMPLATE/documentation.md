@@ -1,30 +1,27 @@
 ---
-name: Documentation
-about: Request documentation improvements or additions
-labels: documentation
+name: Documentation Issue
+about: Report errors, unclear content, or missing documentation
+labels: docs, triage
 ---
-
-## Type
-
-<!-- Check one -->
-- [ ] Missing docs — feature/API not documented
-- [ ] Incorrect docs — documentation is wrong or outdated
-- [ ] Unclear docs — documentation exists but is confusing
-- [ ] New guide — tutorial or how-to needed
 
 ## Location
 
-<!-- Where should this documentation live? -->
-<!-- e.g., docs/guides/modules.md, README.md, godoc comments -->
+<!-- Which doc has the issue? Link or file path -->
 
-## Summary
+## Issue Type
 
-<!-- What documentation is needed? -->
+<!-- Check all that apply -->
+- [ ] Typo or grammatical error
+- [ ] Unclear or confusing explanation
+- [ ] Missing information
+- [ ] Outdated content
+- [ ] Broken link
+- [ ] Code example doesn't work
 
-## Proposed Content
+## Description
 
-<!-- Draft of what the documentation should say, or outline of sections -->
+<!-- What's wrong or missing? -->
 
-## References
+## Suggested Fix
 
-<!-- Links to related code, existing docs, or external resources -->
+<!-- Optional: How would you improve it? -->

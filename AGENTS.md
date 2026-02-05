@@ -23,11 +23,10 @@ modkit/
 ├── examples/            # Example applications
 │   ├── hello-simple/    # Minimal example (no dependencies)
 │   └── hello-mysql/     # Full CRUD example with DB
-├── docs/
-│   ├── guides/          # User guides
-│   ├── reference/       # API reference
-│   └── architecture.md  # How modkit works
-└── .github/internal/plans/  # Implementation tracking (internal)
+└── docs/
+    ├── guides/          # User guides
+    ├── reference/       # API reference
+    └── architecture.md  # How modkit works
 ```
 
 ## Development Workflow
@@ -70,31 +69,13 @@ make test   # Run all tests (must pass)
 - Bootstrap real modules in integration tests
 - Use testcontainers for smoke tests with external deps
 
-## Commit Format
+## Commits and Pull Requests
 
-Follow [Conventional Commits](https://www.conventionalcommits.org/):
-```text
-<type>(<scope>): <subject>
+See [CONTRIBUTING.md](CONTRIBUTING.md) for commit format (Conventional Commits) and PR requirements.
 
-[optional body]
-```
-
-Valid types: `feat`, `fix`, `docs`, `test`, `chore`, `refactor`, `perf`, `ci`
-
-**Examples:**
-- `feat(http): add graceful shutdown to Serve`
-- `fix(kernel): detect provider cycles correctly`
-- `docs: add lifecycle guide`
-
-## Pull Requests
-
-See [.github/pull_request_template.md](.github/pull_request_template.md) for the complete template.
-
-**Key requirements:**
-1. Run `make fmt && make lint && make test` before submitting
-2. Check all applicable type boxes
-3. Complete the validation section with command outputs
-4. Document any breaking changes
+**Quick reference:**
+- Valid types: `feat`, `fix`, `docs`, `test`, `chore`, `refactor`, `perf`, `ci`
+- Run `make fmt && make lint && make test` before submitting
 
 ## Documentation
 
