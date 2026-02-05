@@ -53,7 +53,7 @@ test-patch-coverage: test-coverage
 # Install all development tools (tracked in tools/tools.go)
 tools:
 	@echo "Installing development tools..."
-	@cd tools && cat tools.go | grep _ | awk '{print $$2}' | xargs -n1 go install
+	@cd tools && cat tools.go | grep _ | awk '{print $$2}' | tr -d '"' | xargs -t -n1 go install
 	@echo "Done: All tools installed"
 
 # Install development tools and setup git hooks
