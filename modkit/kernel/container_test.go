@@ -3,6 +3,7 @@ package kernel_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -32,6 +33,44 @@ type erroringCloser struct {
 func (c *erroringCloser) Close() error {
 	*c.closed = append(*c.closed, c.name)
 	return c.err
+}
+
+type testCloser interface {
+	Close() error
+}
+
+func newTestAppWithClosers(t *testing.T, closers ...testCloser) *kernel.App {
+	t.Helper()
+
+	providers := make([]module.ProviderDef, 0, len(closers))
+	tokens := make([]module.Token, 0, len(closers))
+
+	for i, closer := range closers {
+		token := module.Token(fmt.Sprintf("closer.%d", i))
+		c := closer
+		providers = append(providers, module.ProviderDef{
+			Token: token,
+			Build: func(r module.Resolver) (any, error) {
+				return c, nil
+			},
+		})
+		tokens = append(tokens, token)
+	}
+
+	modA := mod("A", nil, providers, nil, nil)
+
+	app, err := kernel.Bootstrap(modA)
+	if err != nil {
+		t.Fatalf("Bootstrap failed: %v", err)
+	}
+
+	for _, token := range tokens {
+		if _, err := app.Get(token); err != nil {
+			t.Fatalf("Get %s failed: %v", token, err)
+		}
+	}
+
+	return app
 }
 
 func TestAppGetRejectsNotVisibleToken(t *testing.T) {
@@ -531,5 +570,44 @@ func TestAppCloseContinuesAfterError(t *testing.T) {
 
 	if len(closed) != 3 || closed[0] != "c" || closed[1] != "b" || closed[2] != "a" {
 		t.Fatalf("expected reverse close order with all closers, got %v", closed)
+	}
+}
+
+func TestAppCloseAggregatesErrors(t *testing.T) {
+	var closed []string
+	errA := errors.New("close a failed")
+	errB := errors.New("close b failed")
+
+	app := newTestAppWithClosers(
+		t,
+		&erroringCloser{name: "a", closed: &closed, err: errA},
+		&erroringCloser{name: "b", closed: &closed, err: errB},
+	)
+
+	err := app.Close()
+	if err == nil {
+		t.Fatalf("expected error, got nil")
+	}
+	if !errors.Is(err, errA) || !errors.Is(err, errB) {
+		t.Fatalf("expected aggregated error to include both errA and errB")
+	}
+}
+
+func TestAppCloseIsIdempotent(t *testing.T) {
+	var closed []string
+	app := newTestAppWithClosers(
+		t,
+		&recordingCloser{name: "a", closed: &closed},
+	)
+
+	if err := app.Close(); err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if err := app.Close(); err != nil {
+		t.Fatalf("expected nil error on second close, got %v", err)
+	}
+
+	if got := len(closed); got != 1 {
+		t.Fatalf("expected 1 close call, got %d", got)
 	}
 }
