@@ -14,7 +14,7 @@ This guide maps NestJS concepts to modkit equivalents (or intentional difference
 |  | Controllers | ✅ Implemented | Same concept |
 |  | Global modules | ⏭️ Skipped | Anti-pattern in Go; prefer explicit imports |
 |  | Dynamic modules | ⏭️ Different | Use constructor functions with options |
-|  | Module re-exporting | 🔄 This Epic | Exporting tokens from imported modules |
+|  | Module re-exporting | 🔄 Partial | Exporting tokens from imported modules |
 | **Providers** |  |  |  |
 |  | Singleton scope | ✅ Implemented | Default and only scope |
 |  | Request scope | ⏭️ Skipped | Use context.Context instead |
@@ -27,9 +27,9 @@ This guide maps NestJS concepts to modkit equivalents (or intentional difference
 | **Lifecycle** |  |  |  |
 |  | onModuleInit | ⏭️ Skipped | Put init logic in `Build()` function |
 |  | onApplicationBootstrap | ⏭️ Skipped | Controllers built = app bootstrapped |
-|  | onModuleDestroy | ✅ This Epic | Via `io.Closer` interface |
+|  | onModuleDestroy | ✅ Implemented | Via `io.Closer` interface |
 |  | beforeApplicationShutdown | ⏭️ Skipped | Covered by `io.Closer` |
-|  | onApplicationShutdown | ✅ This Epic | `App.Close()` method |
+|  | onApplicationShutdown | ✅ Implemented | `App.Close()` method |
 |  | enableShutdownHooks | ⏭️ Different | Use `signal.NotifyContext` (Go stdlib) |
 | **HTTP** |  |  |  |
 |  | Controllers | ✅ Implemented | `RouteRegistrar` interface |
