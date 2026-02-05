@@ -58,7 +58,9 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version: "1.25.x"
-          cache-dependency-path: "**/*.sum"
+          cache-dependency-path: |
+            tools/tools.go
+            go.mod
       - name: Test with coverage
         run: make test-coverage
       - name: Upload coverage to Codecov
