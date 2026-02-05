@@ -3,6 +3,7 @@ package kernel
 
 import (
 	"context"
+	"errors"
 	"io"
 
 	"github.com/go-modkit/modkit/modkit/module"
@@ -89,11 +90,14 @@ func (a *App) Closers() []io.Closer {
 
 // Close calls Close on all io.Closer providers in reverse build order.
 func (a *App) Close() error {
-	var firstErr error
+	var errs []error
 	for _, closer := range a.container.closersLIFO() {
-		if err := closer.Close(); err != nil && firstErr == nil {
-			firstErr = err
+		if err := closer.Close(); err != nil {
+			errs = append(errs, err)
 		}
 	}
-	return firstErr
+	if len(errs) == 0 {
+		return nil
+	}
+	return errors.Join(errs...)
 }
