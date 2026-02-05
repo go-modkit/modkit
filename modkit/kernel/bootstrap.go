@@ -1,6 +1,6 @@
 package kernel
 
-import "github.com/aryeko/modkit/modkit/module"
+import "github.com/go-modkit/modkit/modkit/module"
 
 type App struct {
 	Graph       *Graph

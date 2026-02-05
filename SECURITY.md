@@ -25,7 +25,7 @@ We will work with you on a fix and coordinate a responsible disclosure timeline.
 
 ## Security Advisories
 
-Security fixes will be announced via [GitHub Security Advisories](https://github.com/aryeko/modkit/security/advisories).
+Security fixes will be announced via [GitHub Security Advisories](https://github.com/go-modkit/modkit/security/advisories).
 
 ## Best Practices
 

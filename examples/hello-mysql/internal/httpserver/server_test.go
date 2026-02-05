@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/modules/app"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/app"
 )
 
 func TestBuildHandler_LogsRequest(t *testing.T) {

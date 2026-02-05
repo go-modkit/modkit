@@ -1,0 +1,1671 @@
+[
+  {
+    "id": "T-001",
+    "story_id": "ST-001",
+    "title": "Create auth module structure",
+    "motivation": "Provide a dedicated auth module in hello-mysql to match the authentication guide.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 1: Authentication Module",
+      "quote": "Create internal/modules/auth/ module structure"
+    },
+    "scope": {
+      "in": ["Add internal/modules/auth package with module definition and provider scaffolding"],
+      "out": ["Implementing auth behavior"]
+    },
+    "requirements": [
+      "MUST create internal/modules/auth/ with module definition and provider placeholders",
+      "MUST keep module definition deterministic"
+    ],
+    "acceptance_criteria": [
+      "Given the hello-mysql example, when the auth module is imported, then the project builds without unresolved symbols"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Auth module files exist and tests compile"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/modules/auth/module.go",
+      "examples/hello-mysql/internal/modules/auth/providers.go"
+    ],
+    "depends_on": [],
+    "risks": ["Module naming conflicts with existing modules"],
+    "estimate": { "tshirt": "S", "rationale": "New package scaffolding" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-002",
+    "story_id": "ST-001",
+    "title": "Implement JWT middleware",
+    "motivation": "Demonstrate JWT auth by validating tokens in middleware.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 1: Authentication Module",
+      "quote": "Implement JWT middleware with token validation"
+    },
+    "scope": {
+      "in": ["JWT validation middleware for hello-mysql"],
+      "out": ["OAuth or other auth flows"]
+    },
+    "requirements": [
+      "MUST validate JWT signature and expiry",
+      "MUST reject requests with missing or invalid tokens",
+      "SHOULD make validation configuration explicit in example config"
+    ],
+    "acceptance_criteria": [
+      "Given a request without a token, when it hits a protected route, then it returns an auth error",
+      "Given a request with a valid token, when it hits a protected route, then it proceeds"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Auth middleware tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/modules/auth/middleware.go",
+      "examples/hello-mysql/internal/modules/auth/config.go"
+    ],
+    "depends_on": ["T-001"],
+    "risks": ["JWT library choice may differ from docs"],
+    "estimate": { "tshirt": "M", "rationale": "Middleware + config" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-003",
+    "story_id": "ST-001",
+    "title": "Add typed user context helpers",
+    "motivation": "Expose authenticated user info via request context per guide.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 1: Authentication Module",
+      "quote": "Add typed context helpers for user extraction"
+    },
+    "scope": {
+      "in": ["Typed context keys and helper accessors"],
+      "out": ["User persistence or profile logic"]
+    },
+    "requirements": [
+      "MUST provide typed context accessors for user info",
+      "MUST document usage in code comments or README"
+    ],
+    "acceptance_criteria": [
+      "Given a request with a valid token, when a handler reads the context helper, then it receives user info"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Handlers compile with context helper usage"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/modules/auth/context.go"
+    ],
+    "depends_on": ["T-002"],
+    "risks": ["Context key collisions if not namespaced"],
+    "estimate": { "tshirt": "S", "rationale": "Small helper API" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-004",
+    "story_id": "ST-001",
+    "title": "Add /auth/login token endpoint",
+    "motivation": "Provide a runnable token generation endpoint for the example.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 1: Authentication Module",
+      "quote": "Create /auth/login endpoint for token generation"
+    },
+    "scope": {
+      "in": ["Login handler that issues JWT for a sample user"],
+      "out": ["Real password storage or hashing"]
+    },
+    "requirements": [
+      "MUST expose /auth/login endpoint",
+      "MUST return a signed JWT on success",
+      "SHOULD keep sample credentials explicit in docs"
+    ],
+    "acceptance_criteria": [
+      "Given valid sample credentials, when POST /auth/login is called, then it returns a JWT"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Login endpoint test returns JWT"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/modules/auth/handler.go",
+      "examples/hello-mysql/internal/modules/auth/routes.go"
+    ],
+    "depends_on": ["T-001", "T-002"],
+    "risks": ["Endpoint behavior may diverge from docs"],
+    "estimate": { "tshirt": "M", "rationale": "Handler + wiring" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-005",
+    "story_id": "ST-001",
+    "title": "Protect /users routes with auth",
+    "motivation": "Show mixed public and authenticated endpoints in example.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 1: Authentication Module",
+      "quote": "Protect existing /users CRUD routes (except GET list)"
+    },
+    "scope": {
+      "in": ["Apply auth middleware to /users routes except list"],
+      "out": ["Changing user business logic"]
+    },
+    "requirements": [
+      "MUST require auth on create/update/delete user endpoints",
+      "MUST leave GET list publicly accessible"
+    ],
+    "acceptance_criteria": [
+      "Given no token, when POST /users is called, then it returns an auth error",
+      "Given a valid token, when POST /users is called, then it proceeds"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Protected route tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/modules/users/routes.go"
+    ],
+    "depends_on": ["T-002", "T-003"],
+    "risks": ["Route refactor might affect tests"],
+    "estimate": { "tshirt": "S", "rationale": "Middleware wiring" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-006",
+    "story_id": "ST-001",
+    "title": "Add auth module tests",
+    "motivation": "Ensure auth flows are validated in unit and integration tests.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 1: Authentication Module",
+      "quote": "Add auth module tests (unit + integration)"
+    },
+    "scope": {
+      "in": ["Unit tests for middleware and integration tests for routes"],
+      "out": ["Load testing"]
+    },
+    "requirements": [
+      "MUST include tests for auth success and failure cases",
+      "SHOULD cover context extraction in handlers"
+    ],
+    "acceptance_criteria": [
+      "Given invalid tokens, when tests run, then auth failure cases are asserted",
+      "Given valid tokens, when tests run, then protected routes succeed"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Auth unit and integration tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/modules/auth/auth_test.go",
+      "examples/hello-mysql/internal/modules/auth/integration_test.go"
+    ],
+    "depends_on": ["T-001", "T-002", "T-003", "T-004", "T-005"],
+    "risks": ["Integration tests may require database fixtures"],
+    "estimate": { "tshirt": "M", "rationale": "Multiple test types" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-007",
+    "story_id": "ST-001",
+    "title": "Update README with auth examples",
+    "motivation": "Ensure example README documents auth usage.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 1: Authentication Module",
+      "quote": "Update README with auth usage examples"
+    },
+    "scope": {
+      "in": ["Document auth routes and sample usage in example README"],
+      "out": ["Broader doc changes outside README"]
+    },
+    "requirements": [
+      "MUST include example request for /auth/login",
+      "MUST describe which /users routes require auth"
+    ],
+    "acceptance_criteria": [
+      "Given the README, when a user follows the auth example, then the endpoints are correct"
+    ],
+    "verification": {
+      "commands": ["rg -n 'auth/login' examples/hello-mysql/README.md"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["README includes auth endpoint usage"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/README.md"
+    ],
+    "depends_on": ["T-006"],
+    "risks": ["README drift if routes change"],
+    "estimate": { "tshirt": "XS", "rationale": "Doc-only change" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-008",
+    "story_id": "ST-002",
+    "title": "Add validation helper package",
+    "motivation": "Provide shared validation utilities for example requests.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 2: Request Validation",
+      "quote": "Add validation helper package in internal/validation/"
+    },
+    "scope": {
+      "in": ["internal/validation helpers and error types"],
+      "out": ["Cross-repo validation framework"]
+    },
+    "requirements": [
+      "MUST add internal/validation package with helper functions",
+      "MUST keep API minimal and example-focused"
+    ],
+    "acceptance_criteria": [
+      "Given a request struct, when validation helpers are called, then they return structured errors"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Validation helpers compile and tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/validation/validation.go"
+    ],
+    "depends_on": [],
+    "risks": ["Helper API could diverge from guide wording"],
+    "estimate": { "tshirt": "S", "rationale": "Small helper package" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-009",
+    "story_id": "ST-002",
+    "title": "Validate CreateUserRequest fields",
+    "motivation": "Show field-level validation on create requests.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 2: Request Validation",
+      "quote": "Implement field-level validation for CreateUserRequest"
+    },
+    "scope": {
+      "in": ["Validation for CreateUserRequest in handlers"],
+      "out": ["Changing persistence logic"]
+    },
+    "requirements": [
+      "MUST validate required fields on CreateUserRequest",
+      "MUST return structured validation errors"
+    ],
+    "acceptance_criteria": [
+      "Given missing fields, when POST /users is called, then it returns field-level validation errors"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["CreateUserRequest validation tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/modules/users/requests.go",
+      "examples/hello-mysql/internal/modules/users/handlers.go"
+    ],
+    "depends_on": ["T-008"],
+    "risks": ["Validation rules may need alignment with docs"],
+    "estimate": { "tshirt": "S", "rationale": "Handler changes" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-010",
+    "story_id": "ST-002",
+    "title": "Validate UpdateUserRequest fields",
+    "motivation": "Show field-level validation on update requests.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 2: Request Validation",
+      "quote": "Implement field-level validation for UpdateUserRequest"
+    },
+    "scope": {
+      "in": ["Validation for UpdateUserRequest in handlers"],
+      "out": ["Changing update semantics"]
+    },
+    "requirements": [
+      "MUST validate required fields on UpdateUserRequest",
+      "MUST return structured validation errors"
+    ],
+    "acceptance_criteria": [
+      "Given invalid fields, when PUT /users/{id} is called, then it returns field-level errors"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["UpdateUserRequest validation tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/modules/users/requests.go",
+      "examples/hello-mysql/internal/modules/users/handlers.go"
+    ],
+    "depends_on": ["T-008"],
+    "risks": ["Validation rules may need alignment with docs"],
+    "estimate": { "tshirt": "S", "rationale": "Handler changes" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-011",
+    "story_id": "ST-002",
+    "title": "Add RFC 7807 validation error response",
+    "motivation": "Return Problem Details responses for validation errors.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 2: Request Validation",
+      "quote": "Add validation error response type (RFC 7807 extension)"
+    },
+    "scope": {
+      "in": ["Define RFC 7807 response and wire into validation handlers"],
+      "out": ["Global error handling refactor"]
+    },
+    "requirements": [
+      "MUST define a Problem Details response type with field errors",
+      "MUST use the response for validation failures"
+    ],
+    "acceptance_criteria": [
+      "Given a validation failure, when a request is processed, then it returns RFC 7807 with field errors"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Validation error responses match RFC 7807 structure"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/validation/problem_details.go"
+    ],
+    "depends_on": ["T-008"],
+    "risks": ["Existing error responses may conflict"],
+    "estimate": { "tshirt": "S", "rationale": "New type + wiring" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-012",
+    "story_id": "ST-002",
+    "title": "Add query parameter validation example",
+    "motivation": "Demonstrate validation for list pagination query parameters.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 2: Request Validation",
+      "quote": "Add query parameter validation example (list pagination)"
+    },
+    "scope": {
+      "in": ["Validate pagination query parameters in list handler"],
+      "out": ["New pagination features"]
+    },
+    "requirements": [
+      "MUST validate pagination query parameters",
+      "MUST return RFC 7807 responses for invalid params"
+    ],
+    "acceptance_criteria": [
+      "Given invalid pagination values, when GET /users is called, then it returns field-level errors"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Pagination validation tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/modules/users/handlers.go"
+    ],
+    "depends_on": ["T-008", "T-011"],
+    "risks": ["Changing list handler behavior impacts examples"],
+    "estimate": { "tshirt": "S", "rationale": "Small handler update" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-013",
+    "story_id": "ST-002",
+    "title": "Add validation tests",
+    "motivation": "Ensure validation helpers and handlers are covered by tests.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 2: Request Validation",
+      "quote": "Add validation tests"
+    },
+    "scope": {
+      "in": ["Unit tests for validation helpers and handler validation flows"],
+      "out": ["End-to-end load tests"]
+    },
+    "requirements": [
+      "MUST cover create, update, and pagination validation cases",
+      "SHOULD assert RFC 7807 response shape"
+    ],
+    "acceptance_criteria": [
+      "Given validation scenarios, when tests run, then all validation cases pass"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Validation test suite passes"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/validation/validation_test.go",
+      "examples/hello-mysql/internal/modules/users/validation_test.go"
+    ],
+    "depends_on": ["T-008", "T-009", "T-010", "T-011", "T-012"],
+    "risks": ["Test data may overlap with auth changes"],
+    "estimate": { "tshirt": "M", "rationale": "Multiple test cases" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-014",
+    "story_id": "ST-002",
+    "title": "Document validation patterns in README",
+    "motivation": "Expose validation usage in the example README.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 2: Request Validation",
+      "quote": "Document validation patterns in example README"
+    },
+    "scope": {
+      "in": ["Add validation usage examples to README"],
+      "out": ["Changes to guides"]
+    },
+    "requirements": [
+      "MUST include examples for request body and query validation",
+      "MUST reference RFC 7807 error format"
+    ],
+    "acceptance_criteria": [
+      "Given the README, when a user reads validation section, then examples match routes"
+    ],
+    "verification": {
+      "commands": ["rg -n 'validation' examples/hello-mysql/README.md"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["README includes validation section"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/README.md"
+    ],
+    "depends_on": ["T-013"],
+    "risks": ["README may need consistent formatting"],
+    "estimate": { "tshirt": "XS", "rationale": "Doc-only" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-015",
+    "story_id": "ST-003",
+    "title": "Add CORS middleware configuration",
+    "motivation": "Demonstrate CORS middleware configuration in example.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 3: Advanced Middleware Patterns",
+      "quote": "Add CORS middleware configuration"
+    },
+    "scope": {
+      "in": ["CORS middleware configuration in hello-mysql"],
+      "out": ["Full CORS policy management"]
+    },
+    "requirements": [
+      "MUST configure CORS middleware with explicit allowed origins and methods",
+      "SHOULD expose configuration via example config"
+    ],
+    "acceptance_criteria": [
+      "Given a cross-origin request, when it hits the server, then CORS headers are present"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["CORS middleware tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/middleware/cors.go",
+      "examples/hello-mysql/internal/config/config.go"
+    ],
+    "depends_on": [],
+    "risks": ["CORS headers may vary across environments"],
+    "estimate": { "tshirt": "S", "rationale": "Small middleware" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-016",
+    "story_id": "ST-003",
+    "title": "Implement rate limiting middleware",
+    "motivation": "Show rate limiting middleware using golang.org/x/time/rate.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 3: Advanced Middleware Patterns",
+      "quote": "Implement rate limiting middleware using golang.org/x/time/rate"
+    },
+    "scope": {
+      "in": ["Rate limiting middleware with configurable limits"],
+      "out": ["Distributed rate limiting"]
+    },
+    "requirements": [
+      "MUST use golang.org/x/time/rate for rate limiting",
+      "MUST allow configuration of rate and burst"
+    ],
+    "acceptance_criteria": [
+      "Given requests above the limit, when they are sent, then the handler returns a rate limit error"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Rate limiting tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/middleware/rate_limit.go"
+    ],
+    "depends_on": [],
+    "risks": ["Tests may depend on timing"],
+    "estimate": { "tshirt": "M", "rationale": "Middleware + tests" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-017",
+    "story_id": "ST-003",
+    "title": "Create timing/metrics middleware example",
+    "motivation": "Demonstrate custom middleware as a provider.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 3: Advanced Middleware Patterns",
+      "quote": "Create timing/metrics middleware example"
+    },
+    "scope": {
+      "in": ["Timing/metrics middleware with logging output"],
+      "out": ["Metrics backend integration"]
+    },
+    "requirements": [
+      "MUST record request duration and log it",
+      "SHOULD be registered as a provider to demonstrate DI"
+    ],
+    "acceptance_criteria": [
+      "Given a request, when the middleware runs, then it logs duration"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Timing middleware tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/middleware/timing.go"
+    ],
+    "depends_on": [],
+    "risks": ["Logging output may be noisy in tests"],
+    "estimate": { "tshirt": "S", "rationale": "Simple middleware" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-018",
+    "story_id": "ST-003",
+    "title": "Add route group example for middleware",
+    "motivation": "Show scoped middleware using route groups.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 3: Advanced Middleware Patterns",
+      "quote": "Add route group example (/api/v1/ prefix)"
+    },
+    "scope": {
+      "in": ["Route group example with /api/v1 prefix and scoped middleware"],
+      "out": ["Full API versioning refactor"]
+    },
+    "requirements": [
+      "MUST demonstrate route group with scoped middleware",
+      "SHOULD use /api/v1 prefix for the group"
+    ],
+    "acceptance_criteria": [
+      "Given grouped routes, when middleware is applied to the group, then it affects only those routes"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Grouped middleware tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/http/router.go"
+    ],
+    "depends_on": [],
+    "risks": ["Overlap with Story 5 refactor"],
+    "estimate": { "tshirt": "M", "rationale": "Routing changes" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-019",
+    "story_id": "ST-003",
+    "title": "Register middleware as providers",
+    "motivation": "Show middleware registration through DI providers.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 3: Advanced Middleware Patterns",
+      "quote": "Register middleware as providers for dependency injection"
+    },
+    "scope": {
+      "in": ["Provider registration for middleware"],
+      "out": ["Framework-level DI changes"]
+    },
+    "requirements": [
+      "MUST register CORS, rate limiting, and timing middleware as providers",
+      "MUST demonstrate ordering in registration"
+    ],
+    "acceptance_criteria": [
+      "Given middleware providers, when the app boots, then middleware is resolved via DI"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Middleware provider wiring compiles and tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/modules/app/module.go"
+    ],
+    "depends_on": ["T-015", "T-016", "T-017"],
+    "risks": ["Provider order may affect behavior"],
+    "estimate": { "tshirt": "S", "rationale": "Wiring changes" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-020",
+    "story_id": "ST-003",
+    "title": "Add middleware tests",
+    "motivation": "Validate middleware behavior and ordering.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 3: Advanced Middleware Patterns",
+      "quote": "Add middleware tests"
+    },
+    "scope": {
+      "in": ["Tests for CORS, rate limiting, timing, and group scoping"],
+      "out": ["Performance benchmarks"]
+    },
+    "requirements": [
+      "MUST cover CORS, rate limiting, and timing middleware",
+      "MUST verify middleware ordering and group scoping"
+    ],
+    "acceptance_criteria": [
+      "Given middleware tests, when executed, then all middleware behaviors are asserted"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Middleware test suite passes"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/middleware/middleware_test.go"
+    ],
+    "depends_on": ["T-015", "T-016", "T-017", "T-018", "T-019"],
+    "risks": ["Timing-based tests may be flaky"],
+    "estimate": { "tshirt": "M", "rationale": "Multiple middleware tests" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-021",
+    "story_id": "ST-003",
+    "title": "Document middleware patterns in README",
+    "motivation": "Expose middleware patterns and ordering in README.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 3: Advanced Middleware Patterns",
+      "quote": "Document middleware patterns in example README"
+    },
+    "scope": {
+      "in": ["README updates for middleware examples"],
+      "out": ["Guide changes"]
+    },
+    "requirements": [
+      "MUST include examples for CORS and rate limiting",
+      "MUST describe middleware ordering"
+    ],
+    "acceptance_criteria": [
+      "Given the README, when users read middleware section, then examples match code"
+    ],
+    "verification": {
+      "commands": ["rg -n 'middleware' examples/hello-mysql/README.md"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["README includes middleware section"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/README.md"
+    ],
+    "depends_on": ["T-020"],
+    "risks": ["README may need formatting updates"],
+    "estimate": { "tshirt": "XS", "rationale": "Doc-only" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-022",
+    "story_id": "ST-004",
+    "title": "Add database cleanup interface",
+    "motivation": "Demonstrate resource cleanup responsibilities for the DB module.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 4: Lifecycle & Cleanup Patterns",
+      "quote": "Add cleanup interface and implementation to database module"
+    },
+    "scope": {
+      "in": ["Cleanup interface and implementation in database module"],
+      "out": ["New database abstractions"]
+    },
+    "requirements": [
+      "MUST provide a cleanup method for database module",
+      "MUST document cleanup order expectations"
+    ],
+    "acceptance_criteria": [
+      "Given the database module, when shutdown occurs, then cleanup is invoked"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Cleanup implementation compiles and tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/modules/database/module.go",
+      "examples/hello-mysql/internal/modules/database/cleanup.go"
+    ],
+    "depends_on": [],
+    "risks": ["Cleanup ordering may be unclear"],
+    "estimate": { "tshirt": "S", "rationale": "Small interface" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-023",
+    "story_id": "ST-004",
+    "title": "Implement graceful shutdown hook",
+    "motivation": "Demonstrate graceful shutdown with in-flight request handling.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 4: Lifecycle & Cleanup Patterns",
+      "quote": "Implement graceful shutdown hook in main"
+    },
+    "scope": {
+      "in": ["Shutdown hook wiring in hello-mysql main"],
+      "out": ["Deployment scripts"]
+    },
+    "requirements": [
+      "MUST add graceful shutdown handling for HTTP server",
+      "MUST call cleanup interfaces on shutdown"
+    ],
+    "acceptance_criteria": [
+      "Given a shutdown signal, when the app exits, then cleanup is called in order"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Lifecycle tests validate shutdown behavior"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/cmd/hello-mysql/main.go"
+    ],
+    "depends_on": ["T-022"],
+    "risks": ["Graceful shutdown may need timeouts"],
+    "estimate": { "tshirt": "M", "rationale": "Main wiring changes" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-024",
+    "story_id": "ST-004",
+    "title": "Add context cancellation example",
+    "motivation": "Demonstrate cancellation patterns in long-running operations.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 4: Lifecycle & Cleanup Patterns",
+      "quote": "Add context cancellation example for long-running operations"
+    },
+    "scope": {
+      "in": ["Example handler or service showing context cancellation"],
+      "out": ["Production job orchestration"]
+    },
+    "requirements": [
+      "MUST demonstrate context cancellation in a long-running operation",
+      "SHOULD show error handling for canceled context"
+    ],
+    "acceptance_criteria": [
+      "Given a request that is canceled, when the operation runs, then it stops early and returns a canceled error"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Context cancellation tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/modules/users/service.go"
+    ],
+    "depends_on": ["T-023"],
+    "risks": ["Cancellation timing in tests may be sensitive"],
+    "estimate": { "tshirt": "S", "rationale": "Example change" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-025",
+    "story_id": "ST-004",
+    "title": "Document cleanup order (LIFO)",
+    "motivation": "Make cleanup ordering explicit for example users.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 4: Lifecycle & Cleanup Patterns",
+      "quote": "Document cleanup order (LIFO)"
+    },
+    "scope": {
+      "in": ["Add cleanup order documentation to README"],
+      "out": ["Guide changes"]
+    },
+    "requirements": [
+      "MUST document LIFO cleanup ordering",
+      "MUST indicate where cleanup hooks are registered"
+    ],
+    "acceptance_criteria": [
+      "Given the README, when users read lifecycle section, then cleanup order is described"
+    ],
+    "verification": {
+      "commands": ["rg -n 'cleanup' examples/hello-mysql/README.md"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["README includes cleanup order"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/README.md"
+    ],
+    "depends_on": ["T-022", "T-023"],
+    "risks": ["Docs may need updates if hooks change"],
+    "estimate": { "tshirt": "XS", "rationale": "Doc-only" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-026",
+    "story_id": "ST-004",
+    "title": "Add lifecycle tests",
+    "motivation": "Validate cleanup and shutdown behavior with tests.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 4: Lifecycle & Cleanup Patterns",
+      "quote": "Add lifecycle tests"
+    },
+    "scope": {
+      "in": ["Tests for cleanup order and graceful shutdown"],
+      "out": ["Load testing"]
+    },
+    "requirements": [
+      "MUST cover cleanup invocation order",
+      "MUST cover graceful shutdown behavior"
+    ],
+    "acceptance_criteria": [
+      "Given shutdown tests, when executed, then cleanup order is asserted"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Lifecycle test suite passes"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/lifecycle/lifecycle_test.go"
+    ],
+    "depends_on": ["T-022", "T-023", "T-024"],
+    "risks": ["Tests may be timing sensitive"],
+    "estimate": { "tshirt": "M", "rationale": "Integration-style tests" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-027",
+    "story_id": "ST-004",
+    "title": "Update README with lifecycle patterns",
+    "motivation": "Document lifecycle patterns for example users.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 4: Lifecycle & Cleanup Patterns",
+      "quote": "Update README with lifecycle patterns"
+    },
+    "scope": {
+      "in": ["README updates for lifecycle and shutdown patterns"],
+      "out": ["Guide changes"]
+    },
+    "requirements": [
+      "MUST describe graceful shutdown",
+      "MUST reference cleanup hooks"
+    ],
+    "acceptance_criteria": [
+      "Given the README, when users follow lifecycle section, then steps match code"
+    ],
+    "verification": {
+      "commands": ["rg -n 'shutdown' examples/hello-mysql/README.md"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["README includes lifecycle section"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/README.md"
+    ],
+    "depends_on": ["T-026"],
+    "risks": ["README drift if shutdown behavior changes"],
+    "estimate": { "tshirt": "XS", "rationale": "Doc-only" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-028",
+    "story_id": "ST-005",
+    "title": "Refactor routes to /api/v1 prefix",
+    "motivation": "Demonstrate API versioning via route prefixing.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 5: Route Groups & API Versioning",
+      "quote": "Refactor routes to use /api/v1/ prefix"
+    },
+    "scope": {
+      "in": ["Move example routes under /api/v1"],
+      "out": ["Adding new API versions"]
+    },
+    "requirements": [
+      "MUST refactor routes to use /api/v1 prefix",
+      "MUST update route tests accordingly"
+    ],
+    "acceptance_criteria": [
+      "Given the server, when routes are listed, then endpoints are under /api/v1"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Route tests pass with /api/v1 prefix"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/http/router.go"
+    ],
+    "depends_on": ["T-018"],
+    "risks": ["Refactor could break doc references"],
+    "estimate": { "tshirt": "M", "rationale": "Routing changes" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-029",
+    "story_id": "ST-005",
+    "title": "Add route group with auth middleware",
+    "motivation": "Demonstrate scoped middleware for authenticated routes.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 5: Route Groups & API Versioning",
+      "quote": "Add route group with auth middleware"
+    },
+    "scope": {
+      "in": ["Route group using auth middleware"],
+      "out": ["Changing auth behavior"]
+    },
+    "requirements": [
+      "MUST apply auth middleware to a specific route group",
+      "MUST keep public routes outside the group"
+    ],
+    "acceptance_criteria": [
+      "Given grouped routes, when auth middleware is applied, then only grouped routes require auth"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Auth group routing tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/http/router.go"
+    ],
+    "depends_on": ["T-028", "T-002"],
+    "risks": ["Auth middleware order may be incorrect"],
+    "estimate": { "tshirt": "S", "rationale": "Group wiring" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-030",
+    "story_id": "ST-005",
+    "title": "Add nested route group example",
+    "motivation": "Demonstrate nested groups such as /api/v1/admin.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 5: Route Groups & API Versioning",
+      "quote": "Add nested group example (e.g., /api/v1/admin/)"
+    },
+    "scope": {
+      "in": ["Nested route group example"],
+      "out": ["Admin authorization logic"]
+    },
+    "requirements": [
+      "MUST demonstrate nested route groups",
+      "SHOULD add a sample admin handler"
+    ],
+    "acceptance_criteria": [
+      "Given nested groups, when routes are registered, then /api/v1/admin is scoped correctly"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Nested group tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/http/router.go",
+      "examples/hello-mysql/internal/modules/admin/handlers.go"
+    ],
+    "depends_on": ["T-028"],
+    "risks": ["New admin module may need scaffolding"],
+    "estimate": { "tshirt": "M", "rationale": "New routes + handler" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-031",
+    "story_id": "ST-005",
+    "title": "Update controller grouping usage",
+    "motivation": "Ensure controllers demonstrate grouping patterns.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 5: Route Groups & API Versioning",
+      "quote": "Update controller to demonstrate grouping"
+    },
+    "scope": {
+      "in": ["Controller updates to use route groups"],
+      "out": ["Controller API refactor"]
+    },
+    "requirements": [
+      "MUST register routes via groups where appropriate",
+      "MUST keep public and protected endpoints separated"
+    ],
+    "acceptance_criteria": [
+      "Given the controller, when routes are registered, then group structure matches routing plan"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Controllers compile and routing tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/modules/users/controller.go"
+    ],
+    "depends_on": ["T-028"],
+    "risks": ["Controller refactor may affect auth routing"],
+    "estimate": { "tshirt": "S", "rationale": "Refactor routing registration" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-032",
+    "story_id": "ST-005",
+    "title": "Add routing tests for groups",
+    "motivation": "Verify grouped route behavior and path prefixing.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 5: Route Groups & API Versioning",
+      "quote": "Add routing tests for groups"
+    },
+    "scope": {
+      "in": ["Routing tests for /api/v1 and nested groups"],
+      "out": ["Load tests"]
+    },
+    "requirements": [
+      "MUST cover /api/v1 prefix and nested group routes",
+      "MUST verify middleware scoping for grouped routes"
+    ],
+    "acceptance_criteria": [
+      "Given routing tests, when executed, then grouped routes resolve correctly"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Routing group tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/http/router_test.go"
+    ],
+    "depends_on": ["T-028", "T-029", "T-030", "T-031"],
+    "risks": ["Tests may overlap with middleware tests"],
+    "estimate": { "tshirt": "M", "rationale": "Multiple routing cases" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-033",
+    "story_id": "ST-005",
+    "title": "Document routing patterns",
+    "motivation": "Expose route grouping and versioning in README.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 5: Route Groups & API Versioning",
+      "quote": "Document routing patterns"
+    },
+    "scope": {
+      "in": ["README updates for route grouping"],
+      "out": ["Guide changes"]
+    },
+    "requirements": [
+      "MUST describe /api/v1 prefix and nested groups",
+      "MUST include example route group code snippet"
+    ],
+    "acceptance_criteria": [
+      "Given the README, when users read routing section, then groups match code"
+    ],
+    "verification": {
+      "commands": ["rg -n '/api/v1' examples/hello-mysql/README.md"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["README includes /api/v1 routing section"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/README.md"
+    ],
+    "depends_on": ["T-032"],
+    "risks": ["README may need updates if paths change"],
+    "estimate": { "tshirt": "XS", "rationale": "Doc-only" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-034",
+    "story_id": "ST-006",
+    "title": "Add buildVisibility unit tests",
+    "motivation": "Ensure buildVisibility has direct unit coverage.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 6: Test Coverage Improvements",
+      "quote": "Add unit tests for buildVisibility() in kernel"
+    },
+    "scope": {
+      "in": ["Unit tests in modkit/kernel"],
+      "out": ["Refactoring buildVisibility implementation"]
+    },
+    "requirements": [
+      "MUST add direct unit tests for buildVisibility",
+      "SHOULD cover module visibility edge cases"
+    ],
+    "acceptance_criteria": [
+      "Given buildVisibility inputs, when tests run, then expected visibility rules are asserted"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Kernel unit tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "modkit/kernel/visibility_test.go"
+    ],
+    "depends_on": ["T-007", "T-014", "T-021", "T-027", "T-033"],
+    "risks": ["Existing tests may require updates"],
+    "estimate": { "tshirt": "S", "rationale": "Unit tests only" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-035",
+    "story_id": "ST-006",
+    "title": "Add ProviderBuildError tests",
+    "motivation": "Cover provider build error scenarios in kernel tests.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 6: Test Coverage Improvements",
+      "quote": "Add tests for ProviderBuildError scenarios"
+    },
+    "scope": {
+      "in": ["Provider build error tests"],
+      "out": ["Provider behavior changes"]
+    },
+    "requirements": [
+      "MUST add tests for ProviderBuildError cases",
+      "SHOULD cover missing provider dependencies"
+    ],
+    "acceptance_criteria": [
+      "Given invalid providers, when kernel builds, then ProviderBuildError is asserted"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Provider build error tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "modkit/kernel/provider_errors_test.go"
+    ],
+    "depends_on": ["T-007", "T-014", "T-021", "T-027", "T-033"],
+    "risks": ["May require new fixtures"],
+    "estimate": { "tshirt": "S", "rationale": "Unit tests only" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-036",
+    "story_id": "ST-006",
+    "title": "Add ControllerBuildError tests",
+    "motivation": "Cover controller build errors with explicit tests.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 6: Test Coverage Improvements",
+      "quote": "Add tests for ControllerBuildError scenarios"
+    },
+    "scope": {
+      "in": ["Controller build error tests"],
+      "out": ["Controller behavior changes"]
+    },
+    "requirements": [
+      "MUST add tests for ControllerBuildError cases",
+      "SHOULD cover missing dependencies"
+    ],
+    "acceptance_criteria": [
+      "Given invalid controllers, when kernel builds, then ControllerBuildError is asserted"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Controller build error tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "modkit/kernel/controller_errors_test.go"
+    ],
+    "depends_on": ["T-007", "T-014", "T-021", "T-027", "T-033"],
+    "risks": ["May require new fixtures"],
+    "estimate": { "tshirt": "S", "rationale": "Unit tests only" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-037",
+    "story_id": "ST-006",
+    "title": "Add HTTP middleware error recovery tests",
+    "motivation": "Cover middleware edge cases in HTTP adapter.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 6: Test Coverage Improvements",
+      "quote": "Add HTTP middleware error recovery tests"
+    },
+    "scope": {
+      "in": ["HTTP middleware error recovery tests"],
+      "out": ["HTTP adapter refactor"]
+    },
+    "requirements": [
+      "MUST add tests for middleware error recovery",
+      "SHOULD cover panic recovery or error propagation"
+    ],
+    "acceptance_criteria": [
+      "Given middleware errors, when tests run, then recovery behavior is asserted"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["HTTP middleware tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "modkit/http/middleware_test.go"
+    ],
+    "depends_on": ["T-007", "T-014", "T-021", "T-027", "T-033"],
+    "risks": ["Test may need new fixtures"],
+    "estimate": { "tshirt": "S", "rationale": "Unit tests" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-038",
+    "story_id": "ST-006",
+    "title": "Add router edge case tests",
+    "motivation": "Cover router conflicts and invalid method cases.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 6: Test Coverage Improvements",
+      "quote": "Add router edge case tests (conflicts, invalid methods)"
+    },
+    "scope": {
+      "in": ["Router edge case tests"],
+      "out": ["Router implementation changes"]
+    },
+    "requirements": [
+      "MUST add tests for route conflicts",
+      "MUST add tests for invalid methods"
+    ],
+    "acceptance_criteria": [
+      "Given invalid routes, when router builds, then errors are asserted"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Router edge case tests pass"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "modkit/http/router_test.go"
+    ],
+    "depends_on": ["T-007", "T-014", "T-021", "T-027", "T-033"],
+    "risks": ["Existing router tests may need updates"],
+    "estimate": { "tshirt": "S", "rationale": "Unit tests" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-039",
+    "story_id": "ST-006",
+    "title": "Ensure new example features have tests",
+    "motivation": "Maintain coverage for new example features.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 6: Test Coverage Improvements",
+      "quote": "Ensure all new example features have tests"
+    },
+    "scope": {
+      "in": ["Add or extend example tests for auth, validation, middleware, lifecycle, routing"],
+      "out": ["Performance testing"]
+    },
+    "requirements": [
+      "MUST add tests for newly added example features",
+      "SHOULD cover auth, validation, middleware, lifecycle, routing"
+    ],
+    "acceptance_criteria": [
+      "Given example features, when tests run, then each feature has coverage"
+    ],
+    "verification": {
+      "commands": ["make test"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Example tests cover all new features"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "examples/hello-mysql/internal/modules/auth/auth_test.go",
+      "examples/hello-mysql/internal/validation/validation_test.go",
+      "examples/hello-mysql/internal/middleware/middleware_test.go",
+      "examples/hello-mysql/internal/http/router_test.go"
+    ],
+    "depends_on": ["T-007", "T-014", "T-021", "T-027", "T-033"],
+    "risks": ["Test additions may be redundant with earlier tasks"],
+    "estimate": { "tshirt": "M", "rationale": "Cross-feature tests" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-040",
+    "story_id": "ST-006",
+    "title": "Update testing guide with new patterns",
+    "motivation": "Align docs testing guide with new example patterns.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 6: Test Coverage Improvements",
+      "quote": "Update testing guide with new patterns"
+    },
+    "scope": {
+      "in": ["docs/guides/testing.md updates"],
+      "out": ["Other guides"]
+    },
+    "requirements": [
+      "MUST add references to new example tests",
+      "MUST keep guide aligned with example code"
+    ],
+    "acceptance_criteria": [
+      "Given the testing guide, when reviewed, then it references new example tests"
+    ],
+    "verification": {
+      "commands": ["rg -n 'testing' docs/guides/testing.md"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Testing guide references updated tests"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "docs/guides/testing.md"
+    ],
+    "depends_on": ["T-039"],
+    "risks": ["Guide may need more detailed examples"],
+    "estimate": { "tshirt": "XS", "rationale": "Doc-only" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-041",
+    "story_id": "ST-007",
+    "title": "Audit authentication guide vs example",
+    "motivation": "Ensure authentication guide references working example code.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 7: Documentation Synchronization",
+      "quote": "Audit docs/guides/authentication.md vs example code"
+    },
+    "scope": {
+      "in": ["Review auth guide against hello-mysql auth example"],
+      "out": ["Content rewrite beyond references"]
+    },
+    "requirements": [
+      "MUST identify mismatches between guide and example code",
+      "SHOULD note required updates for references"
+    ],
+    "acceptance_criteria": [
+      "Given the auth guide, when reviewed, then all example references are accurate"
+    ],
+    "verification": {
+      "commands": ["rg -n 'auth' docs/guides/authentication.md"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Auth guide references updated example paths"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "docs/guides/authentication.md"
+    ],
+    "depends_on": ["T-040"],
+    "risks": ["Guide may require broader edits"],
+    "estimate": { "tshirt": "XS", "rationale": "Doc audit" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-042",
+    "story_id": "ST-007",
+    "title": "Audit validation guide vs example",
+    "motivation": "Ensure validation guide references working example code.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 7: Documentation Synchronization",
+      "quote": "Audit docs/guides/validation.md vs example code"
+    },
+    "scope": {
+      "in": ["Review validation guide against example code"],
+      "out": ["Content rewrite beyond references"]
+    },
+    "requirements": [
+      "MUST identify mismatches between guide and example",
+      "SHOULD prepare reference updates"
+    ],
+    "acceptance_criteria": [
+      "Given the validation guide, when reviewed, then example references are accurate"
+    ],
+    "verification": {
+      "commands": ["rg -n 'validation' docs/guides/validation.md"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Validation guide references updated example paths"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "docs/guides/validation.md"
+    ],
+    "depends_on": ["T-040"],
+    "risks": ["Guide may need code snippet updates"],
+    "estimate": { "tshirt": "XS", "rationale": "Doc audit" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-043",
+    "story_id": "ST-007",
+    "title": "Audit middleware guide vs example",
+    "motivation": "Ensure middleware guide references working example code.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 7: Documentation Synchronization",
+      "quote": "Audit docs/guides/middleware.md vs example code"
+    },
+    "scope": {
+      "in": ["Review middleware guide against example code"],
+      "out": ["Content rewrite beyond references"]
+    },
+    "requirements": [
+      "MUST identify mismatches between guide and example",
+      "SHOULD prepare reference updates"
+    ],
+    "acceptance_criteria": [
+      "Given the middleware guide, when reviewed, then example references are accurate"
+    ],
+    "verification": {
+      "commands": ["rg -n 'middleware' docs/guides/middleware.md"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Middleware guide references updated example paths"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "docs/guides/middleware.md"
+    ],
+    "depends_on": ["T-040"],
+    "risks": ["Guide may require snippet updates"],
+    "estimate": { "tshirt": "XS", "rationale": "Doc audit" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-044",
+    "story_id": "ST-007",
+    "title": "Audit lifecycle guide vs example",
+    "motivation": "Ensure lifecycle guide references working example code.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 7: Documentation Synchronization",
+      "quote": "Audit docs/guides/lifecycle.md vs example code"
+    },
+    "scope": {
+      "in": ["Review lifecycle guide against example code"],
+      "out": ["Content rewrite beyond references"]
+    },
+    "requirements": [
+      "MUST identify mismatches between guide and example",
+      "SHOULD prepare reference updates"
+    ],
+    "acceptance_criteria": [
+      "Given the lifecycle guide, when reviewed, then example references are accurate"
+    ],
+    "verification": {
+      "commands": ["rg -n 'lifecycle' docs/guides/lifecycle.md"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Lifecycle guide references updated example paths"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "docs/guides/lifecycle.md"
+    ],
+    "depends_on": ["T-040"],
+    "risks": ["Guide may require snippet updates"],
+    "estimate": { "tshirt": "XS", "rationale": "Doc audit" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-045",
+    "story_id": "ST-007",
+    "title": "Update guides with correct code references",
+    "motivation": "Align guide references with actual example code.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 7: Documentation Synchronization",
+      "quote": "Update guides with correct code references"
+    },
+    "scope": {
+      "in": ["Update guide references and snippets"],
+      "out": ["New documentation topics"]
+    },
+    "requirements": [
+      "MUST update auth, validation, middleware, and lifecycle guides with correct references",
+      "MUST ensure snippets reflect actual example code"
+    ],
+    "acceptance_criteria": [
+      "Given updated guides, when a reader follows the references, then they point to existing files"
+    ],
+    "verification": {
+      "commands": ["rg -n 'examples/hello-mysql' docs/guides"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Guides include correct example references"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "docs/guides/authentication.md",
+      "docs/guides/validation.md",
+      "docs/guides/middleware.md",
+      "docs/guides/lifecycle.md"
+    ],
+    "depends_on": ["T-041", "T-042", "T-043", "T-044"],
+    "risks": ["References may change during implementation"],
+    "estimate": { "tshirt": "S", "rationale": "Docs update" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-046",
+    "story_id": "ST-007",
+    "title": "Add See example links to guides",
+    "motivation": "Help users navigate from guides to example code.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 7: Documentation Synchronization",
+      "quote": "Add \"See example\" links to each guide"
+    },
+    "scope": {
+      "in": ["Add See example links in each guide"],
+      "out": ["New guide content"]
+    },
+    "requirements": [
+      "MUST add explicit example links to each guide",
+      "SHOULD keep link format consistent"
+    ],
+    "acceptance_criteria": [
+      "Given the guides, when viewed, then each guide includes a See example link"
+    ],
+    "verification": {
+      "commands": ["rg -n 'See example' docs/guides"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["Each guide includes a See example link"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "docs/guides/authentication.md",
+      "docs/guides/validation.md",
+      "docs/guides/middleware.md",
+      "docs/guides/lifecycle.md"
+    ],
+    "depends_on": ["T-045"],
+    "risks": ["Links may need to be updated if paths change"],
+    "estimate": { "tshirt": "XS", "rationale": "Doc-only" },
+    "owner_type": "agent"
+  },
+  {
+    "id": "T-047",
+    "story_id": "ST-007",
+    "title": "Update main README with feature matrix",
+    "motivation": "Provide a feature matrix linking docs to example code.",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 7: Documentation Synchronization",
+      "quote": "Update main README with feature matrix"
+    },
+    "scope": {
+      "in": ["Add feature matrix in README"],
+      "out": ["New feature implementation"]
+    },
+    "requirements": [
+      "MUST add a feature matrix mapping patterns to example code",
+      "MUST include links to relevant guides"
+    ],
+    "acceptance_criteria": [
+      "Given the main README, when a user reads the matrix, then each pattern links to examples and guides"
+    ],
+    "verification": {
+      "commands": ["rg -n 'feature matrix' README.md"],
+      "ci_checks": ["CI - Pull Request"],
+      "evidence": ["README includes feature matrix section"],
+      "manual_steps": []
+    },
+    "artifacts": [
+      "README.md"
+    ],
+    "depends_on": ["T-046"],
+    "risks": ["README structure may need reformatting"],
+    "estimate": { "tshirt": "XS", "rationale": "Doc-only" },
+    "owner_type": "agent"
+  }
+]

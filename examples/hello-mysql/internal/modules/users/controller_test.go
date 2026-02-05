@@ -8,8 +8,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/httpapi"
-	modkithttp "github.com/aryeko/modkit/modkit/http"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/httpapi"
+	modkithttp "github.com/go-modkit/modkit/modkit/http"
 )
 
 type stubService struct {

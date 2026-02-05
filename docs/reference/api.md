@@ -1,15 +1,15 @@
 # API Reference
 
-This is a quick reference for modkit's core types. For full documentation, see [pkg.go.dev](https://pkg.go.dev/github.com/aryeko/modkit).
+This is a quick reference for modkit's core types. For full documentation, see [pkg.go.dev](https://pkg.go.dev/github.com/go-modkit/modkit).
 
 ## Packages
 
 | Package | Import | Purpose |
 |---------|--------|---------|
-| `module` | `github.com/aryeko/modkit/modkit/module` | Module metadata types |
-| `kernel` | `github.com/aryeko/modkit/modkit/kernel` | Graph builder, bootstrap |
-| `http` | `github.com/aryeko/modkit/modkit/http` | HTTP adapter |
-| `logging` | `github.com/aryeko/modkit/modkit/logging` | Logging interface |
+| `module` | `github.com/go-modkit/modkit/modkit/module` | Module metadata types |
+| `kernel` | `github.com/go-modkit/modkit/modkit/kernel` | Graph builder, bootstrap |
+| `http` | `github.com/go-modkit/modkit/modkit/http` | HTTP adapter |
+| `logging` | `github.com/go-modkit/modkit/modkit/logging` | Logging interface |
 
 ---
 

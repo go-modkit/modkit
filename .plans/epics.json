@@ -1,0 +1,44 @@
+[
+  {
+    "id": "E-PLAN-001",
+    "title": "Examples and Documentation Enhancement",
+    "goal": "Every documented modkit pattern has runnable example code in hello-mysql with passing tests and docs that reference the code",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Overview"
+    },
+    "scope": {
+      "in": [
+        "Extend hello-mysql example with auth, validation, middleware, lifecycle, and route grouping patterns",
+        "Add/expand tests for examples and core modkit library",
+        "Synchronize guides and README with working example code"
+      ],
+      "out": [
+        "New production features outside documented patterns",
+        "Breaking changes to public APIs without documentation updates"
+      ]
+    },
+    "success_metrics": [
+      "All documented patterns have corresponding runnable example code",
+      "Example and library tests pass in CI",
+      "Docs reference actual example code paths"
+    ],
+    "risks": [
+      "Overlap between middleware route groups and API versioning work could cause rework",
+      "Test additions may be flaky without stable fixtures"
+    ],
+    "assumptions": [
+      "CI has a standard pull request workflow and runs make test",
+      "hello-mysql example is the primary target for new patterns"
+    ],
+    "story_ids": [
+      "ST-001",
+      "ST-002",
+      "ST-003",
+      "ST-004",
+      "ST-005",
+      "ST-006",
+      "ST-007"
+    ]
+  }
+]

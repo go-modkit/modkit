@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/aryeko/modkit/modkit/module"
+	"github.com/go-modkit/modkit/modkit/module"
 )
 
 type ModuleNode struct {

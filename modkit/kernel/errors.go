@@ -3,7 +3,7 @@ package kernel
 import (
 	"fmt"
 
-	"github.com/aryeko/modkit/modkit/module"
+	"github.com/go-modkit/modkit/modkit/module"
 )
 
 type RootModuleNilError struct{}

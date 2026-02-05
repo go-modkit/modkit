@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/httpserver"
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/modules/app"
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/platform/mysql"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/httpserver"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/app"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/platform/mysql"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )

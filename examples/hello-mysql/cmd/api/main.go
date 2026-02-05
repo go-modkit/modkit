@@ -3,12 +3,12 @@ package main
 import (
 	"log"
 
-	_ "github.com/aryeko/modkit/examples/hello-mysql/docs"
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/httpserver"
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/modules/app"
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/platform/config"
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/platform/logging"
-	modkithttp "github.com/aryeko/modkit/modkit/http"
+	_ "github.com/go-modkit/modkit/examples/hello-mysql/docs"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/httpserver"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/app"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/platform/config"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/platform/logging"
+	modkithttp "github.com/go-modkit/modkit/modkit/http"
 )
 
 // @title hello-mysql API

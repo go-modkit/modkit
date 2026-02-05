@@ -1,0 +1,271 @@
+[
+  {
+    "id": "ST-001",
+    "epic_id": "E-PLAN-001",
+    "title": "Authentication Module Example",
+    "goal": "hello-mysql demonstrates JWT auth with protected routes and tests",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 1: Authentication Module"
+    },
+    "scope": {
+      "in": [
+        "Auth module with JWT middleware, login endpoint, and route protection",
+        "Auth-related tests and README updates"
+      ],
+      "out": [
+        "Alternative auth mechanisms beyond JWT",
+        "Cross-example auth changes"
+      ]
+    },
+    "success_metrics": [
+      "Auth success and failure tests pass",
+      "Docs point to working auth example"
+    ],
+    "risks": [
+      "JWT validation details may differ from guide expectations"
+    ],
+    "assumptions": [
+      "JWT secret/config can be sourced from example config"
+    ],
+    "task_ids": [
+      "T-001",
+      "T-002",
+      "T-003",
+      "T-004",
+      "T-005",
+      "T-006",
+      "T-007"
+    ]
+  },
+  {
+    "id": "ST-002",
+    "epic_id": "E-PLAN-001",
+    "title": "Request Validation Example",
+    "goal": "hello-mysql demonstrates structured request validation with RFC 7807 errors",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 2: Request Validation"
+    },
+    "scope": {
+      "in": [
+        "Validation helpers, request validations, and RFC 7807 error responses",
+        "Validation tests and README updates"
+      ],
+      "out": [
+        "Schema generation tooling or external validation frameworks"
+      ]
+    },
+    "success_metrics": [
+      "POST/PUT validations return field-level errors",
+      "Docs show working validation examples"
+    ],
+    "risks": [
+      "Validation error format may conflict with existing error responses"
+    ],
+    "assumptions": [
+      "Example routes already accept CreateUserRequest and UpdateUserRequest"
+    ],
+    "task_ids": [
+      "T-008",
+      "T-009",
+      "T-010",
+      "T-011",
+      "T-012",
+      "T-013",
+      "T-014"
+    ]
+  },
+  {
+    "id": "ST-003",
+    "epic_id": "E-PLAN-001",
+    "title": "Advanced Middleware Patterns",
+    "goal": "hello-mysql demonstrates CORS, rate limiting, and provider-based middleware with tests",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 3: Advanced Middleware Patterns"
+    },
+    "scope": {
+      "in": [
+        "CORS, rate limiting, timing/metrics middleware",
+        "Route groups and middleware ordering examples",
+        "Tests and README updates"
+      ],
+      "out": [
+        "Production-grade metrics backends"
+      ]
+    },
+    "success_metrics": [
+      "Middleware examples compile and are exercised in tests",
+      "Docs point to working middleware examples"
+    ],
+    "risks": [
+      "Rate limiting configuration may be environment-sensitive"
+    ],
+    "assumptions": [
+      "Middleware can be registered as providers in hello-mysql"
+    ],
+    "task_ids": [
+      "T-015",
+      "T-016",
+      "T-017",
+      "T-018",
+      "T-019",
+      "T-020",
+      "T-021"
+    ]
+  },
+  {
+    "id": "ST-004",
+    "epic_id": "E-PLAN-001",
+    "title": "Lifecycle and Cleanup Patterns",
+    "goal": "hello-mysql demonstrates cleanup and graceful shutdown with tests",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 4: Lifecycle & Cleanup Patterns"
+    },
+    "scope": {
+      "in": [
+        "Database cleanup interface and shutdown hooks",
+        "Context cancellation examples",
+        "Lifecycle tests and README updates"
+      ],
+      "out": [
+        "Production deployment docs"
+      ]
+    },
+    "success_metrics": [
+      "Shutdown behavior is covered by tests",
+      "Cleanup order is documented"
+    ],
+    "risks": [
+      "Graceful shutdown tests may require timing tolerances"
+    ],
+    "assumptions": [
+      "hello-mysql main allows adding shutdown hooks"
+    ],
+    "task_ids": [
+      "T-022",
+      "T-023",
+      "T-024",
+      "T-025",
+      "T-026",
+      "T-027"
+    ]
+  },
+  {
+    "id": "ST-005",
+    "epic_id": "E-PLAN-001",
+    "title": "Route Groups and API Versioning",
+    "goal": "hello-mysql demonstrates route grouping, versioning, and scoped middleware",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 5: Route Groups & API Versioning"
+    },
+    "scope": {
+      "in": [
+        "Refactor routes under /api/v1 and demonstrate nested groups",
+        "Routing tests and documentation"
+      ],
+      "out": [
+        "New API versions beyond v1"
+      ]
+    },
+    "success_metrics": [
+      "Routing tests pass for grouped routes",
+      "Docs show grouping patterns"
+    ],
+    "risks": [
+      "Refactor may break existing example references"
+    ],
+    "assumptions": [
+      "Route refactor can be done without changing business logic"
+    ],
+    "task_ids": [
+      "T-028",
+      "T-029",
+      "T-030",
+      "T-031",
+      "T-032",
+      "T-033"
+    ]
+  },
+  {
+    "id": "ST-006",
+    "epic_id": "E-PLAN-001",
+    "title": "Test Coverage Improvements",
+    "goal": "Core library and example coverage increases with new tests",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 6: Test Coverage Improvements"
+    },
+    "scope": {
+      "in": [
+        "Kernel and build error tests",
+        "HTTP middleware edge case tests",
+        "Coverage for new example features",
+        "Testing guide updates"
+      ],
+      "out": [
+        "Performance benchmarking"
+      ]
+    },
+    "success_metrics": [
+      "CI coverage meets threshold",
+      "New unit tests for build errors pass"
+    ],
+    "risks": [
+      "Existing tests may need refactoring to avoid flakiness"
+    ],
+    "assumptions": [
+      "Coverage threshold is enforced in CI"
+    ],
+    "task_ids": [
+      "T-034",
+      "T-035",
+      "T-036",
+      "T-037",
+      "T-038",
+      "T-039",
+      "T-040"
+    ]
+  },
+  {
+    "id": "ST-007",
+    "epic_id": "E-PLAN-001",
+    "title": "Documentation Synchronization",
+    "goal": "Guides and README point to working example code",
+    "spec_ref": {
+      "path": ".cursor/specs/epic-01-examples-enhancement.md",
+      "section": "Story 7: Documentation Synchronization"
+    },
+    "scope": {
+      "in": [
+        "Audit guides and update references",
+        "Add example links and feature matrix"
+      ],
+      "out": [
+        "New documentation topics not in scope"
+      ]
+    },
+    "success_metrics": [
+      "No orphaned doc patterns without examples",
+      "README links are correct"
+    ],
+    "risks": [
+      "Docs may drift if example paths change later"
+    ],
+    "assumptions": [
+      "Guides live under docs/guides/"
+    ],
+    "task_ids": [
+      "T-041",
+      "T-042",
+      "T-043",
+      "T-044",
+      "T-045",
+      "T-046",
+      "T-047"
+    ]
+  }
+]

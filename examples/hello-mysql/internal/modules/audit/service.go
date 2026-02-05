@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/modules/users"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/users"
 )
 
 type Service interface {

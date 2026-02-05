@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/aryeko/modkit/modkit/logging"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-modkit/modkit/modkit/logging"
 )
 
 func RequestLogger(logger logging.Logger) func(http.Handler) http.Handler {

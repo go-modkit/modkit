@@ -14,9 +14,9 @@ import (
 	"log"
 	"net/http"
 
-	mkhttp "github.com/aryeko/modkit/modkit/http"
-	"github.com/aryeko/modkit/modkit/kernel"
-	"github.com/aryeko/modkit/modkit/module"
+	mkhttp "github.com/go-modkit/modkit/modkit/http"
+	"github.com/go-modkit/modkit/modkit/kernel"
+	"github.com/go-modkit/modkit/modkit/module"
 )
 
 // Tokens identify providers

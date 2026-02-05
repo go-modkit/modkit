@@ -1,8 +1,8 @@
 package audit
 
 import (
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/modules/users"
-	"github.com/aryeko/modkit/modkit/module"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/users"
+	"github.com/go-modkit/modkit/modkit/module"
 )
 
 const TokenService module.Token = "audit.service"

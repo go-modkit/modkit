@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/modules/database"
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/platform/logging"
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/sqlc"
-	"github.com/aryeko/modkit/modkit/module"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/database"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/platform/logging"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/sqlc"
+	"github.com/go-modkit/modkit/modkit/module"
 )
 
 const (

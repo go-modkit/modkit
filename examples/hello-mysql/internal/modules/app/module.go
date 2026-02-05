@@ -1,10 +1,10 @@
 package app
 
 import (
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/modules/audit"
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/modules/database"
-	"github.com/aryeko/modkit/examples/hello-mysql/internal/modules/users"
-	"github.com/aryeko/modkit/modkit/module"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/audit"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/database"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/users"
+	"github.com/go-modkit/modkit/modkit/module"
 )
 
 const HealthControllerID = "HealthController"
