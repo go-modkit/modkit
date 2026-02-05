@@ -1,6 +1,7 @@
 package kernel_test
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -173,6 +174,67 @@ func TestBootstrapRejectsDuplicateControllerNames(t *testing.T) {
 	}
 	if dupErr.Module != "A" {
 		t.Fatalf("unexpected module name: %q", dupErr.Module)
+	}
+}
+
+func TestBootstrap_CollectsCleanupHooksInLIFO(t *testing.T) {
+	tokenB := module.Token("test.tokenB")
+	tokenA := module.Token("test.tokenA")
+	calls := make([]string, 0, 2)
+
+	modA := mod("A", nil,
+		[]module.ProviderDef{{
+			Token: tokenB,
+			Build: func(r module.Resolver) (any, error) {
+				return "b", nil
+			},
+			Cleanup: func(ctx context.Context) error {
+				calls = append(calls, "B")
+				return nil
+			},
+		}, {
+			Token: tokenA,
+			Build: func(r module.Resolver) (any, error) {
+				_, err := r.Get(tokenB)
+				if err != nil {
+					return nil, err
+				}
+				return "a", nil
+			},
+			Cleanup: func(ctx context.Context) error {
+				calls = append(calls, "A")
+				return nil
+			},
+		}},
+		nil,
+		nil,
+	)
+
+	app, err := kernel.Bootstrap(modA)
+	if err != nil {
+		t.Fatalf("Bootstrap failed: %v", err)
+	}
+
+	if _, err := app.Get(tokenA); err != nil {
+		t.Fatalf("Get failed: %v", err)
+	}
+
+	hooks := app.CleanupHooks()
+	if len(hooks) != 2 {
+		t.Fatalf("expected 2 cleanup hooks, got %d", len(hooks))
+	}
+
+	for _, hook := range hooks {
+		if err := hook(context.Background()); err != nil {
+			t.Fatalf("cleanup failed: %v", err)
+		}
+	}
+
+	if len(calls) != 2 {
+		t.Fatalf("expected 2 cleanup calls, got %d", len(calls))
+	}
+	if calls[0] != "A" || calls[1] != "B" {
+		t.Fatalf("unexpected cleanup order: %v", calls)
 	}
 }
 

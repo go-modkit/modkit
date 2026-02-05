@@ -1,6 +1,13 @@
 # Codecov configuration
 # https://docs.codecov.com/docs/codecovyml-reference
 
+# Exclude files from coverage calculation
+ignore:
+  # Integration-only code (requires real database)
+  - "examples/hello-mysql/internal/modules/users/repo_mysql.go"
+  # Untestable entry point
+  - "examples/hello-mysql/cmd/api/main.go"
+
 coverage:
   status:
     # Project coverage: overall repository coverage check

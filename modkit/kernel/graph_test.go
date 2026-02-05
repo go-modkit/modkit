@@ -8,40 +8,6 @@ import (
 	"github.com/go-modkit/modkit/modkit/module"
 )
 
-type testModule struct {
-	def module.ModuleDef
-}
-
-func (m *testModule) Definition() module.ModuleDef {
-	return m.def
-}
-
-type valueModule struct {
-	def module.ModuleDef
-}
-
-func (m valueModule) Definition() module.ModuleDef {
-	return m.def
-}
-
-func mod(
-	name string,
-	imports []module.Module,
-	providers []module.ProviderDef,
-	controllers []module.ControllerDef,
-	exports []module.Token,
-) module.Module {
-	return &testModule{
-		def: module.ModuleDef{
-			Name:        name,
-			Imports:     imports,
-			Providers:   providers,
-			Controllers: controllers,
-			Exports:     exports,
-		},
-	}
-}
-
 func TestBuildGraphRejectsNilRoot(t *testing.T) {
 	_, err := kernel.BuildGraph(nil)
 	if err == nil {
@@ -308,7 +274,7 @@ func TestBuildGraphRejectsCycles(t *testing.T) {
 	modA := mod("A", nil, nil, nil, nil)
 	modB := mod("B", []module.Module{modA}, nil, nil, nil)
 
-	root := modA.(*testModule)
+	root := modA.(*modHelper)
 	root.def.Imports = []module.Module{modB}
 
 	_, err := kernel.BuildGraph(modA)

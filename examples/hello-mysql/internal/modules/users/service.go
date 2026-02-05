@@ -3,6 +3,7 @@ package users
 import (
 	"context"
 	"log/slog"
+	"time"
 
 	modkitlogging "github.com/go-modkit/modkit/modkit/logging"
 )
@@ -13,11 +14,13 @@ type Service interface {
 	ListUsers(ctx context.Context) ([]User, error)
 	UpdateUser(ctx context.Context, id int64, input UpdateUserInput) (User, error)
 	DeleteUser(ctx context.Context, id int64) error
+	LongOperation(ctx context.Context) error
 }
 
 type service struct {
-	repo   Repository
-	logger modkitlogging.Logger
+	repo               Repository
+	logger             modkitlogging.Logger
+	longOperationDelay time.Duration
 }
 
 func NewService(repo Repository, logger modkitlogging.Logger) Service {
@@ -25,7 +28,11 @@ func NewService(repo Repository, logger modkitlogging.Logger) Service {
 		logger = modkitlogging.NewNopLogger()
 	}
 	logger = logger.With(slog.String("scope", "users"))
-	return &service{repo: repo, logger: logger}
+	return &service{
+		repo:               repo,
+		logger:             logger,
+		longOperationDelay: 2 * time.Second,
+	}
 }
 
 func (s *service) GetUser(ctx context.Context, id int64) (User, error) {
@@ -51,4 +58,14 @@ func (s *service) UpdateUser(ctx context.Context, id int64, input UpdateUserInpu
 func (s *service) DeleteUser(ctx context.Context, id int64) error {
 	s.logger.Debug("delete user", slog.Int64("id", id))
 	return s.repo.DeleteUser(ctx, id)
+}
+
+func (s *service) LongOperation(ctx context.Context) error {
+	s.logger.Debug("long operation")
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-time.After(s.longOperationDelay):
+		return nil
+	}
 }

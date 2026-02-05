@@ -1,8 +1,10 @@
 .worktrees/
 
 # Coverage files
-coverage.out
-coverage-examples.out
+.coverage/
+
+# Build cache
+.cache/
 
 # Internal planning files
 .plans/

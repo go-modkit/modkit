@@ -1,6 +1,7 @@
 package kernel
 
 import (
+	"context"
 	"sync"
 
 	"github.com/go-modkit/modkit/modkit/module"
@@ -9,15 +10,17 @@ import (
 type providerEntry struct {
 	moduleName string
 	build      func(r module.Resolver) (any, error)
+	cleanup    func(ctx context.Context) error
 }
 
 type Container struct {
-	providers  map[module.Token]providerEntry
-	instances  map[module.Token]any
-	visibility Visibility
-	locks      map[module.Token]*sync.Mutex
-	waitingOn  map[module.Token]module.Token
-	mu         sync.Mutex
+	providers    map[module.Token]providerEntry
+	instances    map[module.Token]any
+	visibility   Visibility
+	locks        map[module.Token]*sync.Mutex
+	waitingOn    map[module.Token]module.Token
+	cleanupHooks []func(context.Context) error
+	mu           sync.Mutex
 }
 
 func newContainer(graph *Graph, visibility Visibility) (*Container, error) {
@@ -33,16 +36,18 @@ func newContainer(graph *Graph, visibility Visibility) (*Container, error) {
 			providers[provider.Token] = providerEntry{
 				moduleName: node.Name,
 				build:      provider.Build,
+				cleanup:    provider.Cleanup,
 			}
 		}
 	}
 
 	return &Container{
-		providers:  providers,
-		instances:  make(map[module.Token]any),
-		visibility: visibility,
-		locks:      make(map[module.Token]*sync.Mutex),
-		waitingOn:  make(map[module.Token]module.Token),
+		providers:    providers,
+		instances:    make(map[module.Token]any),
+		visibility:   visibility,
+		locks:        make(map[module.Token]*sync.Mutex),
+		waitingOn:    make(map[module.Token]module.Token),
+		cleanupHooks: make([]func(context.Context) error, 0),
 	}, nil
 }
 
@@ -102,8 +107,22 @@ func (c *Container) getWithStack(token module.Token, requester string, stack []m
 
 	c.mu.Lock()
 	c.instances[token] = instance
+	if entry.cleanup != nil {
+		c.cleanupHooks = append(c.cleanupHooks, entry.cleanup)
+	}
 	c.mu.Unlock()
 	return instance, nil
+}
+
+func (c *Container) cleanupHooksLIFO() []func(context.Context) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	hooks := make([]func(context.Context) error, len(c.cleanupHooks))
+	for i, hook := range c.cleanupHooks {
+		hooks[len(c.cleanupHooks)-1-i] = hook
+	}
+	return hooks
 }
 
 type moduleResolver struct {

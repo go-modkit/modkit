@@ -71,3 +71,8 @@ func TestLogStartup_EmitsMessage(t *testing.T) {
 		t.Fatalf("expected scope api, got %q", scope)
 	}
 }
+
+func TestLogStartup_NilLogger(t *testing.T) {
+	// Ensure no panic when logger is nil.
+	logStartup(nil, ":9090")
+}

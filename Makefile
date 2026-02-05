@@ -1,6 +1,6 @@
 SHELL := /bin/sh
 
-.PHONY: fmt lint vuln test test-coverage tools setup-hooks lint-commit
+.PHONY: fmt lint vuln test test-coverage test-patch-coverage tools setup-hooks lint-commit
 
 GOPATH ?= $(shell go env GOPATH)
 GOIMPORTS ?= $(GOPATH)/bin/goimports
@@ -23,8 +23,28 @@ test:
 	go test ./...
 
 test-coverage:
-	go test -race -coverprofile=coverage.out -covermode=atomic ./...
-	go test -race -coverprofile=coverage-examples.out -covermode=atomic ./examples/hello-mysql/...
+	@mkdir -p .coverage
+	go test -race -coverprofile=.coverage/coverage.out -covermode=atomic ./...
+	go test -race -coverprofile=.coverage/coverage-examples.out -covermode=atomic ./examples/hello-mysql/...
+
+test-patch-coverage:
+	@mkdir -p .coverage
+	@changed=$$(git diff --name-only origin/main...HEAD --diff-filter=AM | grep '\.go$$' || true); \
+	if [ -z "$$changed" ]; then \
+		echo "No changed Go files detected vs origin/main."; \
+		exit 0; \
+	fi; \
+	pkgs=$$(echo "$$changed" | xargs -n1 dirname | sort -u | awk '{ if ($$0 == ".") { print "./..." } else { print "./"$$0"/..." } }' | tr '\n' ' '); \
+	echo "Running patch coverage for packages:"; \
+	echo "$$pkgs" | tr ' ' '\n'; \
+	go test -race -coverprofile=.coverage/coverage-patch.out -covermode=atomic $$pkgs; \
+	exclude_pattern=$$(awk '/^ignore:/{flag=1; next} /^[a-z]/ && !/^ignore:/{flag=0} flag && /^  -/{gsub(/^[[:space:]]*-[[:space:]]*"/,""); gsub(/"$$/,""); print}' codecov.yml 2>/dev/null | tr '\n' '|' | sed 's/|$$//'); \
+	if [ -n "$$exclude_pattern" ]; then \
+		grep -vE "$$exclude_pattern" .coverage/coverage-patch.out > .coverage/coverage-patch-filtered.out || cp .coverage/coverage-patch.out .coverage/coverage-patch-filtered.out; \
+		go tool cover -func=.coverage/coverage-patch-filtered.out; \
+	else \
+		go tool cover -func=.coverage/coverage-patch.out; \
+	fi
 
 # Install all development tools (tracked in tools/tools.go)
 tools:

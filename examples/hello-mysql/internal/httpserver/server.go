@@ -11,18 +11,20 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
-func BuildHandler(opts app.Options) (http.Handler, error) {
+var registerRoutes = modkithttp.RegisterRoutes
+
+func BuildAppHandler(opts app.Options) (*kernel.App, http.Handler, error) {
 	mod := app.NewModule(opts)
 	boot, err := kernel.Bootstrap(mod)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	logger := logging.New().With(slog.String("scope", "httpserver"))
 	router := modkithttp.NewRouter()
 	router.Use(modkithttp.RequestLogger(logger))
-	if err := modkithttp.RegisterRoutes(modkithttp.AsRouter(router), boot.Controllers); err != nil {
-		return nil, err
+	if err := registerRoutes(modkithttp.AsRouter(router), boot.Controllers); err != nil {
+		return boot, nil, err
 	}
 	router.Get("/swagger/*", httpSwagger.WrapHandler)
 	router.Get("/docs/*", httpSwagger.WrapHandler)
@@ -30,5 +32,10 @@ func BuildHandler(opts app.Options) (http.Handler, error) {
 		http.Redirect(w, r, "/docs/index.html", http.StatusMovedPermanently)
 	}))
 
-	return router, nil
+	return boot, router, nil
+}
+
+func BuildHandler(opts app.Options) (http.Handler, error) {
+	_, handler, err := BuildAppHandler(opts)
+	return handler, err
 }

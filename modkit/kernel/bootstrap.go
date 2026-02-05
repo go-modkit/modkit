@@ -1,6 +1,10 @@
 package kernel
 
-import "github.com/go-modkit/modkit/modkit/module"
+import (
+	"context"
+
+	"github.com/go-modkit/modkit/modkit/module"
+)
 
 type App struct {
 	Graph       *Graph
@@ -63,4 +67,9 @@ func (a *App) Resolver() module.Resolver {
 // Get resolves a token from the root module scope.
 func (a *App) Get(token module.Token) (any, error) {
 	return a.Resolver().Get(token)
+}
+
+// CleanupHooks returns provider cleanup hooks in LIFO order.
+func (a *App) CleanupHooks() []func(context.Context) error {
+	return a.container.cleanupHooksLIFO()
 }
