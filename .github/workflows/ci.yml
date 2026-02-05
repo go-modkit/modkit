@@ -24,22 +24,19 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.25.x"
-          cache: true
-          # Cache based on all go.sum files in the workspace to capture changes in examples/submodules
-          cache-dependency-path: |
-            **/go.sum
-            go.work.sum
+          # Disable setup-go's cache; we use a custom cache below with a more stable key
+          cache: false
 
-      - name: Cache Tools Binaries
+      - name: Cache Tools and Modules
         uses: actions/cache@v4
         with:
           path: |
             ~/go/bin
             ~/go/pkg/mod
             ~/.cache/golangci-lint
-          # Key depends ONLY on tools/tools.go and the root go.sum (where tools versions are pinned)
-          # This prevents tool rebuilds when app dependencies change
-          # Caching ~/go/pkg/mod ensures downloaded modules are reused across runs
+          # Key based on tools/tools.go and go.sum (tool versions only)
+          # This cache is stable: only invalidates when tools change, not app dependencies
+          # Caches both binaries and modules to prevent re-downloading on every run
           key: ${{ runner.os }}-tools-${{ hashFiles('tools/tools.go', 'go.sum') }}
           restore-keys: |
             ${{ runner.os }}-tools-
