@@ -4,6 +4,7 @@
 [![CI](https://github.com/aryeko/modkit/actions/workflows/ci.yml/badge.svg)](https://github.com/aryeko/modkit/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/aryeko/modkit/branch/main/graph/badge.svg)](https://codecov.io/gh/aryeko/modkit)
 [![Go Report Card](https://goreportcard.com/badge/github.com/aryeko/modkit)](https://goreportcard.com/report/github.com/aryeko/modkit)
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/aryeko/modkit?utm_source=oss&utm_medium=github&utm_campaign=aryeko%2Fmodkit&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **A Go framework for building modular backend services, inspired by NestJS.**
