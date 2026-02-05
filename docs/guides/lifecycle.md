@@ -254,7 +254,7 @@ func main() {
 
     go func() {
         <-sigCh
-        cancel()  // Signal shutdown
+        cancel()  // Signal shutdown to providers using ctx
         if err := app.CloseContext(ctx); err != nil {
             log.Printf("shutdown error: %v", err)
         }
