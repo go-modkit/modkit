@@ -3,7 +3,6 @@ package lifecycle
 import (
 	"context"
 	"errors"
-	"net/http"
 )
 
 // CleanupHook defines a shutdown cleanup function.
@@ -38,8 +37,12 @@ func FromFuncs(funcs []func(context.Context) error) []CleanupHook {
 	return hooks
 }
 
+type shutdowner interface {
+	Shutdown(ctx context.Context) error
+}
+
 // ShutdownServer shuts down the server, then runs cleanup hooks.
-func ShutdownServer(ctx context.Context, server *http.Server, hooks []CleanupHook) error {
+func ShutdownServer(ctx context.Context, server shutdowner, hooks []CleanupHook) error {
 	shutdownErr := server.Shutdown(ctx)
 	cleanupErr := RunCleanup(ctx, hooks)
 	if shutdownErr != nil {
