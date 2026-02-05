@@ -5,6 +5,9 @@ import "github.com/go-modkit/modkit/modkit/module"
 type Visibility map[string]map[module.Token]bool
 
 func BuildVisibility(graph *Graph) (Visibility, error) {
+	if graph == nil {
+		return nil, ErrNilGraph
+	}
 	return buildVisibility(graph)
 }
 

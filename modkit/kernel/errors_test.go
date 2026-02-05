@@ -10,6 +10,7 @@ func TestKernelErrorStrings(t *testing.T) {
 		name string
 		err  error
 	}{
+		{"NilGraph", ErrNilGraph},
 		{"RootModuleNil", &RootModuleNilError{}},
 		{"InvalidModuleName", &InvalidModuleNameError{Name: "mod"}},
 		{"ModuleNotPointer", &ModuleNotPointerError{Module: "mod"}},
@@ -21,6 +22,7 @@ func TestKernelErrorStrings(t *testing.T) {
 		{"DuplicateControllerName", &DuplicateControllerNameError{Module: "mod", Name: "ctrl"}},
 		{"TokenNotVisible", &TokenNotVisibleError{Module: "mod", Token: "t"}},
 		{"ExportNotVisible", &ExportNotVisibleError{Module: "mod", Token: "t"}},
+		{"ExportAmbiguous", &ExportAmbiguousError{Module: "mod", Token: "t", Imports: []string{"a", "b"}}},
 		{"ProviderNotFound", &ProviderNotFoundError{Module: "mod", Token: "t"}},
 		{"ProviderCycle", &ProviderCycleError{Token: "t"}},
 		{"ProviderBuild", &ProviderBuildError{Module: "mod", Token: "t", Err: errors.New("boom")}},
@@ -45,5 +47,9 @@ func TestErrorWraps(t *testing.T) {
 	err2 := &ControllerBuildError{Module: "m", Controller: "c", Err: inner}
 	if !errors.Is(err2.Unwrap(), inner) {
 		t.Fatalf("expected unwrap to return inner error, got %v", err2.Unwrap())
+	}
+	ambiguous := &ExportAmbiguousError{Module: "m", Token: "t", Imports: []string{"a", "b"}}
+	if !errors.Is(ambiguous, ErrExportAmbiguous) {
+		t.Fatalf("expected ExportAmbiguousError to unwrap to ErrExportAmbiguous")
 	}
 }

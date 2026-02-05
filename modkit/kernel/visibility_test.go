@@ -74,3 +74,13 @@ func TestVisibilityRejectsAmbiguousReExport(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
+
+func TestBuildVisibilityRejectsNilGraph(t *testing.T) {
+	_, err := kernel.BuildVisibility(nil)
+	if err == nil {
+		t.Fatalf("expected error for nil graph")
+	}
+	if !errors.Is(err, kernel.ErrNilGraph) {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}

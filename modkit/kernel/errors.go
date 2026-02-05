@@ -8,6 +8,7 @@ import (
 )
 
 var ErrExportAmbiguous = errors.New("export token is ambiguous across imports")
+var ErrNilGraph = errors.New("graph is nil")
 
 type RootModuleNilError struct{}
 
