@@ -22,7 +22,7 @@ type service struct {
 
 func NewService(repo Repository, logger modkitlogging.Logger) Service {
 	if logger == nil {
-		logger = modkitlogging.Nop()
+		logger = modkitlogging.NewNopLogger()
 	}
 	logger = logger.With(slog.String("scope", "users"))
 	return &service{repo: repo, logger: logger}

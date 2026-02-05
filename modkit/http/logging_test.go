@@ -1,7 +1,6 @@
 package http
 
 import (
-	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,10 +10,11 @@ import (
 
 type captureLogger struct{ messages []string }
 
-func (c *captureLogger) Debug(msg string, _ ...slog.Attr) { c.messages = append(c.messages, msg) }
-func (c *captureLogger) Info(msg string, _ ...slog.Attr)  { c.messages = append(c.messages, msg) }
-func (c *captureLogger) Error(msg string, _ ...slog.Attr) { c.messages = append(c.messages, msg) }
-func (c *captureLogger) With(...slog.Attr) logging.Logger { return c }
+func (c *captureLogger) Debug(msg string, _ ...any) { c.messages = append(c.messages, msg) }
+func (c *captureLogger) Info(msg string, _ ...any)  { c.messages = append(c.messages, msg) }
+func (c *captureLogger) Warn(msg string, _ ...any)  { c.messages = append(c.messages, msg) }
+func (c *captureLogger) Error(msg string, _ ...any) { c.messages = append(c.messages, msg) }
+func (c *captureLogger) With(...any) logging.Logger { return c }
 
 func TestRequestLogger_LogsRequests(t *testing.T) {
 	logger := &captureLogger{}

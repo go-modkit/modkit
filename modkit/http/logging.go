@@ -1,7 +1,6 @@
 package http
 
 import (
-	"log/slog"
 	"net/http"
 	"time"
 
@@ -11,7 +10,7 @@ import (
 
 func RequestLogger(logger logging.Logger) func(http.Handler) http.Handler {
 	if logger == nil {
-		logger = logging.Nop()
+		logger = logging.NewNopLogger()
 	}
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -21,10 +20,10 @@ func RequestLogger(logger logging.Logger) func(http.Handler) http.Handler {
 			duration := time.Since(start)
 
 			logger.Info("http request",
-				slog.String("method", r.Method),
-				slog.String("path", r.URL.Path),
-				slog.Int("status", ww.Status()),
-				slog.Duration("duration", duration),
+				"method", r.Method,
+				"path", r.URL.Path,
+				"status", ww.Status(),
+				"duration", duration,
 			)
 		})
 	}

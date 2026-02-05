@@ -22,7 +22,7 @@ type config struct {
 
 func New() modkitlogging.Logger {
 	logger := newLogger(os.Stdout)
-	return modkitlogging.NewSlog(logger)
+	return modkitlogging.NewSlogLogger(logger)
 }
 
 func newLogger(w io.Writer) *slog.Logger {

@@ -13,15 +13,30 @@ type captureLogger struct {
 	attrs         []slog.Attr
 }
 
-func (c *captureLogger) Debug(msg string, attrs ...slog.Attr) {
+func (c *captureLogger) Debug(msg string, args ...any) {
 	c.debugMessages = append(c.debugMessages, msg)
-	c.attrs = append(c.attrs, attrs...)
+	c.attrs = append(c.attrs, attrsFromArgs(args)...)
 }
-func (c *captureLogger) Info(string, ...slog.Attr)  {}
-func (c *captureLogger) Error(string, ...slog.Attr) {}
-func (c *captureLogger) With(attrs ...slog.Attr) modkitlogging.Logger {
-	c.attrs = append(c.attrs, attrs...)
+func (c *captureLogger) Info(string, ...any)  {}
+func (c *captureLogger) Warn(string, ...any)  {}
+func (c *captureLogger) Error(string, ...any) {}
+func (c *captureLogger) With(args ...any) modkitlogging.Logger {
+	c.attrs = append(c.attrs, attrsFromArgs(args)...)
 	return c
+}
+
+func attrsFromArgs(args []any) []slog.Attr {
+	if len(args) == 0 {
+		return nil
+	}
+	attrs := make([]slog.Attr, 0, len(args))
+	for _, arg := range args {
+		attr, ok := arg.(slog.Attr)
+		if ok {
+			attrs = append(attrs, attr)
+		}
+	}
+	return attrs
 }
 
 func TestService_EmitsDebugLogs(t *testing.T) {

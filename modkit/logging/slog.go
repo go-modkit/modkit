@@ -6,36 +6,29 @@ type slogAdapter struct {
 	logger *slog.Logger
 }
 
-func NewSlog(logger *slog.Logger) Logger {
+func NewSlogLogger(logger *slog.Logger) Logger {
 	if logger == nil {
-		return Nop()
+		return NewNopLogger()
 	}
 	return slogAdapter{logger: logger}
 }
 
-func (s slogAdapter) Debug(msg string, attrs ...slog.Attr) {
-	s.logger.Debug(msg, attrsToAny(attrs)...)
+func (s slogAdapter) Debug(msg string, args ...any) {
+	s.logger.Debug(msg, args...)
 }
 
-func (s slogAdapter) Info(msg string, attrs ...slog.Attr) {
-	s.logger.Info(msg, attrsToAny(attrs)...)
+func (s slogAdapter) Info(msg string, args ...any) {
+	s.logger.Info(msg, args...)
 }
 
-func (s slogAdapter) Error(msg string, attrs ...slog.Attr) {
-	s.logger.Error(msg, attrsToAny(attrs)...)
+func (s slogAdapter) Warn(msg string, args ...any) {
+	s.logger.Warn(msg, args...)
 }
 
-func (s slogAdapter) With(attrs ...slog.Attr) Logger {
-	return slogAdapter{logger: s.logger.With(attrsToAny(attrs)...)}
+func (s slogAdapter) Error(msg string, args ...any) {
+	s.logger.Error(msg, args...)
 }
 
-func attrsToAny(attrs []slog.Attr) []any {
-	if len(attrs) == 0 {
-		return nil
-	}
-	converted := make([]any, len(attrs))
-	for i, attr := range attrs {
-		converted[i] = attr
-	}
-	return converted
+func (s slogAdapter) With(args ...any) Logger {
+	return slogAdapter{logger: s.logger.With(args...)}
 }

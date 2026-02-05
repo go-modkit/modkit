@@ -1,14 +1,13 @@
 package logging
 
-import "log/slog"
-
 type nopLogger struct{}
 
-func Nop() Logger {
+func NewNopLogger() Logger {
 	return nopLogger{}
 }
 
-func (nopLogger) Debug(string, ...slog.Attr) {}
-func (nopLogger) Info(string, ...slog.Attr)  {}
-func (nopLogger) Error(string, ...slog.Attr) {}
-func (nopLogger) With(...slog.Attr) Logger   { return nopLogger{} }
+func (nopLogger) Debug(string, ...any) {}
+func (nopLogger) Info(string, ...any)  {}
+func (nopLogger) Warn(string, ...any)  {}
+func (nopLogger) Error(string, ...any) {}
+func (nopLogger) With(...any) Logger   { return nopLogger{} }

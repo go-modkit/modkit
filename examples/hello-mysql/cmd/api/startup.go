@@ -8,7 +8,7 @@ import (
 
 func logStartup(logger modkitlogging.Logger, addr string) {
 	if logger == nil {
-		logger = modkitlogging.Nop()
+		logger = modkitlogging.NewNopLogger()
 	}
 	logger = logger.With(slog.String("scope", "api"))
 	logger.Info("server starting",
