@@ -13,6 +13,7 @@ import (
 type stubServer struct {
 	shutdownCalled bool
 	shutdownErr    error
+	shutdownCh     chan struct{}
 }
 
 func (s *stubServer) ListenAndServe() error {
@@ -21,6 +22,9 @@ func (s *stubServer) ListenAndServe() error {
 
 func (s *stubServer) Shutdown(ctx context.Context) error {
 	s.shutdownCalled = true
+	if s.shutdownCh != nil {
+		close(s.shutdownCh)
+	}
 	return s.shutdownErr
 }
 
@@ -36,8 +40,12 @@ func TestRunServer_ShutdownPath(t *testing.T) {
 		},
 	}
 
+	server.shutdownCh = make(chan struct{})
+	go func() {
+		<-server.shutdownCh
+		errCh <- http.ErrServerClosed
+	}()
 	sigCh <- os.Interrupt
-	errCh <- http.ErrServerClosed
 
 	err := runServer(50*time.Millisecond, server, sigCh, errCh, hooks)
 	if err != nil {
