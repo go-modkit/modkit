@@ -52,28 +52,9 @@ func main() {
 		errCh <- server.ListenAndServe()
 	}()
 
-	select {
-	case err := <-errCh:
-		if err != nil && err != http.ErrServerClosed {
-			log.Fatalf("server failed: %v", err)
-		}
-	case <-sigCh:
-		ctx, cancel := context.WithTimeout(context.Background(), modkithttp.ShutdownTimeout)
-		defer cancel()
-
-		hooks := lifecycle.FromFuncs(boot.CleanupHooks())
-		shutdownErr := lifecycle.ShutdownServer(ctx, server, hooks)
-
-		err := <-errCh
-		if err == http.ErrServerClosed {
-			err = nil
-		}
-		if shutdownErr != nil {
-			log.Fatalf("shutdown failed: %v", shutdownErr)
-		}
-		if err != nil {
-			log.Fatalf("server failed: %v", err)
-		}
+	hooks := lifecycle.FromFuncs(boot.CleanupHooks())
+	if err := runServer(modkithttp.ShutdownTimeout, server, sigCh, errCh, hooks); err != nil {
+		log.Fatalf("server failed: %v", err)
 	}
 }
 
@@ -106,4 +87,33 @@ func parseJWTTTL(raw string) time.Duration {
 		return time.Hour
 	}
 	return ttl
+}
+
+type shutdownServer interface {
+	ListenAndServe() error
+	Shutdown(context.Context) error
+}
+
+func runServer(shutdownTimeout time.Duration, server shutdownServer, sigCh <-chan os.Signal, errCh <-chan error, hooks []lifecycle.CleanupHook) error {
+	select {
+	case err := <-errCh:
+		if err == http.ErrServerClosed {
+			return nil
+		}
+		return err
+	case <-sigCh:
+		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		defer cancel()
+
+		shutdownErr := lifecycle.ShutdownServer(ctx, server, hooks)
+
+		err := <-errCh
+		if err == http.ErrServerClosed {
+			err = nil
+		}
+		if shutdownErr != nil {
+			return shutdownErr
+		}
+		return err
+	}
 }

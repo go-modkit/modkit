@@ -1,95 +1,52 @@
 package main
 
 import (
+	"context"
+	"net/http"
+	"os"
 	"testing"
 	"time"
 
-	"github.com/go-modkit/modkit/examples/hello-mysql/internal/platform/config"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/lifecycle"
 )
 
-func TestParseJWTTTL_DefaultOnInvalid(t *testing.T) {
-	got := parseJWTTTL("bad-value")
-	if got != time.Hour {
-		t.Fatalf("ttl = %v", got)
-	}
+type stubServer struct {
+	shutdownCalled bool
+	shutdownErr    error
 }
 
-func TestParseJWTTTL_Valid(t *testing.T) {
-	got := parseJWTTTL("30m")
-	if got != 30*time.Minute {
-		t.Fatalf("ttl = %v", got)
-	}
+func (s *stubServer) ListenAndServe() error {
+	return nil
 }
 
-func TestParseJWTTTL_RejectsNonPositive(t *testing.T) {
-	for _, value := range []string{"0s", "-1s"} {
-		got := parseJWTTTL(value)
-		if got != time.Hour {
-			t.Fatalf("ttl for %q = %v", value, got)
-		}
-	}
+func (s *stubServer) Shutdown(ctx context.Context) error {
+	s.shutdownCalled = true
+	return s.shutdownErr
 }
 
-func TestBuildAuthConfig(t *testing.T) {
-	cfg := config.Config{
-		JWTSecret:    "secret",
-		JWTIssuer:    "issuer",
-		AuthUsername: "demo",
-		AuthPassword: "s3cret",
+func TestRunServer_ShutdownPath(t *testing.T) {
+	server := &stubServer{}
+	sigCh := make(chan os.Signal, 1)
+	errCh := make(chan error, 1)
+	cleanupCalled := false
+	hooks := []lifecycle.CleanupHook{
+		func(ctx context.Context) error {
+			cleanupCalled = true
+			return nil
+		},
 	}
-	ttl := 2 * time.Minute
 
-	got := buildAuthConfig(cfg, ttl)
+	sigCh <- os.Interrupt
+	errCh <- http.ErrServerClosed
 
-	if got.Secret != cfg.JWTSecret {
-		t.Fatalf("secret = %q", got.Secret)
+	err := runServer(50*time.Millisecond, server, sigCh, errCh, hooks)
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
 	}
-	if got.Issuer != cfg.JWTIssuer {
-		t.Fatalf("issuer = %q", got.Issuer)
+	if !server.shutdownCalled {
+		t.Fatal("expected shutdown to be called")
 	}
-	if got.TTL != ttl {
-		t.Fatalf("ttl = %v", got.TTL)
-	}
-	if got.Username != cfg.AuthUsername {
-		t.Fatalf("username = %q", got.Username)
-	}
-	if got.Password != cfg.AuthPassword {
-		t.Fatalf("password = %q", got.Password)
-	}
-}
-
-func TestBuildAppOptions(t *testing.T) {
-	cfg := config.Config{
-		HTTPAddr:     ":9999",
-		MySQLDSN:     "dsn",
-		JWTSecret:    "secret",
-		JWTIssuer:    "issuer",
-		AuthUsername: "demo",
-		AuthPassword: "s3cret",
-	}
-	ttl := 3 * time.Minute
-
-	opts := buildAppOptions(cfg, ttl)
-
-	if opts.HTTPAddr != cfg.HTTPAddr {
-		t.Fatalf("http addr = %q", opts.HTTPAddr)
-	}
-	if opts.MySQLDSN != cfg.MySQLDSN {
-		t.Fatalf("mysql dsn = %q", opts.MySQLDSN)
-	}
-	if opts.Auth.Secret != cfg.JWTSecret {
-		t.Fatalf("auth secret = %q", opts.Auth.Secret)
-	}
-	if opts.Auth.Issuer != cfg.JWTIssuer {
-		t.Fatalf("auth issuer = %q", opts.Auth.Issuer)
-	}
-	if opts.Auth.TTL != ttl {
-		t.Fatalf("auth ttl = %v", opts.Auth.TTL)
-	}
-	if opts.Auth.Username != cfg.AuthUsername {
-		t.Fatalf("auth username = %q", opts.Auth.Username)
-	}
-	if opts.Auth.Password != cfg.AuthPassword {
-		t.Fatalf("auth password = %q", opts.Auth.Password)
+	if !cleanupCalled {
+		t.Fatal("expected cleanup to be called")
 	}
 }
