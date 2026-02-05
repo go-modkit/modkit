@@ -12,6 +12,16 @@ import (
 	"github.com/go-modkit/modkit/modkit/module"
 )
 
+type recordingCloser struct {
+	name   string
+	closed *[]string
+}
+
+func (c *recordingCloser) Close() error {
+	*c.closed = append(*c.closed, c.name)
+	return nil
+}
+
 func TestAppGetRejectsNotVisibleToken(t *testing.T) {
 	modA := mod("A", nil, nil, nil, nil)
 
@@ -380,3 +390,37 @@ func TestContainerGetRegistersCleanupHooks(t *testing.T) {
 	}
 }
 
+func TestAppCloseReverseOrder(t *testing.T) {
+	var closed []string
+	modA := mod("A", nil,
+		[]module.ProviderDef{{
+			Token: "closer.a",
+			Build: func(r module.Resolver) (any, error) {
+				return &recordingCloser{name: "a", closed: &closed}, nil
+			},
+		}, {
+			Token: "closer.b",
+			Build: func(r module.Resolver) (any, error) {
+				return &recordingCloser{name: "b", closed: &closed}, nil
+			},
+		}},
+		nil,
+		nil,
+	)
+
+	app, err := kernel.Bootstrap(modA)
+	if err != nil {
+		t.Fatalf("Bootstrap failed: %v", err)
+	}
+
+	_, _ = app.Get("closer.a")
+	_, _ = app.Get("closer.b")
+
+	if err := app.Close(); err != nil {
+		t.Fatalf("Close failed: %v", err)
+	}
+
+	if len(closed) != 2 || closed[0] != "b" || closed[1] != "a" {
+		t.Fatalf("expected reverse close order, got %v", closed)
+	}
+}

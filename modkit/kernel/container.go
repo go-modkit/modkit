@@ -134,6 +134,17 @@ func (c *Container) cleanupHooksLIFO() []func(context.Context) error {
 	return hooks
 }
 
+func (c *Container) closersLIFO() []io.Closer {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	closers := make([]io.Closer, len(c.closers))
+	for i, closer := range c.closers {
+		closers[len(c.closers)-1-i] = closer
+	}
+	return closers
+}
+
 func (c *Container) closersInBuildOrder() []io.Closer {
 	c.mu.Lock()
 	defer c.mu.Unlock()

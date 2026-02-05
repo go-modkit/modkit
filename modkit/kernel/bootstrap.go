@@ -74,3 +74,12 @@ func (a *App) CleanupHooks() []func(context.Context) error {
 	return a.container.cleanupHooksLIFO()
 }
 
+// Close calls Close on all io.Closer providers in reverse build order.
+func (a *App) Close() error {
+	for _, closer := range a.container.closersLIFO() {
+		if err := closer.Close(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
