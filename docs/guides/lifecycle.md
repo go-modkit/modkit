@@ -150,14 +150,14 @@ func main() {
     if err := mkhttp.Serve(":8080", router); err != nil {
         log.Printf("server error: %v", err)
     }
-if err := app.CloseContext(context.Background()); err != nil {
-    log.Printf("shutdown error: %v", err)
-}
+    if err := app.CloseContext(context.Background()); err != nil {
+        log.Printf("shutdown error: %v", err)
+    }
 }
 ```
 
 `Close()` closes providers in reverse build order.
-Close is idempotent and safe to call: once it completes successfully (even with aggregated errors),
+Close is idempotent and safe to call: once it completes (even if it returned aggregated errors),
 subsequent calls return `nil` and do not re-close providers.
 
 For context-aware shutdown, use `CloseContext(ctx)`:
