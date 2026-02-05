@@ -7,7 +7,9 @@ const (
 	TokenHandler    module.Token = "auth.handler"
 )
 
-type Options struct{}
+type Options struct {
+	Config Config
+}
 
 type Module struct {
 	opts Options
@@ -21,18 +23,17 @@ func NewModule(opts Options) module.Module {
 
 func (m Module) Definition() module.ModuleDef {
 	return module.ModuleDef{
-		Name: "auth",
-		Providers: []module.ProviderDef{
+		Name:      "auth",
+		Providers: Providers(m.opts.Config),
+		Controllers: []module.ControllerDef{
 			{
-				Token: TokenMiddleware,
+				Name: "AuthController",
 				Build: func(r module.Resolver) (any, error) {
-					return nil, nil
-				},
-			},
-			{
-				Token: TokenHandler,
-				Build: func(r module.Resolver) (any, error) {
-					return nil, nil
+					handlerAny, err := r.Get(TokenHandler)
+					if err != nil {
+						return nil, err
+					}
+					return handlerAny, nil
 				},
 			},
 		},
