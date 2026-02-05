@@ -1,1 +1,5 @@
 .worktrees/
+
+# Coverage files
+coverage.out
+coverage-examples.out

@@ -6,7 +6,7 @@ Thanks for your interest in contributing! modkit is in early development, so the
 
 ### Prerequisites
 
-- Go 1.22+
+- Go 1.25+
 - Docker (for running the example app)
 - Make
 

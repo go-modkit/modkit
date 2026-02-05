@@ -2,6 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/aryeko/modkit.svg)](https://pkg.go.dev/github.com/aryeko/modkit)
 [![CI](https://github.com/aryeko/modkit/actions/workflows/ci.yml/badge.svg)](https://github.com/aryeko/modkit/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/aryeko/modkit/branch/main/graph/badge.svg)](https://codecov.io/gh/aryeko/modkit)
 [![Go Report Card](https://goreportcard.com/badge/github.com/aryeko/modkit)](https://goreportcard.com/report/github.com/aryeko/modkit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -72,7 +73,7 @@ func main() {
 go get github.com/aryeko/modkit
 ```
 
-Requires Go 1.22+
+Requires Go 1.25+
 
 ## Features
 

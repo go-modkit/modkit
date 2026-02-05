@@ -1,6 +1,6 @@
 SHELL := /bin/sh
 
-.PHONY: fmt lint vuln test tools setup-hooks lint-commit
+.PHONY: fmt lint vuln test test-coverage tools setup-hooks lint-commit
 
 GOPATH ?= $(shell go env GOPATH)
 GOIMPORTS ?= $(GOPATH)/bin/goimports
@@ -21,6 +21,10 @@ vuln:
 
 test:
 	go test ./...
+
+test-coverage:
+	go test -race -coverprofile=coverage.out -covermode=atomic ./...
+	go test -race -coverprofile=coverage-examples.out -covermode=atomic ./examples/hello-mysql/...
 
 # Install all development tools (tracked in tools/tools.go)
 tools:

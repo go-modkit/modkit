@@ -1,0 +1,28 @@
+# Codecov configuration
+# https://docs.codecov.com/docs/codecovyml-reference
+
+coverage:
+  status:
+    # Project coverage: overall repository coverage check
+    project:
+      default:
+        # target: auto uses the base branch coverage as the target
+        # PRs must not decrease overall coverage
+        target: auto
+        # threshold: allows up to 1% drop before failing
+        # prevents flaky failures from minor fluctuations
+        threshold: 1%
+
+    # Patch coverage: coverage of new/changed lines only
+    patch:
+      default:
+        # 80% of new/changed lines must be covered by tests
+        # encourages testing new code while allowing flexibility
+        target: 80%
+
+# PR comment configuration
+comment:
+  # Layout sections: sunburst chart, coverage diff, flags, file list
+  layout: "reach,diff,flags,files"
+  # Posts new comment on each push, updates existing comment
+  behavior: default

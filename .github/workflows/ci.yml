@@ -10,10 +10,10 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22.x"
+          go-version: "1.25.x"
           cache: true
       - name: Install tools
         run: |
@@ -25,10 +25,10 @@ jobs:
   vuln:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22.x"
+          go-version: "1.25.x"
           cache: true
       - name: Install tools
         run: go install golang.org/x/vuln/cmd/govulncheck@latest
@@ -38,14 +38,16 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22.x"
+          go-version: "1.25.x"
           cache: true
-      - name: Docker info
-        run: docker info
-      - name: Test
-        run: |
-          make test
-          go test ./examples/hello-mysql/...
+      - name: Test with coverage
+        run: make test-coverage
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.out,coverage-examples.out
+          fail_ci_if_error: false
