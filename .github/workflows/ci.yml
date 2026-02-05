@@ -16,7 +16,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  lint:
+  quality:
+    name: Quality (Lint & Vuln)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -24,23 +25,31 @@ jobs:
         with:
           go-version: "1.25.x"
           cache: true
+          # Cache based on all go.sum files in the workspace to capture changes in examples/submodules
+          cache-dependency-path: |
+            **/go.sum
+            go.work.sum
+
+      - name: Cache Tools Binaries
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/bin
+            ~/.cache/golangci-lint
+          # Key depends ONLY on tools/tools.go and the root go.sum (where tools versions are pinned)
+          # This prevents tool rebuilds when app dependencies change
+          key: ${{ runner.os }}-tools-${{ hashFiles('tools/tools.go', 'go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-tools-
+
       - name: Install tools
-        run: |
-          go install golang.org/x/tools/cmd/goimports@latest
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+        # Use make tools to install versions pinned in go.mod/tools.go
+        # With the cache above, this will be a near-instant no-op if binaries exist
+        run: make tools
+
       - name: Lint
         run: make lint
 
-  vuln:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.25.x"
-          cache: true
-      - name: Install tools
-        run: go install golang.org/x/vuln/cmd/govulncheck@latest
       - name: Vulnerability scan
         run: make vuln
 
@@ -52,6 +61,10 @@ jobs:
         with:
           go-version: "1.25.x"
           cache: true
+          # Cache based on all go.sum files in the workspace
+          cache-dependency-path: |
+            **/go.sum
+            go.work.sum
       - name: Test with coverage
         run: make test-coverage
       - name: Upload coverage to Codecov
