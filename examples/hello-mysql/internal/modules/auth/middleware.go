@@ -17,12 +17,24 @@ func NewJWTMiddleware(cfg Config) func(http.Handler) http.Handler {
 				return
 			}
 
-			if _, err := parseToken(tokenStr, cfg, time.Now()); err != nil {
+			token, err := parseToken(tokenStr, cfg, time.Now())
+			if err != nil {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			claims, ok := token.Claims.(jwt.MapClaims)
+			if !ok {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			user, ok := userFromClaims(claims)
+			if !ok {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
 
-			next.ServeHTTP(w, r)
+			ctx := WithUser(r.Context(), user)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }
@@ -55,4 +67,18 @@ func parseToken(tokenStr string, cfg Config, now time.Time) (*jwt.Token, error) 
 		}
 		return []byte(cfg.Secret), nil
 	})
+}
+
+func userFromClaims(claims jwt.MapClaims) (User, bool) {
+	user := User{}
+	if subject, ok := claims["sub"].(string); ok {
+		user.ID = subject
+	}
+	if email, ok := claims["email"].(string); ok {
+		user.Email = email
+	}
+	if user.ID == "" && user.Email == "" {
+		return User{}, false
+	}
+	return user, true
 }
