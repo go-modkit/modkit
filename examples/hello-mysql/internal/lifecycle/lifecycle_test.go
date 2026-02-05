@@ -93,6 +93,18 @@ func TestFromFuncs_WrapsFuncsAndSkipsNil(t *testing.T) {
 	}
 }
 
+func TestFromFuncs_EmptyReturnsNil(t *testing.T) {
+	hooks := FromFuncs(nil)
+	if hooks != nil {
+		t.Fatalf("expected nil hooks, got %v", hooks)
+	}
+
+	hooks = FromFuncs([]func(context.Context) error{})
+	if hooks != nil {
+		t.Fatalf("expected nil hooks for empty slice, got %v", hooks)
+	}
+}
+
 func TestShutdown_WaitsForInFlightRequest(t *testing.T) {
 	started := make(chan struct{})
 	release := make(chan struct{})

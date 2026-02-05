@@ -85,3 +85,26 @@ func TestProblemDetails_FromValidationErrors(t *testing.T) {
 		t.Fatalf("unexpected invalid param: %+v", pd.InvalidParams[0])
 	}
 }
+
+func TestProblemDetails_IncludesMetadata(t *testing.T) {
+	errs := ValidationErrors{}
+	errs.Add("email", "invalid")
+
+	pd := NewProblemDetails("/users", errs)
+
+	if pd.Type != "https://httpstatuses.com/400" {
+		t.Fatalf("expected type url for 400, got %q", pd.Type)
+	}
+	if pd.Title != http.StatusText(http.StatusBadRequest) {
+		t.Fatalf("expected title %q, got %q", http.StatusText(http.StatusBadRequest), pd.Title)
+	}
+	if pd.Detail != "validation failed" {
+		t.Fatalf("expected detail %q, got %q", "validation failed", pd.Detail)
+	}
+	if pd.Instance != "/users" {
+		t.Fatalf("expected instance %q, got %q", "/users", pd.Instance)
+	}
+	if len(pd.InvalidParams) != 1 || pd.InvalidParams[0].Reason != "invalid" {
+		t.Fatalf("unexpected invalid params: %+v", pd.InvalidParams)
+	}
+}
