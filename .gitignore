@@ -1,10 +1,7 @@
 .worktrees/
 
 # Coverage files
-coverage.out
-coverage-examples.out
-coverage-patch.out
-coverage-patch-filtered.out
+.coverage/
 
 # Build cache
 .cache/
