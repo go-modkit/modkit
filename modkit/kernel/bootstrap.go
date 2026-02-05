@@ -101,18 +101,13 @@ func (a *App) CloseContext(ctx context.Context) error {
 	a.closeOnce.Do(func() {
 		closers := a.container.closersLIFO()
 		var errs []error
-		if ctx != nil && ctx.Err() != nil {
-			a.closeErr = errors.Join(ctx.Err())
-			return
-		}
 		for _, closer := range closers {
-			if ctx != nil && ctx.Err() != nil {
-				errs = append(errs, ctx.Err())
-				break
-			}
 			if err := closer.Close(); err != nil {
 				errs = append(errs, err)
 			}
+		}
+		if ctx != nil && ctx.Err() != nil {
+			errs = append(errs, ctx.Err())
 		}
 		if len(errs) > 0 {
 			a.closeErr = errors.Join(errs...)
