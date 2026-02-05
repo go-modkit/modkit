@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -144,6 +145,57 @@ func TestController_GetUser_NotFound(t *testing.T) {
 	}
 }
 
+func TestController_GetUser_InvalidID(t *testing.T) {
+	svc := stubService{
+		getFn:    func(ctx context.Context, id int64) (User, error) { return User{}, nil },
+		createFn: func(ctx context.Context, input CreateUserInput) (User, error) { return User{}, nil },
+		listFn:   func(ctx context.Context) ([]User, error) { return nil, nil },
+		updateFn: func(ctx context.Context, id int64, input UpdateUserInput) (User, error) { return User{}, nil },
+		deleteFn: func(ctx context.Context, id int64) error { return nil },
+	}
+
+	controller := NewController(svc, allowAll)
+	router := modkithttp.NewRouter()
+	controller.RegisterRoutes(modkithttp.AsRouter(router))
+
+	req := httptest.NewRequest(http.MethodGet, "/users/not-a-number", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected status 400, got %d", rec.Code)
+	}
+	var problem httpapi.Problem
+	if err := json.NewDecoder(rec.Body).Decode(&problem); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if problem.Status != http.StatusBadRequest {
+		t.Fatalf("expected problem status 400, got %d", problem.Status)
+	}
+}
+
+func TestController_GetUser_InternalError(t *testing.T) {
+	svc := stubService{
+		getFn:    func(ctx context.Context, id int64) (User, error) { return User{}, errors.New("boom") },
+		createFn: func(ctx context.Context, input CreateUserInput) (User, error) { return User{}, nil },
+		listFn:   func(ctx context.Context) ([]User, error) { return nil, nil },
+		updateFn: func(ctx context.Context, id int64, input UpdateUserInput) (User, error) { return User{}, nil },
+		deleteFn: func(ctx context.Context, id int64) error { return nil },
+	}
+
+	controller := NewController(svc, allowAll)
+	router := modkithttp.NewRouter()
+	controller.RegisterRoutes(modkithttp.AsRouter(router))
+
+	req := httptest.NewRequest(http.MethodGet, "/users/42", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("expected status 500, got %d", rec.Code)
+	}
+}
+
 func TestController_ListUsers(t *testing.T) {
 	svc := stubService{
 		createFn: func(ctx context.Context, input CreateUserInput) (User, error) { return User{}, nil },
@@ -171,6 +223,90 @@ func TestController_ListUsers(t *testing.T) {
 	}
 	if len(users) != 1 || users[0].ID != 1 {
 		t.Fatalf("unexpected users: %+v", users)
+	}
+}
+
+func TestController_ListUsers_Pagination(t *testing.T) {
+	svc := stubService{
+		createFn: func(ctx context.Context, input CreateUserInput) (User, error) { return User{}, nil },
+		listFn: func(ctx context.Context) ([]User, error) {
+			return []User{
+				{ID: 1, Name: "Ada", Email: "ada@example.com"},
+				{ID: 2, Name: "Bea", Email: "bea@example.com"},
+			}, nil
+		},
+		updateFn: func(ctx context.Context, id int64, input UpdateUserInput) (User, error) { return User{}, nil },
+		deleteFn: func(ctx context.Context, id int64) error { return nil },
+	}
+
+	controller := NewController(svc, allowAll)
+	router := modkithttp.NewRouter()
+	controller.RegisterRoutes(modkithttp.AsRouter(router))
+
+	req := httptest.NewRequest(http.MethodGet, "/users?page=2&limit=1", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", rec.Code)
+	}
+	var users []User
+	if err := json.NewDecoder(rec.Body).Decode(&users); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if len(users) != 1 || users[0].ID != 2 {
+		t.Fatalf("unexpected users: %+v", users)
+	}
+}
+
+func TestController_ListUsers_Pagination_EmptyPage(t *testing.T) {
+	svc := stubService{
+		createFn: func(ctx context.Context, input CreateUserInput) (User, error) { return User{}, nil },
+		listFn: func(ctx context.Context) ([]User, error) {
+			return []User{{ID: 1, Name: "Ada", Email: "ada@example.com"}}, nil
+		},
+		updateFn: func(ctx context.Context, id int64, input UpdateUserInput) (User, error) { return User{}, nil },
+		deleteFn: func(ctx context.Context, id int64) error { return nil },
+	}
+
+	controller := NewController(svc, allowAll)
+	router := modkithttp.NewRouter()
+	controller.RegisterRoutes(modkithttp.AsRouter(router))
+
+	req := httptest.NewRequest(http.MethodGet, "/users?page=99&limit=10", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", rec.Code)
+	}
+	var users []User
+	if err := json.NewDecoder(rec.Body).Decode(&users); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if len(users) != 0 {
+		t.Fatalf("expected empty users, got %+v", users)
+	}
+}
+
+func TestController_ListUsers_Error(t *testing.T) {
+	svc := stubService{
+		createFn: func(ctx context.Context, input CreateUserInput) (User, error) { return User{}, nil },
+		listFn:   func(ctx context.Context) ([]User, error) { return nil, errors.New("boom") },
+		updateFn: func(ctx context.Context, id int64, input UpdateUserInput) (User, error) { return User{}, nil },
+		deleteFn: func(ctx context.Context, id int64) error { return nil },
+	}
+
+	controller := NewController(svc, allowAll)
+	router := modkithttp.NewRouter()
+	controller.RegisterRoutes(modkithttp.AsRouter(router))
+
+	req := httptest.NewRequest(http.MethodGet, "/users", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("expected status 500, got %d", rec.Code)
 	}
 }
 
@@ -208,6 +344,50 @@ func TestController_UpdateUser(t *testing.T) {
 	}
 }
 
+func TestController_UpdateUser_NotFound(t *testing.T) {
+	svc := stubService{
+		createFn: func(ctx context.Context, input CreateUserInput) (User, error) { return User{}, nil },
+		listFn:   func(ctx context.Context) ([]User, error) { return nil, nil },
+		updateFn: func(ctx context.Context, id int64, input UpdateUserInput) (User, error) { return User{}, ErrNotFound },
+		deleteFn: func(ctx context.Context, id int64) error { return nil },
+	}
+
+	controller := NewController(svc, allowAll)
+	router := modkithttp.NewRouter()
+	controller.RegisterRoutes(modkithttp.AsRouter(router))
+
+	body := []byte(`{"name":"Bea","email":"bea@example.com"}`)
+	req := httptest.NewRequest(http.MethodPut, "/users/4", bytes.NewReader(body))
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("expected status 404, got %d", rec.Code)
+	}
+}
+
+func TestController_UpdateUser_InternalError(t *testing.T) {
+	svc := stubService{
+		createFn: func(ctx context.Context, input CreateUserInput) (User, error) { return User{}, nil },
+		listFn:   func(ctx context.Context) ([]User, error) { return nil, nil },
+		updateFn: func(ctx context.Context, id int64, input UpdateUserInput) (User, error) { return User{}, errors.New("boom") },
+		deleteFn: func(ctx context.Context, id int64) error { return nil },
+	}
+
+	controller := NewController(svc, allowAll)
+	router := modkithttp.NewRouter()
+	controller.RegisterRoutes(modkithttp.AsRouter(router))
+
+	body := []byte(`{"name":"Bea","email":"bea@example.com"}`)
+	req := httptest.NewRequest(http.MethodPut, "/users/4", bytes.NewReader(body))
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("expected status 500, got %d", rec.Code)
+	}
+}
+
 func TestController_DeleteUser(t *testing.T) {
 	svc := stubService{
 		createFn: func(ctx context.Context, input CreateUserInput) (User, error) { return User{}, nil },
@@ -231,6 +411,48 @@ func TestController_DeleteUser(t *testing.T) {
 
 	if rec.Code != http.StatusNoContent {
 		t.Fatalf("expected status 204, got %d", rec.Code)
+	}
+}
+
+func TestController_DeleteUser_InvalidID(t *testing.T) {
+	svc := stubService{
+		createFn: func(ctx context.Context, input CreateUserInput) (User, error) { return User{}, nil },
+		listFn:   func(ctx context.Context) ([]User, error) { return nil, nil },
+		updateFn: func(ctx context.Context, id int64, input UpdateUserInput) (User, error) { return User{}, nil },
+		deleteFn: func(ctx context.Context, id int64) error { return nil },
+	}
+
+	controller := NewController(svc, allowAll)
+	router := modkithttp.NewRouter()
+	controller.RegisterRoutes(modkithttp.AsRouter(router))
+
+	req := httptest.NewRequest(http.MethodDelete, "/users/not-a-number", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected status 400, got %d", rec.Code)
+	}
+}
+
+func TestController_DeleteUser_NotFound(t *testing.T) {
+	svc := stubService{
+		createFn: func(ctx context.Context, input CreateUserInput) (User, error) { return User{}, nil },
+		listFn:   func(ctx context.Context) ([]User, error) { return nil, nil },
+		updateFn: func(ctx context.Context, id int64, input UpdateUserInput) (User, error) { return User{}, nil },
+		deleteFn: func(ctx context.Context, id int64) error { return ErrNotFound },
+	}
+
+	controller := NewController(svc, allowAll)
+	router := modkithttp.NewRouter()
+	controller.RegisterRoutes(modkithttp.AsRouter(router))
+
+	req := httptest.NewRequest(http.MethodDelete, "/users/3", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("expected status 404, got %d", rec.Code)
 	}
 }
 

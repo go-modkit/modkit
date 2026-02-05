@@ -41,6 +41,20 @@
                     "users"
                 ],
                 "summary": "List users",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page (\u003e= 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit (\u003e= 1)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -86,7 +100,7 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/users.Problem"
+                            "$ref": "#/definitions/users.ProblemDetails"
                         }
                     },
                     "409": {
@@ -178,7 +192,7 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/users.Problem"
+                            "$ref": "#/definitions/users.ProblemDetails"
                         }
                     },
                     "404": {
@@ -262,6 +276,32 @@
                 }
             }
         },
+        "users.ProblemDetails": {
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "type": "string"
+                },
+                "instance": {
+                    "type": "string"
+                },
+                "invalidParams": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/validation.InvalidParam"
+                    }
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "users.UpdateUserInput": {
             "type": "object",
             "properties": {
@@ -289,6 +329,17 @@
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "validation.InvalidParam": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "reason": {
                     "type": "string"
                 }
             }

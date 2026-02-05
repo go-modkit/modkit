@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-modkit/modkit/examples/hello-mysql/internal/httpapi"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/validation"
 )
 
 type Controller struct {
@@ -68,17 +69,19 @@ func (c *Controller) handleGetUser(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param body body CreateUserInput true "User payload"
 // @Success 201 {object} User
-// @Failure 400 {object} Problem
+// @Failure 400 {object} ProblemDetails
 // @Failure 409 {object} Problem
 // @Router /users [post]
 func (c *Controller) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	var input CreateUserInput
 	if err := decodeJSON(r, &input); err != nil {
-		httpapi.WriteProblem(w, r, http.StatusBadRequest, "invalid body")
+		var errs validation.ValidationErrors
+		errs.Add("body", "invalid")
+		validation.WriteProblemDetails(w, r, errs)
 		return
 	}
-	if input.Name == "" || input.Email == "" {
-		httpapi.WriteProblem(w, r, http.StatusBadRequest, "name and email required")
+	if errs := input.Validate(); errs.HasErrors() {
+		validation.WriteProblemDetails(w, r, errs)
 		return
 	}
 
@@ -98,13 +101,54 @@ func (c *Controller) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 // @Description Returns all users.
 // @Tags users
 // @Produce json
+// @Param page query int false "Page (>= 1)"
+// @Param limit query int false "Limit (>= 1)"
 // @Success 200 {array} User
 // @Router /users [get]
 func (c *Controller) handleListUsers(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	page := 1
+	limit := 20
+	var errs validation.ValidationErrors
+	if pageStr := query.Get("page"); pageStr != "" {
+		parsed, err := strconv.Atoi(pageStr)
+		if err != nil {
+			errs.Add("page", "must be a number")
+		} else if parsed < 1 {
+			errs.Add("page", "must be >= 1")
+		} else {
+			page = parsed
+		}
+	}
+	if limitStr := query.Get("limit"); limitStr != "" {
+		parsed, err := strconv.Atoi(limitStr)
+		if err != nil {
+			errs.Add("limit", "must be a number")
+		} else if parsed < 1 {
+			errs.Add("limit", "must be >= 1")
+		} else {
+			limit = parsed
+		}
+	}
+	if errs.HasErrors() {
+		validation.WriteProblemDetails(w, r, errs)
+		return
+	}
+
 	users, err := c.service.ListUsers(r.Context())
 	if err != nil {
 		httpapi.WriteProblem(w, r, http.StatusInternalServerError, "internal error")
 		return
+	}
+	start := (page - 1) * limit
+	if start >= len(users) {
+		users = []User{}
+	} else {
+		end := start + limit
+		if end > len(users) {
+			end = len(users)
+		}
+		users = users[start:end]
 	}
 	writeJSON(w, http.StatusOK, users)
 }
@@ -117,24 +161,28 @@ func (c *Controller) handleListUsers(w http.ResponseWriter, r *http.Request) {
 // @Param id path int true "User ID"
 // @Param body body UpdateUserInput true "User payload"
 // @Success 200 {object} User
-// @Failure 400 {object} Problem
+// @Failure 400 {object} ProblemDetails
 // @Failure 404 {object} Problem
 // @Router /users/{id} [put]
 func (c *Controller) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		httpapi.WriteProblem(w, r, http.StatusBadRequest, "invalid id")
+		var errs validation.ValidationErrors
+		errs.Add("id", "must be a number")
+		validation.WriteProblemDetails(w, r, errs)
 		return
 	}
 
 	var input UpdateUserInput
 	if err := decodeJSON(r, &input); err != nil {
-		httpapi.WriteProblem(w, r, http.StatusBadRequest, "invalid body")
+		var errs validation.ValidationErrors
+		errs.Add("body", "invalid")
+		validation.WriteProblemDetails(w, r, errs)
 		return
 	}
-	if input.Name == "" || input.Email == "" {
-		httpapi.WriteProblem(w, r, http.StatusBadRequest, "name and email required")
+	if errs := input.Validate(); errs.HasErrors() {
+		validation.WriteProblemDetails(w, r, errs)
 		return
 	}
 

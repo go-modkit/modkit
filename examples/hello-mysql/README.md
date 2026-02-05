@@ -79,6 +79,56 @@ Swagger docs are checked in. To regenerate them, run:
 make swagger
 ```
 
+## Validation
+
+Request validation returns RFC 7807 Problem Details with `invalidParams` for field-level errors.
+
+Create with missing fields:
+
+```bash
+curl -X POST http://localhost:8080/users \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"","email":""}'
+```
+
+Example response:
+
+```json
+{
+  "type": "https://httpstatuses.com/400",
+  "title": "Bad Request",
+  "status": 400,
+  "detail": "validation failed",
+  "instance": "/users",
+  "invalidParams": [
+    { "name": "name", "reason": "is required" },
+    { "name": "email", "reason": "is required" }
+  ]
+}
+```
+
+Query parameter validation (pagination):
+
+```bash
+curl "http://localhost:8080/users?page=-1&limit=0"
+```
+
+Example response:
+
+```json
+{
+  "type": "https://httpstatuses.com/400",
+  "title": "Bad Request",
+  "status": 400,
+  "detail": "validation failed",
+  "instance": "/users",
+  "invalidParams": [
+    { "name": "page", "reason": "must be >= 1" },
+    { "name": "limit", "reason": "must be >= 1" }
+  ]
+}
+```
+
 ## Test
 
 ```bash
