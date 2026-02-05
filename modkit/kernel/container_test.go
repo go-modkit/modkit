@@ -68,7 +68,7 @@ func newTestAppWithClosers(t *testing.T, closers ...testCloser) *kernel.App {
 		c := closer
 		providers = append(providers, module.ProviderDef{
 			Token: token,
-			Build: func(r module.Resolver) (any, error) {
+			Build: func(_ module.Resolver) (any, error) {
 				return c, nil
 			},
 		})
