@@ -75,6 +75,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for commit format (Conventional Commits) 
 
 **Quick reference:**
 - Valid types: `feat`, `fix`, `docs`, `test`, `chore`, `refactor`, `perf`, `ci`
+- PR titles must use Conventional Commits format (`type: short summary`)
 - Run `make fmt && make lint && make test` before submitting
 
 **Issue Linking:**
