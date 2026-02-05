@@ -3,15 +3,47 @@ run:
   tests: true
 
 linters:
+  disable-all: true
   enable:
+    # Bugs & Errors
     - errcheck
-    - govet
     - staticcheck
+    - govet
+    - unused
+    - gosec
+    - bodyclose
+    - nilerr
+    
+    # Code Style & Quality
+    - revive       # (replaces golint)
+    - gocritic     # (extensive checks)
     - ineffassign
+    - misspell
     - gofmt
     - goimports
-    - misspell
-    - unused
+    - unconvert
+    - unparam
+    - nakedret
+    
+    # Complexity
+    - gocyclo
+
+linters-settings:
+  goimports:
+    local-prefixes: github.com/go-modkit/modkit
+  govet:
+    enable:
+      - nilness
+      - unusedresult
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - whyNoLint
 
 issues:
   exclude-use-default: false
@@ -20,11 +52,20 @@ issues:
     - third_party
     - node_modules
     - docs
+    
+  # Do NOT globally exclude tests
   exclude-files:
-    - ".*_test\\.go"
-    - ".*\\.sql\\.go"
-    - ".*\\.pb\\.go"
+    - ".*\\.sql\\.go" # Generated SQLC files
+    - ".*\\.pb\\.go"  # Generated Proto files
+    - ".*_mock\\.go"  # Mocks
+
   exclude-rules:
-    - path: ".*_test\\.go"
+    # Relax rules for tests
+    - path: _test\.go
       linters:
         - errcheck
+        - gosec
+        - dupl
+        - funlen
+        - gocyclo
+        - lll
