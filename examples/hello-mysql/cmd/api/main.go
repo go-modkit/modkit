@@ -52,5 +52,9 @@ func parseJWTTTL(raw string) time.Duration {
 		log.Printf("invalid JWT_TTL %q, using 1h: %v", raw, err)
 		return time.Hour
 	}
+	if ttl <= 0 {
+		log.Printf("invalid JWT_TTL %q, using 1h: non-positive duration", raw)
+		return time.Hour
+	}
 	return ttl
 }

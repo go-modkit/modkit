@@ -21,10 +21,10 @@ func NewController(service Service, authMiddleware func(http.Handler) http.Handl
 
 func (c *Controller) RegisterRoutes(router Router) {
 	router.Handle(http.MethodGet, "/users", http.HandlerFunc(c.handleListUsers))
+	router.Handle(http.MethodGet, "/users/{id}", http.HandlerFunc(c.handleGetUser))
 
 	router.Group("/", func(r Router) {
 		r.Use(c.authMiddleware)
-		r.Handle(http.MethodGet, "/users/{id}", http.HandlerFunc(c.handleGetUser))
 		r.Handle(http.MethodPost, "/users", http.HandlerFunc(c.handleCreateUser))
 		r.Handle(http.MethodPut, "/users/{id}", http.HandlerFunc(c.handleUpdateUser))
 		r.Handle(http.MethodDelete, "/users/{id}", http.HandlerFunc(c.handleDeleteUser))

@@ -18,3 +18,12 @@ func TestParseJWTTTL_Valid(t *testing.T) {
 		t.Fatalf("ttl = %v", got)
 	}
 }
+
+func TestParseJWTTTL_RejectsNonPositive(t *testing.T) {
+	for _, value := range []string{"0s", "-1s"} {
+		got := parseJWTTTL(value)
+		if got != time.Hour {
+			t.Fatalf("ttl for %q = %v", value, got)
+		}
+	}
+}
