@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"runtime"
 	"syscall"
 	"testing"
 	"time"
@@ -80,6 +81,9 @@ func TestServe_HandlesSignals_ReturnsNil(t *testing.T) {
 			}()
 
 			<-serveStarted
+			if tt.sig == syscall.SIGTERM && runtime.GOOS == "windows" {
+				t.Skip("SIGTERM not supported on Windows")
+			}
 			proc, err := os.FindProcess(os.Getpid())
 			if err != nil {
 				t.Fatalf("failed to find process: %v", err)
