@@ -2,6 +2,7 @@ package kernel
 
 import (
 	"context"
+	"io"
 
 	"github.com/go-modkit/modkit/modkit/module"
 )
@@ -72,4 +73,9 @@ func (a *App) Get(token module.Token) (any, error) {
 // CleanupHooks returns provider cleanup hooks in LIFO order.
 func (a *App) CleanupHooks() []func(context.Context) error {
 	return a.container.cleanupHooksLIFO()
+}
+
+// Closers returns provider closers in build order.
+func (a *App) Closers() []io.Closer {
+	return a.container.closersInBuildOrder()
 }

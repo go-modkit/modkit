@@ -379,3 +379,61 @@ func TestContainerGetRegistersCleanupHooks(t *testing.T) {
 		t.Fatalf("expected cleanup to be called")
 	}
 }
+
+func TestContainerRecordsClosersInBuildOrder(t *testing.T) {
+	closerA := module.Token("closer.a")
+	closerB := module.Token("closer.b")
+
+	modA := mod("A", nil,
+		[]module.ProviderDef{{
+			Token: closerA,
+			Build: func(r module.Resolver) (any, error) {
+				return &testCloser{name: "a"}, nil
+			},
+		}, {
+			Token: closerB,
+			Build: func(r module.Resolver) (any, error) {
+				return &testCloser{name: "b"}, nil
+			},
+		}},
+		nil,
+		nil,
+	)
+
+	app, err := kernel.Bootstrap(modA)
+	if err != nil {
+		t.Fatalf("Bootstrap failed: %v", err)
+	}
+
+	_, _ = app.Get(closerA)
+	_, _ = app.Get(closerB)
+
+	closers := app.Closers()
+	if len(closers) != 2 {
+		t.Fatalf("expected 2 closers, got %d", len(closers))
+	}
+
+	first, ok := closers[0].(*testCloser)
+	if !ok {
+		t.Fatalf("expected *testCloser, got %T", closers[0])
+	}
+	second, ok := closers[1].(*testCloser)
+	if !ok {
+		t.Fatalf("expected *testCloser, got %T", closers[1])
+	}
+	if first.Name() != "a" || second.Name() != "b" {
+		t.Fatalf("unexpected order: %v", closers)
+	}
+}
+
+type testCloser struct {
+	name string
+}
+
+func (c *testCloser) Close() error {
+	return nil
+}
+
+func (c *testCloser) Name() string {
+	return c.name
+}
