@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"os"
 	"testing"
@@ -56,5 +57,36 @@ func TestRunServer_ShutdownPath(t *testing.T) {
 	}
 	if !cleanupCalled {
 		t.Fatal("expected cleanup to be called")
+	}
+}
+
+func TestRunServer_ReturnsListenError(t *testing.T) {
+	server := &stubServer{}
+	sigCh := make(chan os.Signal, 1)
+	errCh := make(chan error, 1)
+	errCh <- errors.New("listen failed")
+
+	err := runServer(50*time.Millisecond, server, sigCh, errCh, nil)
+	if err == nil || err.Error() != "listen failed" {
+		t.Fatalf("expected listen error, got %v", err)
+	}
+	if server.shutdownCalled {
+		t.Fatal("shutdown should not be called")
+	}
+}
+
+func TestRunServer_ShutdownReturnsError(t *testing.T) {
+	server := &stubServer{shutdownErr: errors.New("shutdown failed"), shutdownCh: make(chan struct{})}
+	sigCh := make(chan os.Signal, 1)
+	errCh := make(chan error, 1)
+	go func() {
+		<-server.shutdownCh
+		errCh <- http.ErrServerClosed
+	}()
+	sigCh <- os.Interrupt
+
+	err := runServer(50*time.Millisecond, server, sigCh, errCh, nil)
+	if err == nil || err.Error() != "shutdown failed" {
+		t.Fatalf("expected shutdown error, got %v", err)
 	}
 }
