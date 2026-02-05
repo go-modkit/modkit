@@ -165,7 +165,6 @@ func (c *Container) providerBuildOrder() []module.Token {
 	copy(order, c.buildOrder)
 	return order
 }
-
 type moduleResolver struct {
 	container    *Container
 	moduleName   string
