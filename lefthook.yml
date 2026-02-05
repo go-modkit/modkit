@@ -6,17 +6,25 @@ pre-commit:
   commands:
     gofmt:
       glob: "*.go"
-      run: test -z "$(gofmt -l {staged_files})"
+      run: |
+        if [ -z "{staged_files}" ]; then exit 0; fi
+        unformatted="$(gofmt -l {staged_files})" || exit $?
+        test -z "$unformatted"
       fail_text: "Files need formatting. Run 'make fmt'"
     
     goimports:
       glob: "*.go"
-      run: test -z "$(goimports -l {staged_files})"
+      run: |
+        if [ -z "{staged_files}" ]; then exit 0; fi
+        unformatted="$(goimports -l {staged_files})" || exit $?
+        test -z "$unformatted"
       fail_text: "Imports need formatting. Run 'make fmt'"
     
     golangci-lint:
       glob: "*.go"
-      run: golangci-lint run {staged_files}
+      run: |
+        if [ -z "{staged_files}" ]; then exit 0; fi
+        golangci-lint run {staged_files}
 
 commit-msg:
   commands:
