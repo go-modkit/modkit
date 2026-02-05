@@ -129,6 +129,14 @@ Example response:
 }
 ```
 
+## Lifecycle and Cleanup
+
+Cleanup hooks are registered on providers via `ProviderDef.Cleanup`. The database module uses this hook to close the `*sql.DB` pool.
+
+On shutdown, the API server:
+- Stops accepting new requests and waits for in-flight requests to finish.
+- Runs cleanup hooks in **LIFO** order (last registered, first cleaned).
+
 ## Test
 
 ```bash
