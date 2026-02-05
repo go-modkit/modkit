@@ -8,8 +8,6 @@ import (
 	modkitlogging "github.com/go-modkit/modkit/modkit/logging"
 )
 
-var longOperationDelay = 2 * time.Second
-
 type Service interface {
 	GetUser(ctx context.Context, id int64) (User, error)
 	CreateUser(ctx context.Context, input CreateUserInput) (User, error)
@@ -20,8 +18,9 @@ type Service interface {
 }
 
 type service struct {
-	repo   Repository
-	logger modkitlogging.Logger
+	repo              Repository
+	logger            modkitlogging.Logger
+	longOperationDelay time.Duration
 }
 
 func NewService(repo Repository, logger modkitlogging.Logger) Service {
@@ -29,7 +28,11 @@ func NewService(repo Repository, logger modkitlogging.Logger) Service {
 		logger = modkitlogging.NewNopLogger()
 	}
 	logger = logger.With(slog.String("scope", "users"))
-	return &service{repo: repo, logger: logger}
+	return &service{
+		repo:               repo,
+		logger:             logger,
+		longOperationDelay: 2 * time.Second,
+	}
 }
 
 func (s *service) GetUser(ctx context.Context, id int64) (User, error) {
@@ -62,7 +65,7 @@ func (s *service) LongOperation(ctx context.Context) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
-	case <-time.After(longOperationDelay):
+	case <-time.After(s.longOperationDelay):
 		return nil
 	}
 }

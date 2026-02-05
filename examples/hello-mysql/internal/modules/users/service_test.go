@@ -114,10 +114,10 @@ func TestService_LongOperation_RespectsContextCancel(t *testing.T) {
 }
 
 func TestService_LongOperation_Completes(t *testing.T) {
-	svc := NewService(&stubRepo{}, nil)
-	origDelay := longOperationDelay
-	longOperationDelay = 2 * time.Millisecond
-	t.Cleanup(func() { longOperationDelay = origDelay })
+	svc := NewService(&stubRepo{}, nil).(*service)
+	origDelay := svc.longOperationDelay
+	svc.longOperationDelay = 2 * time.Millisecond
+	t.Cleanup(func() { svc.longOperationDelay = origDelay })
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
