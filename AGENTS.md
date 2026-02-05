@@ -13,7 +13,7 @@ modkit is a **Go framework for building modular backend services, inspired by Ne
 
 ## Project Structure
 
-```
+```text
 modkit/
 ├── modkit/              # Core library packages
 │   ├── module/          # Module metadata types
@@ -73,7 +73,7 @@ make test   # Run all tests (must pass)
 ## Commit Format
 
 Follow [Conventional Commits](https://www.conventionalcommits.org/):
-```
+```text
 <type>(<scope>): <subject>
 
 [optional body]

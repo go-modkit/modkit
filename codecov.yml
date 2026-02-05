@@ -22,7 +22,7 @@ coverage:
 
 # PR comment configuration
 comment:
-  # Layout sections: sunburst chart, coverage diff, flags, file list
-  layout: "reach,diff,flags,files"
+  # Layout sections: header, coverage diff, flags, file list
+  layout: "header,diff,flags,files"
   # Posts new comment on each push, updates existing comment
   behavior: default

@@ -106,7 +106,7 @@ If a provider depends on itself (directly or indirectly), modkit returns a `Prov
 ```
 
 **Error:**
-```
+```text
 ProviderCycleError: cycle detected while building "b": b → a → b
 ```
 
