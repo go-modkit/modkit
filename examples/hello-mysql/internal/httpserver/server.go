@@ -11,6 +11,8 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
+var registerRoutes = modkithttp.RegisterRoutes
+
 func BuildAppHandler(opts app.Options) (*kernel.App, http.Handler, error) {
 	mod := app.NewModule(opts)
 	boot, err := kernel.Bootstrap(mod)
@@ -21,7 +23,7 @@ func BuildAppHandler(opts app.Options) (*kernel.App, http.Handler, error) {
 	logger := logging.New().With(slog.String("scope", "httpserver"))
 	router := modkithttp.NewRouter()
 	router.Use(modkithttp.RequestLogger(logger))
-	if err := modkithttp.RegisterRoutes(modkithttp.AsRouter(router), boot.Controllers); err != nil {
+	if err := registerRoutes(modkithttp.AsRouter(router), boot.Controllers); err != nil {
 		return boot, nil, err
 	}
 	router.Get("/swagger/*", httpSwagger.WrapHandler)

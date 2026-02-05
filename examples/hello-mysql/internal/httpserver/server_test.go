@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/app"
 	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/auth"
+	modkithttp "github.com/go-modkit/modkit/modkit/http"
 )
 
 func TestBuildHandler_LogsRequest(t *testing.T) {
@@ -65,6 +67,25 @@ func TestBuildAppHandler_ReturnsAppAndHandler(t *testing.T) {
 	handler.ServeHTTP(rec, req)
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected status 200, got %d", rec.Code)
+	}
+}
+
+func TestBuildAppHandler_ReturnsBootOnRouteError(t *testing.T) {
+	origRegister := registerRoutes
+	registerRoutes = func(_ modkithttp.Router, _ map[string]any) error {
+		return errors.New("routes failed")
+	}
+	defer func() { registerRoutes = origRegister }()
+
+	boot, handler, err := BuildAppHandler(testAppOptions())
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if boot == nil {
+		t.Fatal("expected boot to be returned on error")
+	}
+	if handler != nil {
+		t.Fatal("expected nil handler on error")
 	}
 }
 
