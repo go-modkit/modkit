@@ -2,6 +2,7 @@ package kernel
 
 import (
 	"context"
+	"io"
 	"sync"
 
 	"github.com/go-modkit/modkit/modkit/module"
@@ -20,6 +21,8 @@ type Container struct {
 	locks        map[module.Token]*sync.Mutex
 	waitingOn    map[module.Token]module.Token
 	cleanupHooks []func(context.Context) error
+	closers      []io.Closer
+	buildOrder   []module.Token
 	mu           sync.Mutex
 }
 
@@ -48,6 +51,8 @@ func newContainer(graph *Graph, visibility Visibility) (*Container, error) {
 		locks:        make(map[module.Token]*sync.Mutex),
 		waitingOn:    make(map[module.Token]module.Token),
 		cleanupHooks: make([]func(context.Context) error, 0),
+		closers:      make([]io.Closer, 0),
+		buildOrder:   make([]module.Token, 0),
 	}, nil
 }
 
@@ -110,6 +115,10 @@ func (c *Container) getWithStack(token module.Token, requester string, stack []m
 	if entry.cleanup != nil {
 		c.cleanupHooks = append(c.cleanupHooks, entry.cleanup)
 	}
+	if closer, ok := instance.(io.Closer); ok {
+		c.closers = append(c.closers, closer)
+	}
+	c.buildOrder = append(c.buildOrder, token)
 	c.mu.Unlock()
 	return instance, nil
 }
@@ -123,6 +132,35 @@ func (c *Container) cleanupHooksLIFO() []func(context.Context) error {
 		hooks[len(c.cleanupHooks)-1-i] = hook
 	}
 	return hooks
+}
+
+func (c *Container) closersLIFO() []io.Closer {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	closers := make([]io.Closer, len(c.closers))
+	for i, closer := range c.closers {
+		closers[len(c.closers)-1-i] = closer
+	}
+	return closers
+}
+
+func (c *Container) closersInBuildOrder() []io.Closer {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	closers := make([]io.Closer, len(c.closers))
+	copy(closers, c.closers)
+	return closers
+}
+
+func (c *Container) providerBuildOrder() []module.Token {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	order := make([]module.Token, len(c.buildOrder))
+	copy(order, c.buildOrder)
+	return order
 }
 
 type moduleResolver struct {

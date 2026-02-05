@@ -3,6 +3,7 @@ package kernel_test
 import (
 	"context"
 	"errors"
+	"reflect"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -11,6 +12,27 @@ import (
 	"github.com/go-modkit/modkit/modkit/kernel"
 	"github.com/go-modkit/modkit/modkit/module"
 )
+
+type recordingCloser struct {
+	name   string
+	closed *[]string
+}
+
+func (c *recordingCloser) Close() error {
+	*c.closed = append(*c.closed, c.name)
+	return nil
+}
+
+type erroringCloser struct {
+	name   string
+	closed *[]string
+	err    error
+}
+
+func (c *erroringCloser) Close() error {
+	*c.closed = append(*c.closed, c.name)
+	return c.err
+}
 
 func TestAppGetRejectsNotVisibleToken(t *testing.T) {
 	modA := mod("A", nil, nil, nil, nil)
@@ -377,5 +399,137 @@ func TestContainerGetRegistersCleanupHooks(t *testing.T) {
 
 	if !cleanupCalled {
 		t.Fatalf("expected cleanup to be called")
+	}
+}
+
+func TestAppCloseReverseOrder(t *testing.T) {
+	var closed []string
+	modA := mod("A", nil,
+		[]module.ProviderDef{{
+			Token: "closer.a",
+			Build: func(r module.Resolver) (any, error) {
+				return &recordingCloser{name: "a", closed: &closed}, nil
+			},
+		}, {
+			Token: "closer.b",
+			Build: func(r module.Resolver) (any, error) {
+				return &recordingCloser{name: "b", closed: &closed}, nil
+			},
+		}},
+		nil,
+		nil,
+	)
+
+	app, err := kernel.Bootstrap(modA)
+	if err != nil {
+		t.Fatalf("Bootstrap failed: %v", err)
+	}
+
+	if _, err := app.Get("closer.a"); err != nil {
+		t.Fatalf("Get closer.a failed: %v", err)
+	}
+	if _, err := app.Get("closer.b"); err != nil {
+		t.Fatalf("Get closer.b failed: %v", err)
+	}
+
+	if err := app.Close(); err != nil {
+		t.Fatalf("Close failed: %v", err)
+	}
+
+	if len(closed) != 2 || closed[0] != "b" || closed[1] != "a" {
+		t.Fatalf("expected reverse close order, got %v", closed)
+	}
+}
+
+func TestAppCloseOrderWithDependencies(t *testing.T) {
+	var closed []string
+
+	modA := mod("A", nil,
+		[]module.ProviderDef{{
+			Token: "closer.a",
+			Build: func(r module.Resolver) (any, error) {
+				return &recordingCloser{name: "a", closed: &closed}, nil
+			},
+		}, {
+			Token: "closer.b",
+			Build: func(r module.Resolver) (any, error) {
+				if _, err := r.Get("closer.a"); err != nil {
+					return nil, err
+				}
+				return &recordingCloser{name: "b", closed: &closed}, nil
+			},
+		}, {
+			Token: "closer.c",
+			Build: func(r module.Resolver) (any, error) {
+				if _, err := r.Get("closer.b"); err != nil {
+					return nil, err
+				}
+				return &recordingCloser{name: "c", closed: &closed}, nil
+			},
+		}},
+		nil,
+		nil,
+	)
+
+	app, err := kernel.Bootstrap(modA)
+	if err != nil {
+		t.Fatalf("Bootstrap failed: %v", err)
+	}
+
+	_, _ = app.Get("closer.c")
+
+	if err := app.Close(); err != nil {
+		t.Fatalf("Close failed: %v", err)
+	}
+
+	want := []string{"c", "b", "a"}
+	if !reflect.DeepEqual(closed, want) {
+		t.Fatalf("expected %v, got %v", want, closed)
+	}
+}
+
+func TestAppCloseContinuesAfterError(t *testing.T) {
+	var closed []string
+	errB := errors.New("close failed")
+	modA := mod("A", nil,
+		[]module.ProviderDef{{
+			Token: "closer.a",
+			Build: func(r module.Resolver) (any, error) {
+				return &recordingCloser{name: "a", closed: &closed}, nil
+			},
+		}, {
+			Token: "closer.b",
+			Build: func(r module.Resolver) (any, error) {
+				return &erroringCloser{name: "b", closed: &closed, err: errB}, nil
+			},
+		}, {
+			Token: "closer.c",
+			Build: func(r module.Resolver) (any, error) {
+				return &recordingCloser{name: "c", closed: &closed}, nil
+			},
+		}},
+		nil,
+		nil,
+	)
+
+	app, err := kernel.Bootstrap(modA)
+	if err != nil {
+		t.Fatalf("Bootstrap failed: %v", err)
+	}
+
+	if _, err := app.Get("closer.a"); err != nil {
+		t.Fatalf("Get closer.a failed: %v", err)
+	}
+	if _, err := app.Get("closer.b"); err != nil {
+		t.Fatalf("Get closer.b failed: %v", err)
+	}
+	_, _ = app.Get("closer.c")
+
+	if err := app.Close(); !errors.Is(err, errB) {
+		t.Fatalf("expected error %v, got %v", errB, err)
+	}
+
+	if len(closed) != 3 || closed[0] != "c" || closed[1] != "b" || closed[2] != "a" {
+		t.Fatalf("expected reverse close order with all closers, got %v", closed)
 	}
 }
