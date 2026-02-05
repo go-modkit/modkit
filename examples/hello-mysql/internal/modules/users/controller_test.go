@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/auth"
 	"github.com/go-modkit/modkit/examples/hello-mysql/internal/httpapi"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/auth"
 	modkithttp "github.com/go-modkit/modkit/modkit/http"
 )
 

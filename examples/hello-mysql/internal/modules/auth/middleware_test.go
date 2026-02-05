@@ -15,10 +15,10 @@ func TestJWTMiddleware(t *testing.T) {
 
 	makeToken := func(exp time.Time) string {
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			"sub": "demo",
+			"sub":   "demo",
 			"email": "demo@example.com",
-			"iss": issuer,
-			"exp": exp.Unix(),
+			"iss":   issuer,
+			"exp":   exp.Unix(),
 		})
 		signed, err := token.SignedString(secret)
 		if err != nil {

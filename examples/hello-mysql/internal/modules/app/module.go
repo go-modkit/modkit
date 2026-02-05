@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/auth"
 	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/audit"
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/auth"
 	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/database"
 	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/users"
 	"github.com/go-modkit/modkit/modkit/module"
