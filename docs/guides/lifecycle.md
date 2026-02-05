@@ -136,6 +136,8 @@ fmt.Println(svc1 == svc2)  // true
 modkit provides explicit shutdown via `App.Close()` / `App.CloseContext(ctx)`. Providers that implement
 `io.Closer` are closed in reverse build order when you call these methods.
 
+For a summary of how this compares to NestJS lifecycle hooks, see the [NestJS Compatibility Guide](nestjs-compatibility.md).
+
 ### Primary Pattern: App.Close/CloseContext
 
 ```go
