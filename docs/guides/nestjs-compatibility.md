@@ -138,6 +138,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 **Alternative:** Use a `Build` function that fetches and returns the existing provider.
 
 ```go
+import "fmt"
+
 module.ProviderDef{
     Token: "users.reader",
     Build: func(r module.Resolver) (any, error) {
