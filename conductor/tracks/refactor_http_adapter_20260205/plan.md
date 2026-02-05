@@ -1,7 +1,7 @@
 # Implementation Plan - Refactor Http Adapter
 
 ## Phase 1: Analysis & API Design
-- [ ] Task: Analyze current `modkit/http` implementation and identify extension points.
+- [~] Task: Analyze current `modkit/http` implementation and identify extension points.
 - [ ] Task: Design the new Middleware API and Server Options pattern.
     - [ ] Create a design document or prototype snippet in `docs/specs/rfc_http_refactor.md`.
 - [ ] Task: Conductor - User Manual Verification 'Analysis & API Design' (Protocol in workflow.md)
