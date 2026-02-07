@@ -4,7 +4,20 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	configmodule "github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/config"
+	"github.com/go-modkit/modkit/modkit/module"
 )
+
+type resolverMap map[module.Token]any
+
+func (m resolverMap) Get(token module.Token) (any, error) {
+	v, ok := m[token]
+	if !ok {
+		return nil, errors.New("missing token")
+	}
+	return v, nil
+}
 
 func TestModuleDefinition_ProviderCleanupHook_CanceledContext(t *testing.T) {
 	def := Module{}.Definition()
@@ -29,13 +42,17 @@ func TestModuleDefinition_ProviderCleanupHook_CanceledContext(t *testing.T) {
 }
 
 func TestDatabaseModule_Definition_ProvidesDB(t *testing.T) {
-	mod := NewModule(Options{DSN: "dsn"})
+	cfgModule := configmodule.NewModule(configmodule.Options{})
+	mod := NewModule(Options{Config: cfgModule})
 	def := mod.(*Module).Definition()
 	if def.Name != "database" {
 		t.Fatalf("expected name database, got %q", def.Name)
 	}
 	if len(def.Providers) != 1 {
 		t.Fatalf("expected 1 provider, got %d", len(def.Providers))
+	}
+	if len(def.Imports) != 1 {
+		t.Fatalf("expected 1 import, got %d", len(def.Imports))
 	}
 	if def.Providers[0].Token != TokenDB {
 		t.Fatalf("expected TokenDB, got %q", def.Providers[0].Token)
@@ -46,12 +63,11 @@ func TestDatabaseModule_Definition_ProvidesDB(t *testing.T) {
 }
 
 func TestDatabaseModule_ProviderBuildError(t *testing.T) {
-	mod := NewModule(Options{DSN: ""})
+	mod := NewModule(Options{Config: configmodule.NewModule(configmodule.Options{})})
 	def := mod.(*Module).Definition()
 	provider := def.Providers[0]
 
-	// Use a stub resolver - the error will come from mysql.Open with empty DSN
-	_, err := provider.Build(nil)
+	_, err := provider.Build(resolverMap{configmodule.TokenMySQLDSN: ""})
 	if err == nil {
 		t.Fatal("expected error for empty DSN")
 	}

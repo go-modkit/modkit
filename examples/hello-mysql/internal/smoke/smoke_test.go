@@ -12,8 +12,6 @@ import (
 	"time"
 
 	"github.com/go-modkit/modkit/examples/hello-mysql/internal/httpserver"
-	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/app"
-	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/auth"
 	"github.com/go-modkit/modkit/examples/hello-mysql/internal/platform/mysql"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -34,16 +32,8 @@ func TestSmoke_HealthAndUsers(t *testing.T) {
 		t.Fatalf("seed failed: %v", err)
 	}
 
-	handler, err := httpserver.BuildHandler(app.Options{
-		HTTPAddr:           ":8080",
-		MySQLDSN:           dsn,
-		Auth:               auth.Config{Secret: "dev-secret-change-me", Issuer: "hello-mysql", TTL: time.Hour, Username: "demo", Password: "demo"},
-		CORSAllowedOrigins: []string{"http://localhost:3000"},
-		CORSAllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
-		CORSAllowedHeaders: []string{"Content-Type", "Authorization"},
-		RateLimitPerSecond: 5,
-		RateLimitBurst:     10,
-	})
+	t.Setenv("MYSQL_DSN", dsn)
+	handler, err := httpserver.BuildHandler()
 	if err != nil {
 		t.Fatalf("build handler failed: %v", err)
 	}

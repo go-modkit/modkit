@@ -3,7 +3,6 @@ package auth
 import (
 	"errors"
 	"testing"
-	"time"
 
 	"github.com/go-modkit/modkit/modkit/kernel"
 	"github.com/go-modkit/modkit/modkit/module"
@@ -18,8 +17,7 @@ func TestModule_Bootstrap(t *testing.T) {
 }
 
 func TestAuthModule_Definition(t *testing.T) {
-	cfg := Config{Secret: "secret", Issuer: "issuer", TTL: time.Minute}
-	def := NewModule(Options{Config: cfg}).(*Module).Definition()
+	def := NewModule(Options{}).(*Module).Definition()
 
 	if def.Name != "auth" {
 		t.Fatalf("name = %q", def.Name)
@@ -42,8 +40,7 @@ func (r errorResolver) Get(token module.Token) (any, error) {
 }
 
 func TestAuthModule_ControllerBuildError(t *testing.T) {
-	cfg := Config{Secret: "secret", Issuer: "issuer", TTL: time.Minute}
-	def := NewModule(Options{Config: cfg}).(*Module).Definition()
+	def := NewModule(Options{}).(*Module).Definition()
 
 	_, err := def.Controllers[0].Build(errorResolver{
 		token: TokenHandler,

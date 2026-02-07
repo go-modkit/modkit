@@ -1,40 +1,34 @@
 package app
 
 import (
+	"errors"
 	"net/http"
 	"testing"
-	"time"
 
-	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/auth"
+	configmodule "github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/config"
 	"github.com/go-modkit/modkit/modkit/module"
 )
 
-type noopResolver struct{}
+type mapResolver map[module.Token]any
 
-func (noopResolver) Get(module.Token) (any, error) {
-	return nil, nil
+func (r mapResolver) Get(token module.Token) (any, error) {
+	v, ok := r[token]
+	if !ok {
+		return nil, errors.New("missing token")
+	}
+	return v, nil
 }
 
 func TestModule_DefinitionIncludesImports(t *testing.T) {
-	mod := NewModule(Options{
-		HTTPAddr: ":8080",
-		MySQLDSN: "user:pass@tcp(localhost:3306)/app",
-		Auth: auth.Config{
-			Secret:   "test-secret",
-			Issuer:   "test-issuer",
-			TTL:      time.Minute,
-			Username: "demo",
-			Password: "demo",
-		},
-	})
+	mod := NewModule()
 	def := mod.Definition()
 
 	if def.Name == "" {
 		t.Fatalf("expected module name")
 	}
 
-	if len(def.Imports) != 4 {
-		t.Fatalf("expected 4 imports, got %d", len(def.Imports))
+	if len(def.Imports) != 5 {
+		t.Fatalf("expected 5 imports, got %d", len(def.Imports))
 	}
 
 	seen := map[string]bool{}
@@ -42,7 +36,7 @@ func TestModule_DefinitionIncludesImports(t *testing.T) {
 		seen[imp.Definition().Name] = true
 	}
 
-	for _, name := range []string{"database", "auth", "users", "audit"} {
+	for _, name := range []string{"config", "database", "auth", "users", "audit"} {
 		if !seen[name] {
 			t.Fatalf("expected import %s", name)
 		}
@@ -50,22 +44,7 @@ func TestModule_DefinitionIncludesImports(t *testing.T) {
 }
 
 func TestModule_DefinitionIncludesProviders(t *testing.T) {
-	mod := NewModule(Options{
-		HTTPAddr:           ":8080",
-		MySQLDSN:           "user:pass@tcp(localhost:3306)/app",
-		CORSAllowedOrigins: []string{"http://localhost:3000"},
-		CORSAllowedMethods: []string{"GET", "POST"},
-		CORSAllowedHeaders: []string{"Content-Type"},
-		RateLimitPerSecond: 5.0,
-		RateLimitBurst:     10,
-		Auth: auth.Config{
-			Secret:   "test-secret",
-			Issuer:   "test-issuer",
-			TTL:      time.Minute,
-			Username: "demo",
-			Password: "demo",
-		},
-	})
+	mod := NewModule()
 	def := mod.Definition()
 
 	if len(def.Providers) != 3 {
@@ -89,20 +68,7 @@ func TestModule_DefinitionIncludesProviders(t *testing.T) {
 }
 
 func TestModule_ProviderBuildsCORS(t *testing.T) {
-	mod := NewModule(Options{
-		HTTPAddr:           ":8080",
-		MySQLDSN:           "user:pass@tcp(localhost:3306)/app",
-		CORSAllowedOrigins: []string{"http://example.com"},
-		CORSAllowedMethods: []string{"GET"},
-		CORSAllowedHeaders: []string{"X-Custom"},
-		Auth: auth.Config{
-			Secret:   "test-secret",
-			Issuer:   "test-issuer",
-			TTL:      time.Minute,
-			Username: "demo",
-			Password: "demo",
-		},
-	})
+	mod := NewModule()
 	def := mod.Definition()
 
 	var corsProvider module.ProviderDef
@@ -117,7 +83,11 @@ func TestModule_ProviderBuildsCORS(t *testing.T) {
 		t.Fatal("expected CORS provider")
 	}
 
-	middleware, err := corsProvider.Build(noopResolver{})
+	middleware, err := corsProvider.Build(mapResolver{
+		configmodule.TokenCORSAllowedOrigins: []string{"http://example.com"},
+		configmodule.TokenCORSAllowedMethods: []string{"GET"},
+		configmodule.TokenCORSAllowedHeaders: []string{"X-Custom"},
+	})
 	if err != nil {
 		t.Fatalf("build CORS middleware: %v", err)
 	}
@@ -132,19 +102,7 @@ func TestModule_ProviderBuildsCORS(t *testing.T) {
 }
 
 func TestModule_ProviderBuildsRateLimit(t *testing.T) {
-	mod := NewModule(Options{
-		HTTPAddr:           ":8080",
-		MySQLDSN:           "user:pass@tcp(localhost:3306)/app",
-		RateLimitPerSecond: 10.5,
-		RateLimitBurst:     20,
-		Auth: auth.Config{
-			Secret:   "test-secret",
-			Issuer:   "test-issuer",
-			TTL:      time.Minute,
-			Username: "demo",
-			Password: "demo",
-		},
-	})
+	mod := NewModule()
 	def := mod.Definition()
 
 	var rateLimitProvider module.ProviderDef
@@ -159,7 +117,10 @@ func TestModule_ProviderBuildsRateLimit(t *testing.T) {
 		t.Fatal("expected RateLimit provider")
 	}
 
-	middleware, err := rateLimitProvider.Build(noopResolver{})
+	middleware, err := rateLimitProvider.Build(mapResolver{
+		configmodule.TokenRateLimitPerSecond: 10.5,
+		configmodule.TokenRateLimitBurst:     20,
+	})
 	if err != nil {
 		t.Fatalf("build RateLimit middleware: %v", err)
 	}
@@ -174,17 +135,7 @@ func TestModule_ProviderBuildsRateLimit(t *testing.T) {
 }
 
 func TestModule_ProviderBuildsTiming(t *testing.T) {
-	mod := NewModule(Options{
-		HTTPAddr: ":8080",
-		MySQLDSN: "user:pass@tcp(localhost:3306)/app",
-		Auth: auth.Config{
-			Secret:   "test-secret",
-			Issuer:   "test-issuer",
-			TTL:      time.Minute,
-			Username: "demo",
-			Password: "demo",
-		},
-	})
+	mod := NewModule()
 	def := mod.Definition()
 
 	var timingProvider module.ProviderDef
@@ -199,7 +150,7 @@ func TestModule_ProviderBuildsTiming(t *testing.T) {
 		t.Fatal("expected Timing provider")
 	}
 
-	middleware, err := timingProvider.Build(noopResolver{})
+	middleware, err := timingProvider.Build(mapResolver{})
 	if err != nil {
 		t.Fatalf("build Timing middleware: %v", err)
 	}
@@ -214,17 +165,7 @@ func TestModule_ProviderBuildsTiming(t *testing.T) {
 }
 
 func TestModule_DefinitionIncludesController(t *testing.T) {
-	mod := NewModule(Options{
-		HTTPAddr: ":8080",
-		MySQLDSN: "user:pass@tcp(localhost:3306)/app",
-		Auth: auth.Config{
-			Secret:   "test-secret",
-			Issuer:   "test-issuer",
-			TTL:      time.Minute,
-			Username: "demo",
-			Password: "demo",
-		},
-	})
+	mod := NewModule()
 	def := mod.Definition()
 
 	if len(def.Controllers) != 1 {
@@ -237,20 +178,10 @@ func TestModule_DefinitionIncludesController(t *testing.T) {
 }
 
 func TestModule_ControllerBuilds(t *testing.T) {
-	mod := NewModule(Options{
-		HTTPAddr: ":8080",
-		MySQLDSN: "user:pass@tcp(localhost:3306)/app",
-		Auth: auth.Config{
-			Secret:   "test-secret",
-			Issuer:   "test-issuer",
-			TTL:      time.Minute,
-			Username: "demo",
-			Password: "demo",
-		},
-	})
+	mod := NewModule()
 	def := mod.Definition()
 
-	controller, err := def.Controllers[0].Build(noopResolver{})
+	controller, err := def.Controllers[0].Build(mapResolver{})
 	if err != nil {
 		t.Fatalf("build controller: %v", err)
 	}

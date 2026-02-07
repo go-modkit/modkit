@@ -1,6 +1,9 @@
 package auth
 
-import "github.com/go-modkit/modkit/modkit/module"
+import (
+	configmodule "github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/config"
+	"github.com/go-modkit/modkit/modkit/module"
+)
 
 const (
 	TokenMiddleware module.Token = "auth.middleware"
@@ -8,7 +11,7 @@ const (
 )
 
 type Options struct {
-	Config Config
+	Config module.Module
 }
 
 type Module struct {
@@ -18,13 +21,22 @@ type Module struct {
 type AuthModule = Module
 
 func NewModule(opts Options) module.Module {
+	if opts.Config == nil {
+		opts.Config = configmodule.NewModule(configmodule.Options{})
+	}
 	return &Module{opts: opts}
 }
 
 func (m Module) Definition() module.ModuleDef {
+	configMod := m.opts.Config
+	if configMod == nil {
+		configMod = configmodule.NewModule(configmodule.Options{})
+	}
+
 	return module.ModuleDef{
 		Name:      "auth",
-		Providers: Providers(m.opts.Config),
+		Imports:   []module.Module{configMod},
+		Providers: Providers(),
 		Controllers: []module.ControllerDef{
 			{
 				Name: "AuthController",

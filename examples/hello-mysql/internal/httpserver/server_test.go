@@ -8,10 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
-	"time"
 
-	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/app"
-	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/auth"
 	modkithttp "github.com/go-modkit/modkit/modkit/http"
 )
 
@@ -27,7 +24,7 @@ func TestBuildHandler_LogsRequest(t *testing.T) {
 		_ = r.Close()
 	}()
 
-	h, err := BuildHandler(testAppOptions())
+	h, err := BuildHandler()
 	if err != nil {
 		_ = w.Close()
 		t.Fatalf("build handler: %v", err)
@@ -49,7 +46,7 @@ func TestBuildHandler_LogsRequest(t *testing.T) {
 }
 
 func TestBuildAppHandler_ReturnsAppAndHandler(t *testing.T) {
-	boot, handler, err := BuildAppHandler(testAppOptions())
+	boot, handler, err := BuildAppHandler()
 	if err != nil {
 		t.Fatalf("build app handler: %v", err)
 	}
@@ -77,7 +74,7 @@ func TestBuildAppHandler_ReturnsBootOnRouteError(t *testing.T) {
 	}
 	defer func() { registerRoutes = origRegister }()
 
-	boot, handler, err := BuildAppHandler(testAppOptions())
+	boot, handler, err := BuildAppHandler()
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -90,10 +87,9 @@ func TestBuildAppHandler_ReturnsBootOnRouteError(t *testing.T) {
 }
 
 func TestBuildHandler_UsesMiddlewareProviders(t *testing.T) {
-	opts := testAppOptions()
-	opts.CORSAllowedMethods = []string{"GET"}
+	t.Setenv("CORS_ALLOWED_METHODS", "GET")
 
-	h, err := BuildHandler(opts)
+	h, err := BuildHandler()
 	if err != nil {
 		t.Fatalf("build handler: %v", err)
 	}
@@ -112,7 +108,7 @@ func TestBuildHandler_UsesMiddlewareProviders(t *testing.T) {
 }
 
 func TestBuildHandler_DocsRedirect(t *testing.T) {
-	h, err := BuildHandler(testAppOptions())
+	h, err := BuildHandler()
 	if err != nil {
 		t.Fatalf("build handler: %v", err)
 	}
@@ -126,24 +122,5 @@ func TestBuildHandler_DocsRedirect(t *testing.T) {
 	}
 	if got := rec.Header().Get("Location"); got != "/docs/index.html" {
 		t.Fatalf("expected redirect to /docs/index.html, got %q", got)
-	}
-}
-
-func testAppOptions() app.Options {
-	return app.Options{
-		HTTPAddr: ":8080",
-		MySQLDSN: "root:password@tcp(localhost:3306)/app?parseTime=true&multiStatements=true",
-		Auth: auth.Config{
-			Secret:   "dev-secret-change-me",
-			Issuer:   "hello-mysql",
-			TTL:      time.Hour,
-			Username: "demo",
-			Password: "demo",
-		},
-		CORSAllowedOrigins: []string{"http://localhost:3000"},
-		CORSAllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
-		CORSAllowedHeaders: []string{"Content-Type", "Authorization"},
-		RateLimitPerSecond: 5,
-		RateLimitBurst:     10,
 	}
 }

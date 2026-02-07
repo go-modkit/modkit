@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	configmodule "github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/config"
 	"github.com/go-modkit/modkit/examples/hello-mysql/internal/platform/mysql"
 	"github.com/go-modkit/modkit/modkit/module"
 )
@@ -11,7 +12,7 @@ import (
 const TokenDB module.Token = "database.db"
 
 type Options struct {
-	DSN string
+	Config module.Module
 }
 
 type Module struct {
@@ -21,19 +22,32 @@ type Module struct {
 type DatabaseModule = Module
 
 func NewModule(opts Options) module.Module {
+	if opts.Config == nil {
+		opts.Config = configmodule.NewModule(configmodule.Options{})
+	}
 	return &Module{opts: opts}
 }
 
 func (m Module) Definition() module.ModuleDef {
+	configMod := m.opts.Config
+	if configMod == nil {
+		configMod = configmodule.NewModule(configmodule.Options{})
+	}
+
 	var db *sql.DB
 	return module.ModuleDef{
-		Name: "database",
+		Name:    "database",
+		Imports: []module.Module{configMod},
 		Providers: []module.ProviderDef{
 			{
 				Token: TokenDB,
 				Build: func(r module.Resolver) (any, error) {
-					var err error
-					db, err = mysql.Open(m.opts.DSN)
+					dsn, err := module.Get[string](r, configmodule.TokenMySQLDSN)
+					if err != nil {
+						return nil, err
+					}
+
+					db, err = mysql.Open(dsn)
 					if err != nil {
 						return nil, err
 					}

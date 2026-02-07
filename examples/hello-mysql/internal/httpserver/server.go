@@ -14,8 +14,8 @@ import (
 
 var registerRoutes = modkithttp.RegisterRoutes
 
-func BuildAppHandler(opts app.Options) (*kernel.App, http.Handler, error) {
-	mod := app.NewModule(opts)
+func BuildAppHandler() (*kernel.App, http.Handler, error) {
+	mod := app.NewModule()
 	boot, err := kernel.Bootstrap(mod)
 	if err != nil {
 		return nil, nil, err
@@ -74,7 +74,7 @@ func BuildAppHandler(opts app.Options) (*kernel.App, http.Handler, error) {
 	return boot, router, nil
 }
 
-func BuildHandler(opts app.Options) (http.Handler, error) {
-	_, handler, err := BuildAppHandler(opts)
+func BuildHandler() (http.Handler, error) {
+	_, handler, err := BuildAppHandler()
 	return handler, err
 }
