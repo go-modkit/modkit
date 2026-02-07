@@ -76,11 +76,11 @@ func (m *UsersModule) Definition() module.ModuleDef {
         Controllers: []module.ControllerDef{{
             Name: "UsersController",
             Build: func(r module.Resolver) (any, error) {
-                svc, err := r.Get(TokenUsersService)
+                svc, err := module.Get[UsersService](r, TokenUsersService)
                 if err != nil {
                     return nil, err
                 }
-                return NewUsersController(svc.(UsersService)), nil
+                return NewUsersController(svc), nil
             },
         }},
     }

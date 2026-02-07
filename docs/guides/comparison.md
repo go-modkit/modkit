@@ -95,7 +95,7 @@ func main() {
 
 | Aspect | Fx | modkit |
 |--------|-----|--------|
-| Injection | Automatic via reflection | Explicit via `r.Get(token)` |
+| Injection | Automatic via reflection | Explicit via `module.Get[T](r, token)` |
 | Lifecycle | `OnStart`/`OnStop` hooks | Manual cleanup |
 | Module system | Groups (no visibility) | Full visibility enforcement |
 | Type safety | Runtime type matching | Compile-time (explicit casts) |
@@ -127,7 +127,7 @@ svc := do.MustInvoke[UserService](injector)
 
 ```go
 app, _ := kernel.Bootstrap(&AppModule{})
-svc, _ := app.Get("users.service")
+svc, _ := module.Get[UserService](app, "users.service")
 ```
 
 ### Key Differences
@@ -211,7 +211,7 @@ modkit is directly inspired by [NestJS](https://nestjs.com/), bringing similar c
 | `@Module()` decorator | `ModuleDef` struct |
 | `@Injectable()` | `ProviderDef` |
 | `@Controller()` | `ControllerDef` |
-| Constructor injection | `r.Get(token)` |
+| Constructor injection | `module.Get[T](r, token)` |
 | `imports` | `Imports` |
 | `providers` | `Providers` |
 | `exports` | `Exports` |

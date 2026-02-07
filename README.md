@@ -51,8 +51,8 @@ func (m *UsersModule) Definition() module.ModuleDef {
         Controllers: []module.ControllerDef{{
             Name: "UsersController",
             Build: func(r module.Resolver) (any, error) {
-                svc, _ := r.Get("users.service")
-                return NewUsersController(svc.(UsersService)), nil
+                svc, _ := module.Get[UsersService](r, "users.service")
+                return NewUsersController(svc), nil
             },
         }},
         Exports: []module.Token{"users.service"},
@@ -168,7 +168,7 @@ See [Architecture Guide](docs/architecture.md) for details.
 | Concept | NestJS | modkit |
 |---------|--------|--------|
 | Module definition | `@Module()` decorator | `ModuleDef` struct |
-| Dependency injection | Constructor injection via metadata | Explicit `r.Get(token)` |
+| Dependency injection | Constructor injection via metadata | Explicit `module.Get[T](r, token)` |
 | Route binding | `@Get()`, `@Post()` decorators | `RegisterRoutes(router)` method |
 | Middleware | `NestMiddleware` interface | `func(http.Handler) http.Handler` |
 | Guards/Pipes/Interceptors | Framework abstractions | Standard Go middleware |

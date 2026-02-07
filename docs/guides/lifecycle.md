@@ -116,13 +116,13 @@ Once built, providers are cached as singletons:
 
 ```go
 // First call: builds the provider
-svc1, _ := r.Get("users.service")
+svc, err := module.Get[UserService](r, "users.service")
 
 // Second call: returns cached instance
-svc2, _ := r.Get("users.service")
+svc2, _ := module.Get[UserService](r, "users.service")
 
-// svc1 and svc2 are the same instance
-fmt.Println(svc1 == svc2)  // true
+// svc and svc2 are the same instance
+fmt.Println(svc == svc2)  // true
 ```
 
 **Why singletons?**
@@ -189,11 +189,10 @@ func main() {
     }
     
     // Get resources that need cleanup
-    db, _ := app.Get("db.connection")
-    sqlDB := db.(*sql.DB)
+    db, _ := module.Get[*sql.DB](app, "db.connection")
     
     // Defer cleanup
-    defer sqlDB.Close()
+    defer db.Close()
     
     // Start server
     router := mkhttp.NewRouter()
@@ -235,22 +234,22 @@ func (c *Cleanup) Run() error {
     return &Cleanup{}, nil
 }},
 {Token: "db", Build: func(r module.Resolver) (any, error) {
-    cleanup, _ := r.Get("cleanup")
+    cleanup, _ := module.Get[*Cleanup](r, "cleanup")
     
     db, err := sql.Open("mysql", dsn)
     if err != nil {
         return nil, err
     }
     
-    cleanup.(*Cleanup).Register(db.Close)
+    cleanup.Register(db.Close)
     return db, nil
 }},
 
 // In main
 func main() {
     app, _ := kernel.Bootstrap(&AppModule{})
-    cleanup, _ := app.Get("cleanup")
-    defer cleanup.(*Cleanup).Run()
+    cleanup, _ := module.Get[*Cleanup](app, "cleanup")
+    defer cleanup.Run()
     // ...
 }
 ```
@@ -437,8 +436,8 @@ func main() {
     app, _ := kernel.Bootstrap(&AppModule{})
     
     // Get DB for cleanup
-    db, _ := app.Get("db.connection")
-    defer db.(*sql.DB).Close()
+    db, _ := module.Get[*sql.DB](app, "db.connection")
+    defer db.Close()
     
     // Start server (DB connection created on first query)
     router := mkhttp.NewRouter()

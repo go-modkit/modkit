@@ -59,11 +59,11 @@ func (m *AppModule) Definition() module.ModuleDef {
             {
                 Name: "GreetingController",
                 Build: func(r module.Resolver) (any, error) {
-                    value, err := r.Get(TokenGreeting)
+                    value, err := module.Get[string](r, TokenGreeting)
                     if err != nil {
                         return nil, err
                     }
-                    return &GreetingController{greeting: value.(string)}, nil
+                    return &GreetingController{greeting: value}, nil
                 },
             },
         },

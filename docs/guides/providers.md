@@ -86,18 +86,16 @@ module.ProviderDef{
     Token: TokenUsersService,
     Build: func(r module.Resolver) (any, error) {
         // Get a dependency
-        dbAny, err := r.Get(TokenDB)
+        db, err := module.Get[*sql.DB](r, TokenDB)
         if err != nil {
             return nil, err
         }
-        db := dbAny.(*sql.DB)
         
         // Get another dependency
-        loggerAny, err := r.Get(TokenLogger)
+        logger, err := module.Get[Logger](r, TokenLogger)
         if err != nil {
             return nil, err
         }
-        logger := loggerAny.(Logger)
         
         return NewUsersService(db, logger), nil
     },
@@ -183,8 +181,8 @@ type MySQLUserRepository struct {
 
 // Provider returns interface type
 Build: func(r module.Resolver) (any, error) {
-    db, _ := r.Get(TokenDB)
-    return &MySQLUserRepository{db: db.(*sql.DB)}, nil
+    db, _ := module.Get[*sql.DB](r, TokenDB)
+    return &MySQLUserRepository{db: db}, nil
 }
 ```
 

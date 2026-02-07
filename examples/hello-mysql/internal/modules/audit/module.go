@@ -27,11 +27,11 @@ func (m *Module) Definition() module.ModuleDef {
 			{
 				Token: TokenService,
 				Build: func(r module.Resolver) (any, error) {
-					usersSvc, err := r.Get(users.TokenService)
+					usersSvc, err := module.Get[users.Service](r, users.TokenService)
 					if err != nil {
 						return nil, err
 					}
-					return NewService(usersSvc.(users.Service)), nil
+					return NewService(usersSvc), nil
 				},
 			},
 		},

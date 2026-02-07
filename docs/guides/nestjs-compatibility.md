@@ -142,13 +142,9 @@ module.ProviderDef{
     Token: "users.reader",
     // Note: requires fmt for error formatting.
     Build: func(r module.Resolver) (any, error) {
-        v, err := r.Get("users.service")
+        svc, err := module.Get[*UsersService](r, "users.service")
         if err != nil {
             return nil, err
-        }
-        svc, ok := v.(*UsersService)
-        if !ok {
-            return nil, fmt.Errorf("users.service: expected *UsersService, got %T", v)
         }
         return svc, nil
     },

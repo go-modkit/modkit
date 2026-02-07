@@ -124,11 +124,11 @@ Example:
 module.ControllerDef{
     Name: "UsersController",
     Build: func(r module.Resolver) (any, error) {
-        dbAny, err := r.Get(TokenDB)
+        db, err := module.Get[*sql.DB](r, TokenDB)
         if err != nil {
             return nil, err
         }
-        return NewUsersController(dbAny.(*sql.DB)), nil
+        return NewUsersController(db), nil
     },
 }
 ```
@@ -196,13 +196,9 @@ func (m *UsersModule) Definition() module.ModuleDef {
         Providers: []module.ProviderDef{{
             Token: TokenUsersService,
             Build: func(r module.Resolver) (any, error) {
-                dbAny, err := r.Get(TokenDB)
+                db, err := module.Get[*sql.DB](r, TokenDB)
                 if err != nil {
                     return nil, err
-                }
-                db, ok := dbAny.(*sql.DB)
-                if !ok {
-                    return nil, fmt.Errorf("expected *sql.DB for %q", TokenDB)
                 }
                 return NewUsersService(db), nil
             },
@@ -289,15 +285,15 @@ func (m *UsersModule) Definition() module.ModuleDef {
         Providers: []module.ProviderDef{{
             Token: TokenUsersService,
             Build: func(r module.Resolver) (any, error) {
-                db, _ := r.Get(TokenDB)
-                return NewUsersService(db.(*sql.DB)), nil
+                db, _ := module.Get[*sql.DB](r, TokenDB)
+                return NewUsersService(db), nil
             },
         }},
         Controllers: []module.ControllerDef{{
             Name: "UsersController",
             Build: func(r module.Resolver) (any, error) {
-                svc, _ := r.Get(TokenUsersService)
-                return NewUsersController(svc.(UsersService)), nil
+                svc, _ := module.Get[UsersService](r, TokenUsersService)
+                return NewUsersController(svc), nil
             },
         }},
         Exports: []module.Token{TokenUsersService},

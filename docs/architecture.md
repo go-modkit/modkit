@@ -172,10 +172,10 @@ stateDiagram-v2
 
 ```go
 // First call: builds the provider
-svc, _ := r.Get("users.service")
+svc, _ := module.Get[UserService](r, "users.service")
 
 // Second call: returns cached instance
-svc2, _ := r.Get("users.service")  // same instance as svc
+svc2, _ := module.Get[UserService](r, "users.service")  // same instance as svc
 ```
 
 Cycles are detected at build time and return a `ProviderCycleError`.

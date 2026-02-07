@@ -29,11 +29,7 @@ func (m Module) Definition() module.ModuleDef {
 			{
 				Name: "AuthController",
 				Build: func(r module.Resolver) (any, error) {
-					handlerAny, err := r.Get(TokenHandler)
-					if err != nil {
-						return nil, err
-					}
-					return handlerAny, nil
+					return module.Get[*Handler](r, TokenHandler)
 				},
 			},
 		},
