@@ -67,7 +67,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: .coverage/coverage.out,.coverage/coverage-examples.out
+          files: .coverage/coverage.out
           fail_ci_if_error: false
 
   cli-smoke:

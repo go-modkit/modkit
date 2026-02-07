@@ -2,10 +2,15 @@ package ast
 
 import (
 	"errors"
+	"go/parser"
+	"go/token"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/dave/dst"
+	"github.com/dave/dst/decorator"
 )
 
 func TestAddProvider(t *testing.T) {
@@ -345,5 +350,94 @@ type Module struct{}
 	err := AddController(file, "UsersController", "NewUsersController")
 	if err == nil {
 		t.Fatal("expected error when Definition method is missing")
+	}
+}
+
+func TestProviderExistsSkipsUnexpectedShapes(t *testing.T) {
+	providers := &dst.CompositeLit{
+		Elts: []dst.Expr{
+			&dst.Ident{Name: "notAComposite"},
+			&dst.CompositeLit{Elts: []dst.Expr{&dst.Ident{Name: "notAKeyValue"}}},
+		},
+	}
+
+	if providerExists(providers, "users.auth") {
+		t.Fatal("expected false when providers contain unexpected shapes")
+	}
+}
+
+func TestWriteFileAtomicallyStatError(t *testing.T) {
+	err := writeFileAtomically(filepath.Join(t.TempDir(), "missing.go"), &dst.File{}, "users.auth")
+	if err == nil {
+		t.Fatal("expected stat error")
+	}
+
+	var perr *ProviderError
+	if !errors.As(err, &perr) {
+		t.Fatalf("expected ProviderError, got %T", err)
+	}
+	if perr.Op != "stat" {
+		t.Fatalf("expected stat op, got %q", perr.Op)
+	}
+}
+
+func TestWriteFileAtomicallyRenameError(t *testing.T) {
+	tmp := t.TempDir()
+	src := filepath.Join(tmp, "module.go")
+	if err := os.WriteFile(src, []byte("package users\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	fset := token.NewFileSet()
+	f, err := decorator.ParseFile(fset, src, nil, parser.ParseComments)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	targetDir := filepath.Join(tmp, "target")
+	if err := os.Mkdir(targetDir, 0o750); err != nil {
+		t.Fatal(err)
+	}
+
+	err = writeFileAtomically(targetDir, f, "users.auth")
+	if err == nil {
+		t.Fatal("expected rename error")
+	}
+
+	var perr *ProviderError
+	if !errors.As(err, &perr) {
+		t.Fatalf("expected ProviderError, got %T", err)
+	}
+	if perr.Op != "rename" {
+		t.Fatalf("expected rename op, got %q", perr.Op)
+	}
+}
+
+func TestAddControllerDuplicateSkipsUnexpectedExistingShape(t *testing.T) {
+	tmp := t.TempDir()
+	file := filepath.Join(tmp, "module.go")
+	content := `package users
+
+import "github.com/go-modkit/modkit/modkit/module"
+
+func existingController() module.ControllerDef {
+	return module.ControllerDef{Name: "AuthController"}
+}
+
+type Module struct{}
+
+func (m *Module) Definition() module.ModuleDef {
+	return module.ModuleDef{
+		Name: "users",
+		Controllers: []module.ControllerDef{existingController()},
+	}
+}
+`
+	if err := os.WriteFile(file, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := AddController(file, "UsersController", "NewUsersController"); err != nil {
+		t.Fatalf("expected insertion to succeed: %v", err)
 	}
 }

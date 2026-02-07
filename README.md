@@ -134,10 +134,10 @@ func (m *UsersModule) Definition() module.ModuleDef {
 EOF
 
 # Add a provider
-modkit new provider service --module users
+modkit new provider service
 
 # Add a controller
-modkit new controller users --module users
+modkit new controller users
 ```
 
 The CLI automatically registers providers and controllers in your module's `Definition()` function.
