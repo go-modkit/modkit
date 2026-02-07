@@ -114,9 +114,9 @@ Errors should be:
 *   [x] Generic Helpers: Reduce type-casting noise with `module.Get[T]` helper.
 
 ### Phase 2: Ecosystem & Tooling (Next)
-*   [ ] **modkit-cli**: Scaffold new projects, modules, and providers (`modkit new module users`).
+*   [ ] **modkit-cli**: Scaffold new projects, modules, and providers (`modkit new module users`). Status: in progress (partial). See `docs/specs/design-cli-tooling.md`.
 *   [ ] **TestKit**: Utilities for testing modules in isolation (mocking providers easily).
-*   [ ] **Config Module**: Standard pattern for loading env vars into the container.
+*   [ ] **Config Module**: Standard pattern for loading env vars into the container. Spec: `docs/specs/design-config-module.md`.
 
 ### Phase 3: Advanced Features
 *   [ ] **Graph Visualization**: Dump the dependency graph to Mermaid/Dot format.

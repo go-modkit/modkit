@@ -1,130 +1,187 @@
-# Design Spec: modkit CLI
+# Design Spec: modkit CLI Remaining Work
 
 **Status:** Draft
 **Date:** 2026-02-07
 **Author:** Sisyphus (AI Agent)
+**Related PRD:** `docs/specs/prd-modkit-core.md` (Phase 2 `modkit-cli`)
+**Related Spec:** `docs/specs/design-release-versioning-sdlc-cli.md`
 
 ## 1. Overview
 
-The `modkit` CLI is a developer tool to accelerate the creation and management of modkit applications. It automates repetitive tasks like creating new modules, providers, and controllers, ensuring that generated code follows the framework's strict architectural patterns.
+This document defines the remaining work required to complete the PRD `modkit-cli` item.
 
-## 2. Goals
+The repository already contains a working CLI skeleton and scaffolding commands. The remaining work is to make scaffolding fully usable without manual follow-up edits, make behavior idempotent and safe, and close SDLC/documentation gaps.
 
-*   **Speed:** Reduce setup time for new features from ~5 minutes to ~5 seconds.
-*   **Consistency:** Enforce project structure and naming conventions (e.g., `NewXxxModule`, `Definition()`).
-*   **Discovery:** Help users discover framework features through interactive prompts and templates.
-*   **Zero Magic:** Generated code should be plain, readable Go code that the user owns.
+## 2. Current State (Implemented)
 
-## 3. Scope
+The following are already implemented and tested:
 
-### Phase 1 (MVP)
-*   `modkit new app <name>`: Scaffold a new project with go.mod, main.go, and initial app module.
-*   `modkit new module <name>`: Create a new module directory with `module.go`.
-*   `modkit new provider <name>`: Add a provider to an existing module.
-*   `modkit new controller <name>`: Add a controller to an existing module.
+- CLI entrypoint and command tree:
+  - `cmd/modkit/main.go`
+  - `internal/cli/cmd/root.go`
+  - `internal/cli/cmd/new.go`
+- Generation commands:
+  - `modkit new app`: `internal/cli/cmd/new_app.go`
+  - `modkit new module`: `internal/cli/cmd/new_module.go`
+  - `modkit new provider`: `internal/cli/cmd/new_provider.go`
+  - `modkit new controller`: `internal/cli/cmd/new_controller.go`
+- Embedded template infrastructure:
+  - `internal/cli/templates/embed.go`
+- AST helper for provider registration (currently unused by command flow):
+  - `internal/cli/ast/modify.go`
+- Unit tests for command behaviors:
+  - `internal/cli/cmd/new_*_test.go`
 
-### Phase 2 (Future)
-*   Interactive mode (TUI).
-*   Graph visualization (`modkit graph`).
-*   Migration helpers.
+## 3. Problem Statement (Remaining Gaps)
 
-## 4. User Experience
+### 3.1. Manual Registration Still Required
 
-### 4.1. Creating a New App
+`new provider` and `new controller` still print manual TODO instructions instead of updating `module.go` automatically. This means generated code is not fully wired by default.
 
-```bash
-$ modkit new app my-service
-Created my-service/
-Created my-service/go.mod
-Created my-service/cmd/api/main.go
-Created my-service/internal/modules/app/module.go
+### 3.2. AST Registration Is Incomplete
 
-Run:
-  cd my-service
-  go mod tidy
-  go run cmd/api/main.go
-```
+- Provider AST utility exists but is not integrated into command flow.
+- No equivalent controller AST insertion utility is integrated.
+- Failure and idempotency behavior for repeated runs is not fully specified.
 
-### 4.2. Adding a Module
+### 3.3. Delivery and Docs Gaps
 
-```bash
-$ cd my-service
-$ modkit new module users
-Created internal/modules/users/module.go
-```
+- README does not yet describe CLI install and usage paths.
+- Release pipeline does not yet publish CLI binaries (tracked in related SDLC spec).
 
-### 4.3. Adding a Provider
+## 4. Goals
 
-```bash
-$ modkit new provider service --module users
-Created internal/modules/users/service.go
-TODO: Register provider in internal/modules/users/module.go:
-  Token: "users.service"
-  Build: func(r module.Resolver) (any, error) { return NewServiceService(), nil }
-```
+- Make CLI scaffolding produce compilable, wired code with no manual TODO edits.
+- Keep generated code explicit and idiomatic (no hidden runtime magic).
+- Make command behavior deterministic and safe under repeated invocation.
+- Keep compatibility with the project conventions around module structure and token naming.
 
-## 5. Implementation Details
+## 5. Non-Goals
 
-### 5.1. Directory Structure
+- Interactive TUI mode.
+- `modkit graph` command.
+- Project migration/upgrade assistants.
+- Any reflection-based code generation or auto-discovery.
 
-The CLI will assume a standard layout but allow configuration:
+## 6. Detailed Requirements
 
-```text
-root/
-|- cmd/
-|- internal/
-   |- modules/
-```
+## 6.1. Command Behavior Requirements
 
-### 5.2. Templates
+### `modkit new app <name>`
 
-Templates will be embedded in the CLI binary using `embed`. They will use `text/template`.
+- Must continue to scaffold a runnable app skeleton.
+- Must keep existing path safety and name validation behavior.
+- Must keep deterministic template output.
 
-**Example `module.go.tpl`:**
+### `modkit new module <name>`
 
-```go
-package {{.Package}}
+- Must continue to create `internal/modules/<name>/module.go`.
+- Must fail with clear error if module already exists.
 
-import "github.com/go-modkit/modkit/modkit/module"
+### `modkit new provider <name> --module <module>`
 
-type {{.Name | Title}}Module struct {}
+- Must create provider file.
+- Must register provider automatically in target module `Definition().Providers`.
+- Must emit deterministic token naming based on module package convention.
+- Must fail with actionable errors when:
+  - `module.go` missing,
+  - `Definition()` missing,
+  - `Providers` cannot be safely updated.
 
-func (m *{{.Name | Title}}Module) Definition() module.ModuleDef {
-    return module.ModuleDef{
-        Name: "{{.Name}}",
-        Providers: []module.ProviderDef{},
-        Controllers: []module.ControllerDef{},
-    }
-}
-```
+### `modkit new controller <name> --module <module>`
 
-### 5.3. Code Modification
+- Must create controller file.
+- Must register controller automatically in target module `Definition().Controllers`.
+- Must fail with actionable errors when AST update cannot be applied safely.
 
-For `new provider` and `new controller`, the CLI needs to edit existing `module.go` files to register the new components.
-*   **Strategy:** AST parsing and modification using `dave/dst` (preferred for preserving comments) or regex-based insertion if AST is too complex for MVP.
-*   **MVP Decision:** Use AST parsing to robustly locate `Providers: []module.ProviderDef{...}` and append the new definition.
+## 6.2. AST Update Requirements
 
-## 6. Architecture
+- Use `dave/dst`-based parsing and rewriting for both providers and controllers.
+- Preserve comments and formatting as much as practical.
+- Insertions must be idempotent:
+  - Re-running the same command must not duplicate registration entries.
+- Provide specific typed error messages for unsupported module shapes.
+- Never silently skip registration when generation succeeded.
 
-```text
-cmd/
-|- modkit/
-   |- main.go        # Entry point (cobra)
-internal/
-|- cli/
-   |- cmd/           # Command implementations (new, version, etc.)
-   |- ast/           # Code modification logic
-   |- templates/     # Embedded .tpl files
-```
+## 6.3. Idempotency and Safety
 
-## 7. Dependencies
+- File creation remains fail-fast when destination exists.
+- Registration insertion must detect existing matching token/controller name before writing.
+- Partial failure handling:
+  - If file generation succeeds and AST registration fails, command must report exact follow-up action.
+  - Prefer atomic write pattern for modified `module.go`.
 
-*   `spf13/cobra`: Command structure.
-*   `dave/dst`: AST manipulation (decorator-aware).
-*   `golang.org/x/mod`: Go module manipulation.
+## 6.4. Output and UX
 
-## 8. Success Metrics
+- Success output should list created files and registration status.
+- Error output should include target file path and failed operation.
+- Remove manual TODO output once auto-registration is reliable.
 
-1.  **Time to Hello World:** < 1 minute including installation.
-2.  **Correctness:** Generated code compiles immediately (`go build ./...` passes).
-3.  **Adoption:** Used in the "Getting Started" guide as the primary way to start.
+## 7. Testing Plan
+
+## 7.1. Unit Tests
+
+Add/update tests for:
+
+- Provider registration insertion and duplicate prevention.
+- Controller registration insertion and duplicate prevention.
+- Error paths for malformed `module.go` structures.
+- Stability of generated token/controller naming.
+
+## 7.2. Integration/Smoke Tests
+
+Introduce CLI smoke checks in CI (as defined in the SDLC release spec):
+
+1. Build CLI binary from `./cmd/modkit`.
+2. Generate app, module, provider, controller.
+3. Verify generated project compiles/tests successfully.
+4. Ensure no manual edits are required before compile.
+
+## 8. Documentation and Release Alignment
+
+## 8.1. README
+
+Add CLI install and quickstart:
+
+- `go install github.com/go-modkit/modkit/cmd/modkit@latest`
+- Release binary download option
+- Minimal scaffold workflow
+
+## 8.2. Release Artifacts
+
+Keep this document scoped to CLI product behavior. Artifact publishing details remain in:
+
+- `docs/specs/design-release-versioning-sdlc-cli.md`
+
+## 9. Success Criteria
+
+The PRD `modkit-cli` item is complete when all are true:
+
+1. `new app/module/provider/controller` workflows generate code that compiles without manual registration edits.
+2. Registration insertion for provider/controller is deterministic and idempotent.
+3. CLI smoke tests are enforced in CI.
+4. CLI install/usage documentation is present in README.
+5. Release flow publishes CLI artifacts for tagged releases.
+
+## 10. Risks and Mitigations
+
+- Risk: AST insertion fails on uncommon `module.go` formatting.
+  - Mitigation: strict error messages and tested fallback guidance.
+- Risk: duplicate registrations from repeated command runs.
+  - Mitigation: explicit duplicate detection before write.
+- Risk: generated code drifts from framework conventions.
+  - Mitigation: snapshot tests against templates and token patterns.
+
+## 11. Rollout Plan
+
+1. Integrate provider/controller AST registration in command flow.
+2. Add/expand tests for insertion, idempotency, and error paths.
+3. Add CI smoke job for generator compile checks.
+4. Update README with CLI install and usage.
+5. Enable release artifact publication (per SDLC release spec).
+
+## 12. Out of Scope Follow-Ups
+
+- Interactive CLI/TUI.
+- Graph and devtools commands.
+- Project migration generators.
