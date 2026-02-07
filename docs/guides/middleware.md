@@ -298,3 +298,11 @@ router.Use(authMW.(func(http.Handler) http.Handler))
 - Add context values for cross-cutting data (request ID, user, etc.)
 - Test middleware in isolation using `httptest`
 - Consider using existing middleware libraries (chi, gorilla) for common patterns
+
+## See example
+
+- [Middleware package](../../examples/hello-mysql/internal/middleware/)
+- [CORS middleware](../../examples/hello-mysql/internal/middleware/cors.go)
+- [Rate limit middleware](../../examples/hello-mysql/internal/middleware/rate_limit.go)
+- [Timing middleware](../../examples/hello-mysql/internal/middleware/timing.go)
+- [Route group + middleware order wiring](../../examples/hello-mysql/internal/httpserver/server.go)
