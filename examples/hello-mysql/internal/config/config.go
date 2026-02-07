@@ -2,8 +2,9 @@ package config
 
 import (
 	"os"
-	"strconv"
 	"strings"
+
+	mkconfig "github.com/go-modkit/modkit/modkit/config"
 )
 
 type Config struct {
@@ -38,13 +39,9 @@ func envOrDefault(key, def string) string {
 
 func splitEnv(key, def string) []string {
 	raw := envOrDefault(key, def)
-	parts := strings.Split(raw, ",")
-	out := make([]string, 0, len(parts))
-	for _, part := range parts {
-		trimmed := strings.TrimSpace(part)
-		if trimmed != "" {
-			out = append(out, trimmed)
-		}
+	out, err := mkconfig.ParseCSV(raw)
+	if err != nil {
+		return []string{}
 	}
 	return out
 }
@@ -54,7 +51,7 @@ func envFloat(key string, def float64) float64 {
 	if val == "" {
 		return def
 	}
-	parsed, err := strconv.ParseFloat(val, 64)
+	parsed, err := mkconfig.ParseFloat64(val)
 	if err != nil {
 		return def
 	}
@@ -66,7 +63,7 @@ func envInt(key string, def int) int {
 	if val == "" {
 		return def
 	}
-	parsed, err := strconv.Atoi(val)
+	parsed, err := mkconfig.ParseInt(val)
 	if err != nil {
 		return def
 	}
