@@ -3,8 +3,6 @@ package config
 import (
 	"os"
 	"strings"
-
-	coreconfig "github.com/go-modkit/modkit/modkit/config"
 )
 
 type Config struct {
@@ -40,10 +38,5 @@ func envOrDefault(key, def string) string {
 		return def
 	}
 
-	parsed, err := coreconfig.ParseString(val)
-	if err != nil {
-		return def
-	}
-
-	return parsed
+	return val
 }
