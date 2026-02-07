@@ -1,0 +1,92 @@
+# CLI UX and Error Contract
+
+## 1. Success Message Format
+Standardized format for successful file generation and registration.
+
+### Template
+```
+✓ Created: <file-path>
+✓ Registered in: <module-path>
+```
+
+### Example (Provider)
+```
+✓ Created: internal/modules/auth/auth_service.go
+✓ Registered in: internal/modules/auth/module.go
+```
+
+### Example (Controller)
+```
+✓ Created: internal/modules/auth/auth_controller.go
+✓ Registered in: internal/modules/auth/module.go
+```
+
+## 2. Partial Failure Message Format
+Standardized format when file generation succeeds but AST registration fails.
+
+### Template (Provider)
+```
+✓ Created: <file-path>
+✗ Registration failed: <error-details>
+  Module: <module-path>
+  To complete manually, add to Definition().Providers:
+    {Token: "<token>", Build: <build-func>}
+```
+
+### Template (Controller)
+```
+✓ Created: <file-path>
+✗ Registration failed: <error-details>
+  Module: <module-path>
+  To complete manually, add to Definition().Controllers:
+    {Name: "<name>", Build: <build-func>}
+```
+
+### Example (Provider Partial Failure)
+```
+✓ Created: internal/modules/auth/auth_service.go
+✗ Registration failed: failed to parse module.go: unexpected token
+  Module: internal/modules/auth/module.go
+  To complete manually, add to Definition().Providers:
+    {Token: "auth.authservice", Build: func(r module.Resolver) (any, error) { return NewAuthService(), nil }}
+```
+
+## 3. Full Failure Message Format
+Standardized format for operations that fail completely (e.g., validation, file exists, permission denied).
+
+### Template
+```
+✗ Failed to <operation>: <error-details>
+  Target: <target-path>
+  Remediation: <actionable-guidance>
+```
+
+### Example (File Exists)
+```
+✗ Failed to create provider: provider file already exists
+  Target: internal/modules/auth/auth_service.go
+  Remediation: Delete the existing file or use a different name.
+```
+
+### Example (Module Not Found)
+```
+✗ Failed to locate module: module file not found
+  Target: internal/modules/missing/module.go
+  Remediation: Ensure the module exists or specify a valid module with --module flag.
+```
+
+## 4. Error Mapping and Remediation Guidance
+
+| Error Type | Operation | Remediation |
+|------------|-----------|-------------|
+| File Exists | create file | Delete existing file or use different name |
+| Module Not Found | locate module | Ensure module exists or specify valid module with --module |
+| Validation Error | validate name | Use a valid Go identifier (alphanumeric, starts with letter) |
+| Template Error | execute template | Check template integrity or report issue |
+| AST Parse Error | register component | Manually register the component in module.go |
+| Permission Denied | create file | Check directory permissions |
+
+## 5. Implementation Notes
+- Use colorized output (Green for ✓, Red for ✗) if terminal supports it.
+- Always use relative paths from the project root.
+- Ensure `Build` function strings are valid Go code that can be copy-pasted.

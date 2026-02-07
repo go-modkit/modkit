@@ -1,0 +1,6 @@
+=== RUN   TestAddController
+--- PASS: TestAddController (0.01s)
+=== RUN   TestAddControllerDuplicate
+--- PASS: TestAddControllerDuplicate (0.01s)
+PASS
+ok  	github.com/go-modkit/modkit/internal/cli/ast	0.312s

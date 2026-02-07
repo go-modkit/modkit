@@ -76,12 +76,71 @@ func main() {
 
 ## Installation
 
+### Library
+
 ```bash
 go get github.com/go-modkit/modkit
 ```
 
+### CLI Tool
+
+Install the `modkit` CLI using go install:
+
+```bash
+go install github.com/go-modkit/modkit/cmd/modkit@latest
+```
+
+Or download a pre-built binary from the [releases page](https://github.com/go-modkit/modkit/releases).
+
 Requires Go 1.25.7+
 We pin the patch level to 1.25.7 in CI to align with vulnerability scanning and keep a consistent security posture.
+
+## Quick Start with CLI
+
+Scaffold a new modkit application in seconds:
+
+```bash
+# Create a new app
+modkit new app myapp
+cd myapp
+
+# Run the application
+go run cmd/api/main.go
+```
+
+Add providers and controllers to existing modules:
+
+```bash
+# Create a new module
+cd internal/modules
+mkdir users
+cd users
+
+# Initialize module.go with basic structure
+cat > module.go << 'EOF'
+package users
+
+import "github.com/go-modkit/modkit/modkit/module"
+
+type Module struct{}
+
+func (m *Module) Definition() module.ModuleDef {
+    return module.ModuleDef{
+        Name: "users",
+        Providers: []module.ProviderDef{},
+        Controllers: []module.ControllerDef{},
+    }
+}
+EOF
+
+# Add a provider
+modkit new provider service --module users
+
+# Add a controller
+modkit new controller users --module users
+```
+
+The CLI automatically registers providers and controllers in your module's `Definition()` function.
 
 ## Features
 

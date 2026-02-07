@@ -10,6 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/go-modkit/modkit/internal/cli/ast"
 	"github.com/go-modkit/modkit/internal/cli/templates"
 )
 
@@ -29,6 +30,27 @@ func init() {
 	newCmd.AddCommand(newControllerCmd)
 }
 
+// createNewController creates a new controller file and registers it in the module.
+//
+// UX/Error Contract:
+//
+// Success:
+// ✓ Created: <file-path>
+// ✓ Registered in: <module-path>
+//
+// Partial Failure (File created, registration failed):
+// ✓ Created: <file-path>
+// ✗ Registration failed: <error-details>
+//
+//	Module: <module-path>
+//	To complete manually, add to Definition().Controllers:
+//	  {Name: "<name>", Build: <build-func>}
+//
+// Full Failure:
+// ✗ Failed to <operation>: <error-details>
+//
+//	Target: <target-path>
+//	Remediation: <actionable-guidance>
 func createNewController(name, moduleName string) error {
 	if err := validateScaffoldName(name, "controller name"); err != nil {
 		return err
@@ -100,13 +122,20 @@ func createNewController(name, moduleName string) error {
 		return fmt.Errorf("failed to close file: %w", closeErr)
 	}
 
-	fmt.Printf("Created %s\n", controllerPath)
-
 	controllerName := fmt.Sprintf("%sController", data.Identifier)
+	buildFuncName := "New" + controllerName
 
-	fmt.Printf("TODO: Register controller in %s:\n", modulePath)
-	fmt.Printf("  Name: %q\n", controllerName)
-	fmt.Printf("  Build: func(r module.Resolver) (any, error) { return New%s(), nil }\n", controllerName)
+	if err := ast.AddController(modulePath, controllerName, buildFuncName); err != nil {
+		fmt.Printf("✓ Created: %s\n", controllerPath)
+		fmt.Printf("✗ Registration failed: %v\n", err)
+		fmt.Printf("  Module: %s\n", modulePath)
+		fmt.Printf("  To complete manually, add to Definition().Controllers:\n")
+		fmt.Printf("    {Name: %q, Build: %s}\n", controllerName, buildFuncName)
+		return nil
+	}
+
+	fmt.Printf("✓ Created: %s\n", controllerPath)
+	fmt.Printf("✓ Registered in: %s\n", modulePath)
 
 	return nil
 }

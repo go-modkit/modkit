@@ -1,0 +1,14 @@
+=== RUN   TestAddProvider
+--- PASS: TestAddProvider (0.00s)
+=== RUN   TestAddProviderNoProvidersField
+--- PASS: TestAddProviderNoProvidersField (0.00s)
+=== RUN   TestAddProviderParseError
+--- PASS: TestAddProviderParseError (0.00s)
+=== RUN   TestAddProviderNoDefinitionMethod
+--- PASS: TestAddProviderNoDefinitionMethod (0.00s)
+=== RUN   TestAddProviderInvalidToken
+--- PASS: TestAddProviderInvalidToken (0.00s)
+=== RUN   TestAddProviderDuplicate
+--- PASS: TestAddProviderDuplicate (0.00s)
+PASS
+ok  	github.com/go-modkit/modkit/internal/cli/ast	(cached)

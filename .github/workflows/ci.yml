@@ -69,3 +69,39 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: .coverage/coverage.out,.coverage/coverage-examples.out
           fail_ci_if_error: false
+
+  cli-smoke:
+    name: CLI Smoke Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.25.7"
+          cache-dependency-path: |
+            tools/tools.go
+            go.mod
+
+      - name: Build CLI
+        run: go build -o /tmp/modkit ./cmd/modkit
+
+      - name: Test CLI scaffolding
+        run: |
+          set -e
+          cd /tmp
+          mkdir -p cli-test
+          cd cli-test
+
+          # Create new app
+          /tmp/modkit new app testapp
+          cd testapp
+
+          # Verify generated files exist
+          test -f cmd/api/main.go
+          test -f internal/modules/app/module.go
+          test -f go.mod
+
+          # Verify the app compiles
+          go build ./cmd/api/main.go
+
+          echo "CLI smoke test passed!"

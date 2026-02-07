@@ -1,0 +1,9 @@
+ok  	github.com/go-modkit/modkit/cmd/modkit	1.037s
+ok  	github.com/go-modkit/modkit/internal/cli/ast	(cached)
+ok  	github.com/go-modkit/modkit/internal/cli/cmd	(cached)
+ok  	github.com/go-modkit/modkit/internal/cli/templates	(cached)
+ok  	github.com/go-modkit/modkit/modkit/config	0.548s
+ok  	github.com/go-modkit/modkit/modkit/http	1.602s
+ok  	github.com/go-modkit/modkit/modkit/kernel	1.854s
+ok  	github.com/go-modkit/modkit/modkit/logging	1.499s
+ok  	github.com/go-modkit/modkit/modkit/module	2.183s
