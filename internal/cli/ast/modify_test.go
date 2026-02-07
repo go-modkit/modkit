@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -63,6 +64,17 @@ func (m *Module) Definition() module.ModuleDef {
 
 	if err := AddProvider(file, "users.auth", "buildAuth"); err == nil {
 		t.Fatal("expected error when Providers field is missing")
+	} else {
+		var perr *ProviderError
+		if !errors.As(err, &perr) {
+			t.Fatalf("expected ProviderError, got %T", err)
+		}
+		if !errors.Is(err, ErrProvidersNotFound) {
+			t.Fatalf("expected ErrProvidersNotFound, got %v", err)
+		}
+		if perr.Error() == "" {
+			t.Fatal("expected non-empty ProviderError message")
+		}
 	}
 }
 
@@ -75,6 +87,14 @@ func TestAddProviderParseError(t *testing.T) {
 
 	if err := AddProvider(file, "users.auth", "buildAuth"); err == nil {
 		t.Fatal("expected parse error")
+	} else {
+		var perr *ProviderError
+		if !errors.As(err, &perr) {
+			t.Fatalf("expected ProviderError, got %T", err)
+		}
+		if perr.Unwrap() == nil {
+			t.Fatal("expected wrapped parse error")
+		}
 	}
 }
 
@@ -277,6 +297,17 @@ func (m *Module) Definition() module.ModuleDef {
 	if err == nil {
 		t.Fatal("expected error when Controllers field is missing")
 	}
+
+	var cerr *ControllerError
+	if !errors.As(err, &cerr) {
+		t.Fatalf("expected ControllerError, got %T", err)
+	}
+	if !errors.Is(err, ErrControllersNotFound) {
+		t.Fatalf("expected ErrControllersNotFound, got %v", err)
+	}
+	if cerr.Error() == "" {
+		t.Fatal("expected non-empty ControllerError message")
+	}
 }
 
 func TestAddControllerParseError(t *testing.T) {
@@ -289,6 +320,14 @@ func TestAddControllerParseError(t *testing.T) {
 	err := AddController(file, "UsersController", "NewUsersController")
 	if err == nil {
 		t.Fatal("expected parse error")
+	}
+
+	var cerr *ControllerError
+	if !errors.As(err, &cerr) {
+		t.Fatalf("expected ControllerError, got %T", err)
+	}
+	if cerr.Unwrap() == nil {
+		t.Fatal("expected wrapped parse error")
 	}
 }
 
