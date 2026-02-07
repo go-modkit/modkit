@@ -280,3 +280,11 @@ module.ProviderDef{
 - Consider validation libraries for complex rules
 - Keep validation logic testable (pure functions)
 - Document expected formats in API docs/OpenAPI
+
+## See example
+
+- [Validation helpers package](../../examples/hello-mysql/internal/validation/)
+- [RFC 7807 Problem Details writer](../../examples/hello-mysql/internal/validation/problem_details.go)
+- [User input validation structs](../../examples/hello-mysql/internal/modules/users/types.go)
+- [Controller validation paths](../../examples/hello-mysql/internal/modules/users/controller.go)
+- [Validation-focused tests](../../examples/hello-mysql/internal/modules/users/validation_test.go)
