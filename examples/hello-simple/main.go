@@ -94,17 +94,17 @@ func (m *AppModule) Definition() module.ModuleDef {
 			{
 				Name: "GreetingController",
 				Build: func(r module.Resolver) (any, error) {
-					msg, err := r.Get(TokenGreeting)
+					msg, err := module.Get[string](r, TokenGreeting)
 					if err != nil {
 						return nil, err
 					}
-					counter, err := r.Get(TokenCounter)
+					counter, err := module.Get[*Counter](r, TokenCounter)
 					if err != nil {
 						return nil, err
 					}
 					return &GreetingController{
-						message: msg.(string),
-						counter: counter.(*Counter),
+						message: msg,
+						counter: counter,
 					}, nil
 				},
 			},

@@ -42,22 +42,22 @@ func (m Module) Definition() module.ModuleDef {
 			{
 				Token: TokenRepository,
 				Build: func(r module.Resolver) (any, error) {
-					dbAny, err := r.Get(database.TokenDB)
+					db, err := module.Get[*sql.DB](r, database.TokenDB)
 					if err != nil {
 						return nil, err
 					}
-					queries := sqlc.New(dbAny.(*sql.DB))
+					queries := sqlc.New(db)
 					return NewMySQLRepo(queries), nil
 				},
 			},
 			{
 				Token: TokenService,
 				Build: func(r module.Resolver) (any, error) {
-					repoAny, err := r.Get(TokenRepository)
+					repo, err := module.Get[Repository](r, TokenRepository)
 					if err != nil {
 						return nil, err
 					}
-					return NewService(repoAny.(Repository), logging.New()), nil
+					return NewService(repo, logging.New()), nil
 				},
 			},
 		},
@@ -65,15 +65,15 @@ func (m Module) Definition() module.ModuleDef {
 			{
 				Name: UsersControllerID,
 				Build: func(r module.Resolver) (any, error) {
-					svcAny, err := r.Get(TokenService)
+					svc, err := module.Get[Service](r, TokenService)
 					if err != nil {
 						return nil, err
 					}
-					authAny, err := r.Get(auth.TokenMiddleware)
+					authMiddleware, err := module.Get[func(http.Handler) http.Handler](r, auth.TokenMiddleware)
 					if err != nil {
 						return nil, err
 					}
-					return NewController(svcAny.(Service), authAny.(func(http.Handler) http.Handler)), nil
+					return NewController(svc, authMiddleware), nil
 				},
 			},
 		},
