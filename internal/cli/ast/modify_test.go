@@ -6,6 +6,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -527,6 +528,10 @@ func (m *Module) Definition() module.ModuleDef {
 }
 
 func TestAddProviderTempError(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("chmod-based permission errors are unreliable on Windows")
+	}
+
 	tmp := t.TempDir()
 	moduleDir := filepath.Join(tmp, "module")
 	if err := os.MkdirAll(moduleDir, 0o750); err != nil {
@@ -569,6 +574,10 @@ func (m *Module) Definition() module.ModuleDef {
 }
 
 func TestAddControllerTempError(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("chmod-based permission errors are unreliable on Windows")
+	}
+
 	tmp := t.TempDir()
 	moduleDir := filepath.Join(tmp, "module")
 	if err := os.MkdirAll(moduleDir, 0o750); err != nil {
