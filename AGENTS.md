@@ -65,6 +65,11 @@ High-signal packages by density:
 - If work is driven by a GitHub issue hierarchy (parent/story + sub-issues), PR bodies must include one `Resolves #<number>` line for each implemented issue.
 - If work is not issue-driven, omit `Resolves` (or mark N/A if the active PR template requires the section).
 - If `.github/pull_request_template.md` exists, PR descriptions must follow that template structure.
+- Template checklist must be actively reconciled (checked/unchecked/N/A with reason) before review request.
+- A checklist box may be checked only when same-session verification evidence exists.
+- Before PR create/update, run `make fmt && make lint && make test` (or documented project equivalent) and reflect outcomes in the checklist.
+- If a check is not run, leave it unchecked or mark N/A with an explicit reason.
+- After any new commit on the PR branch, rerun affected checks and re-reconcile the checklist.
 
 ## COMMANDS
 ```bash
