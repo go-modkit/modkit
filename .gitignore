@@ -10,3 +10,4 @@ dist/
 # Internal planning files
 .plans/
 .cursor/
+.sisyphus/

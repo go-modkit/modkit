@@ -1,4 +1,0 @@
-=== RUN   TestAddProviderDuplicate
---- PASS: TestAddProviderDuplicate (0.00s)
-PASS
-ok  	github.com/go-modkit/modkit/internal/cli/ast	0.332s
