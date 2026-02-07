@@ -5,6 +5,7 @@
 
 # Build cache
 .cache/
+dist/
 
 # Internal planning files
 .plans/
