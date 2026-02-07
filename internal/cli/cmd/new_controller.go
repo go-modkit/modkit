@@ -9,8 +9,6 @@ import (
 	"text/template"
 
 	"github.com/spf13/cobra"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 
 	"github.com/go-modkit/modkit/internal/cli/templates"
 )
@@ -59,25 +57,20 @@ func createNewController(name, moduleName string) error {
 		return fmt.Errorf("controller file already exists at %s", controllerPath)
 	}
 
-	// Get package name from directory name if not explicit
-	pkgName := filepath.Base(moduleDir)
+	pkgName := sanitizePackageName(filepath.Base(moduleDir))
 
 	data := struct {
-		Name    string
-		Package string
-		Title   func(string) string
+		Name       string
+		Package    string
+		Identifier string
 	}{
-		Name:    name,
-		Package: pkgName,
-		Title: func(s string) string {
-			return cases.Title(language.English).String(strings.ReplaceAll(s, "-", " "))
-		},
+		Name:       name,
+		Package:    pkgName,
+		Identifier: exportedIdentifier(name),
 	}
 
 	tplFS := templates.FS()
-	tpl, err := template.New("controller.go.tpl").Funcs(template.FuncMap{
-		"Title": data.Title,
-	}).ParseFS(tplFS, "controller.go.tpl")
+	tpl, err := template.ParseFS(tplFS, "controller.go.tpl")
 
 	if err != nil {
 		return fmt.Errorf("failed to parse template: %w", err)
@@ -102,7 +95,7 @@ func createNewController(name, moduleName string) error {
 
 	fmt.Printf("Created %s\n", controllerPath)
 
-	controllerName := fmt.Sprintf("%sController", data.Title(name))
+	controllerName := fmt.Sprintf("%sController", data.Identifier)
 
 	fmt.Printf("TODO: Register controller in %s:\n", modulePath)
 	fmt.Printf("  Name: %q\n", controllerName)

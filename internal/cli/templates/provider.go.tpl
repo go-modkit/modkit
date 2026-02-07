@@ -1,12 +1,8 @@
 package {{.Package}}
 
-import (
-	"github.com/go-modkit/modkit/modkit/module"
-)
+// {{.Identifier}}Service is the {{.Name}} service.
+type {{.Identifier}}Service struct{}
 
-// {{.Name | Title}}Service is the {{.Name}} service.
-type {{.Name | Title}}Service struct{}
-
-func New{{.Name | Title}}Service() *{{.Name | Title}}Service {
-	return &{{.Name | Title}}Service{}
+func New{{.Identifier}}Service() *{{.Identifier}}Service {
+	return &{{.Identifier}}Service{}
 }

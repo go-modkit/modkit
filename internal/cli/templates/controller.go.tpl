@@ -1,19 +1,17 @@
 package {{.Package}}
 
 import (
-	"net/http"
-
 	mkhttp "github.com/go-modkit/modkit/modkit/http"
 )
 
-// {{.Name | Title}}Controller handles {{.Name}} related requests.
-type {{.Name | Title}}Controller struct{}
+// {{.Identifier}}Controller handles {{.Name}} related requests.
+type {{.Identifier}}Controller struct{}
 
-func New{{.Name | Title}}Controller() *{{.Name | Title}}Controller {
-	return &{{.Name | Title}}Controller{}
+func New{{.Identifier}}Controller() *{{.Identifier}}Controller {
+	return &{{.Identifier}}Controller{}
 }
 
-func (c *{{.Name | Title}}Controller) RegisterRoutes(r mkhttp.Router) {
+func (c *{{.Identifier}}Controller) RegisterRoutes(r mkhttp.Router) {
 	// TODO: Register routes
-	// r.Handle(http.MethodGet, "/{{.Name}}", http.HandlerFunc(c.HandleGet))
+	// r.Handle("GET", "/{{.Name}}", ...)
 }

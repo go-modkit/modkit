@@ -5,12 +5,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"text/template"
 
 	"github.com/spf13/cobra"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 
 	"github.com/go-modkit/modkit/internal/cli/templates"
 )
@@ -43,22 +40,17 @@ func createNewModule(name string) error {
 	}
 
 	data := struct {
-		Name    string
-		Package string
-		Title   func(string) string
+		Name       string
+		Package    string
+		Identifier string
 	}{
-		Name:    name,
-		Package: strings.ToLower(strings.ReplaceAll(name, "-", "")),
-		Title: func(s string) string {
-			return cases.Title(language.English).String(strings.ReplaceAll(s, "-", " "))
-		},
+		Name:       name,
+		Package:    sanitizePackageName(name),
+		Identifier: exportedIdentifier(name),
 	}
 
 	tplFS := templates.FS()
-	tpl, err := template.New("module.go.tpl").Funcs(template.FuncMap{
-		"Title":   data.Title,
-		"Replace": strings.ReplaceAll,
-	}).ParseFS(tplFS, "module.go.tpl")
+	tpl, err := template.ParseFS(tplFS, "module.go.tpl")
 
 	if err != nil {
 		return fmt.Errorf("failed to parse template: %w", err)

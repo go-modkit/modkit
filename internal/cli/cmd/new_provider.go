@@ -60,7 +60,7 @@ func createNewProvider(name, moduleName string) error {
 	}
 
 	// Get package name from directory name if not explicit
-	pkgName := filepath.Base(moduleDir)
+	pkgName := strings.ToLower(strings.ReplaceAll(filepath.Base(moduleDir), "-", ""))
 
 	data := struct {
 		Name    string
