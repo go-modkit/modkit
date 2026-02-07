@@ -86,6 +86,15 @@ We pin the patch level to 1.25.7 in CI to align with vulnerability scanning and 
 - **No Reflection** — Everything is explicit and type-safe
 - **Deterministic Bootstrap** — Predictable initialization order with clear error messages
 
+## Feature Matrix
+
+| Pattern | Guide | Example Code | Example Tests |
+|---------|-------|--------------|---------------|
+| Authentication | [Authentication Guide](docs/guides/authentication.md) | [`examples/hello-mysql/internal/modules/auth/`](examples/hello-mysql/internal/modules/auth/) | [`examples/hello-mysql/internal/modules/auth/integration_test.go`](examples/hello-mysql/internal/modules/auth/integration_test.go) |
+| Validation | [Validation Guide](docs/guides/validation.md) | [`examples/hello-mysql/internal/validation/`](examples/hello-mysql/internal/validation/) + [`examples/hello-mysql/internal/modules/users/types.go`](examples/hello-mysql/internal/modules/users/types.go) | [`examples/hello-mysql/internal/modules/users/validation_test.go`](examples/hello-mysql/internal/modules/users/validation_test.go) |
+| Middleware | [Middleware Guide](docs/guides/middleware.md) | [`examples/hello-mysql/internal/middleware/`](examples/hello-mysql/internal/middleware/) + [`examples/hello-mysql/internal/httpserver/server.go`](examples/hello-mysql/internal/httpserver/server.go) | [`examples/hello-mysql/internal/middleware/middleware_test.go`](examples/hello-mysql/internal/middleware/middleware_test.go) |
+| Lifecycle and Cleanup | [Lifecycle Guide](docs/guides/lifecycle.md) | [`examples/hello-mysql/internal/lifecycle/cleanup.go`](examples/hello-mysql/internal/lifecycle/cleanup.go) + [`examples/hello-mysql/cmd/api/main.go`](examples/hello-mysql/cmd/api/main.go) | [`examples/hello-mysql/internal/lifecycle/lifecycle_test.go`](examples/hello-mysql/internal/lifecycle/lifecycle_test.go) |
+
 ## Packages
 
 | Package | Description |

@@ -317,3 +317,11 @@ func TestGetProfile_Unauthenticated(t *testing.T) {
 - Use different middleware for different auth strategies
 - Return 401 for "who are you?" and 403 for "you can't do that"
 - Test both authenticated and unauthenticated scenarios
+
+## See example
+
+- [Auth module package](../../examples/hello-mysql/internal/modules/auth/)
+- [JWT middleware](../../examples/hello-mysql/internal/modules/auth/middleware.go)
+- [Login handler (`POST /api/v1/auth/login`)](../../examples/hello-mysql/internal/modules/auth/handler.go)
+- [Typed auth context helpers](../../examples/hello-mysql/internal/modules/auth/context.go)
+- [Auth integration tests](../../examples/hello-mysql/internal/modules/auth/integration_test.go)

@@ -453,3 +453,11 @@ func main() {
 - [Providers Guide](providers.md) — Dependency injection patterns
 - [Context Helpers](context-helpers.md) — Typed context keys for request-scoped data
 - [Testing Guide](testing.md) — Testing lifecycle and cleanup
+
+## See example
+
+- [Lifecycle helpers package](../../examples/hello-mysql/internal/lifecycle/)
+- [Cleanup hook execution (LIFO)](../../examples/hello-mysql/internal/lifecycle/cleanup.go)
+- [API startup and graceful shutdown flow](../../examples/hello-mysql/cmd/api/main.go)
+- [Lifecycle shutdown tests](../../examples/hello-mysql/internal/lifecycle/lifecycle_test.go)
+- [App shutdown integration tests](../../examples/hello-mysql/cmd/api/main_test.go)
