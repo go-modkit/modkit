@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/database"
 	"github.com/go-modkit/modkit/modkit/kernel"
 	"github.com/go-modkit/modkit/modkit/module"
 )
@@ -48,5 +49,27 @@ func TestAuthModule_ControllerBuildError(t *testing.T) {
 	})
 	if err == nil {
 		t.Fatal("expected error")
+	}
+}
+
+type rootModule struct {
+	imports []module.Module
+}
+
+func (m *rootModule) Definition() module.ModuleDef {
+	return module.ModuleDef{
+		Name:    "root",
+		Imports: m.imports,
+	}
+}
+
+func TestAuthAndDatabase_DefaultConfigComposition(t *testing.T) {
+	root := &rootModule{imports: []module.Module{
+		NewModule(Options{}),
+		database.NewModule(database.Options{}),
+	}}
+
+	if _, err := kernel.Bootstrap(root); err != nil {
+		t.Fatalf("bootstrap failed: %v", err)
 	}
 }

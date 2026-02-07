@@ -23,7 +23,7 @@ type DatabaseModule = Module
 
 func NewModule(opts Options) module.Module {
 	if opts.Config == nil {
-		opts.Config = configmodule.NewModule(configmodule.Options{})
+		opts.Config = configmodule.DefaultModule()
 	}
 	return &Module{opts: opts}
 }
@@ -31,7 +31,7 @@ func NewModule(opts Options) module.Module {
 func (m Module) Definition() module.ModuleDef {
 	configMod := m.opts.Config
 	if configMod == nil {
-		configMod = configmodule.NewModule(configmodule.Options{})
+		configMod = configmodule.DefaultModule()
 	}
 
 	var db *sql.DB

@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	mkconfig "github.com/go-modkit/modkit/modkit/config"
@@ -44,6 +45,19 @@ type Options struct {
 
 type Module struct {
 	opts Options
+}
+
+var (
+	defaultOnce   sync.Once
+	defaultModule module.Module
+)
+
+// DefaultModule returns a shared config module instance for default composition paths.
+func DefaultModule() module.Module {
+	defaultOnce.Do(func() {
+		defaultModule = NewModule(Options{})
+	})
+	return defaultModule
 }
 
 func NewModule(opts Options) module.Module {
