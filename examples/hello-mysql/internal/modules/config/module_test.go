@@ -1,10 +1,12 @@
 package config
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 	"time"
 
+	mkconfig "github.com/go-modkit/modkit/modkit/config"
 	"github.com/go-modkit/modkit/modkit/kernel"
 	"github.com/go-modkit/modkit/modkit/module"
 )
@@ -112,5 +114,24 @@ func TestResolvesSourceOverrides(t *testing.T) {
 	burst, err := module.Get[int](app, TokenRateLimitBurst)
 	if err != nil || burst != 25 {
 		t.Fatalf("unexpected RATE_LIMIT_BURST: %d err=%v", burst, err)
+	}
+}
+
+func TestRejectsNonPositiveJWTTTL(t *testing.T) {
+	src := mapSource{"JWT_TTL": "0s"}
+
+	app, err := kernel.Bootstrap(&rootModule{imports: []module.Module{NewModule(Options{Source: src})}})
+	if err != nil {
+		t.Fatalf("bootstrap failed: %v", err)
+	}
+
+	_, err = module.Get[time.Duration](app, TokenJWTTTL)
+	if err == nil {
+		t.Fatalf("expected JWT_TTL parse error")
+	}
+
+	var parseErr *mkconfig.ParseError
+	if !errors.As(err, &parseErr) {
+		t.Fatalf("expected ParseError, got %T", err)
 	}
 }

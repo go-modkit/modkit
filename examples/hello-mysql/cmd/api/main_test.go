@@ -218,3 +218,12 @@ func TestLoadAppOptions_WithOverrides(t *testing.T) {
 		t.Fatalf("unexpected rate limits: %v/%d", got.RateLimitPerSecond, got.RateLimitBurst)
 	}
 }
+
+func TestLoadAppOptions_InvalidNonPositiveJWTTTL(t *testing.T) {
+	t.Setenv("JWT_TTL", "0s")
+
+	_, err := loadAppOptions()
+	if err == nil {
+		t.Fatalf("expected error for non-positive JWT_TTL")
+	}
+}

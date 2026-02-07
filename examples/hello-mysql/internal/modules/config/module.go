@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"time"
 
 	mkconfig "github.com/go-modkit/modkit/modkit/config"
@@ -89,7 +90,7 @@ func (m *Module) Definition() module.ModuleDef {
 		mkconfig.WithTyped(TokenJWTTTL, mkconfig.ValueSpec[time.Duration]{
 			Key:     "JWT_TTL",
 			Default: &jwtTTLDefault,
-			Parse:   mkconfig.ParseDuration,
+			Parse:   parsePositiveDuration,
 		}, true),
 		mkconfig.WithTyped(TokenAuthUsername, mkconfig.ValueSpec[string]{
 			Key:     "AUTH_USERNAME",
@@ -140,4 +141,15 @@ func (m *Module) Definition() module.ModuleDef {
 		Imports: []module.Module{configModule},
 		Exports: exportedTokens,
 	}
+}
+
+func parsePositiveDuration(raw string) (time.Duration, error) {
+	d, err := mkconfig.ParseDuration(raw)
+	if err != nil {
+		return 0, err
+	}
+	if d <= 0 {
+		return 0, fmt.Errorf("duration must be > 0")
+	}
+	return d, nil
 }
