@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -74,7 +75,8 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           files: .coverage/coverage.out
-          fail_ci_if_error: false
+          fail_ci_if_error: true
+          use_oidc: true
 
   cli-smoke:
     name: CLI Smoke Test
