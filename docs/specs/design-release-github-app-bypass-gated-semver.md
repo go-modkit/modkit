@@ -1,4 +1,4 @@
-# Design Spec: GitHub App Bypass + CI-Gated Semantic Tagging + GoReleaser Changelog
+# Design Spec: GitHub App Bypass + CI-Gated Release Workflow + GoReleaser Changelog
 
 ## Status
 
@@ -17,11 +17,11 @@
 ## Desired Release Architecture
 
 1. `ci` workflow runs on pull requests and pushes to `main`.
-2. `release-semantic` workflow runs only after `ci` completes successfully on `main` push.
-3. `release-artifacts` workflow runs on pushed tags matching `v*`.
+2. A single `release` workflow runs only after `ci` completes successfully on `main` push.
+3. Inside `release`, semantic tagging runs first and artifact publishing runs only when a version was released.
 4. Changelog and release notes are generated automatically by GoReleaser.
 
-This split keeps responsibilities clear:
+This keeps responsibilities in one gated workflow:
 
 - Semantic release: version calculation + tag orchestration.
 - GoReleaser: GitHub Release content + artifacts + changelog generation.
@@ -60,7 +60,7 @@ Keep existing jobs/caching unchanged. Apply only these updates:
    - Ensure permissions include `id-token: write` and `contents: read`.
 5. Remove any reference to `${{ secrets.CODECOV_TOKEN }}`.
 
-### B) Semantic Gate Workflow (`.github/workflows/release-semantic.yml`)
+### B) Release Workflow (`.github/workflows/release.yml`)
 
 Trigger:
 
@@ -68,7 +68,7 @@ Trigger:
 - `types: [completed]`
 - `branches: [main]`
 
-Job gate condition:
+Release gate condition:
 
 - `github.event.workflow_run.conclusion == 'success'`
 - `github.event.workflow_run.event == 'push'`
@@ -77,38 +77,16 @@ Job gate condition:
 Core steps:
 
 1. Create GitHub App installation token via `actions/create-github-app-token@v2` using org var/secret and owner/repositories scoping.
-2. Checkout repository at exact tested SHA: `${{ github.event.workflow_run.head_sha }}` with app token.
-3. Fetch `origin/main` and fail if it moved since CI finished.
-   - Guard condition: `origin/main` commit must equal `workflow_run.head_sha`.
-4. Run `go-semantic-release/action@v1` with app token.
+2. Checkout `main` with app token.
+3. Run `go-semantic-release/action@v1` with app token and expose released version output.
+4. Run artifact publish job only when semantic release emits a non-empty version.
+5. Publish artifacts from the released tag `v<version>` via `goreleaser/goreleaser-action@v6`.
 
 Required controls:
 
-- `permissions: contents: write`
-- `concurrency` single lane for semantic releases on main (`cancel-in-progress: false`)
-
-Notes:
-
-- Merge queue is recommended for branch discipline, but does not replace the SHA drift guard in `workflow_run` release architecture.
-
-### C) Artifacts Workflow (`.github/workflows/release-artifacts.yml`)
-
-Trigger:
-
-- `on.push.tags: ["v*"]`
-
-Core steps:
-
-1. Checkout with `fetch-depth: 0`.
-2. Keep current Go setup and cache blocks unchanged.
-3. Run `goreleaser/goreleaser-action@v6` with `args: release --clean`.
-
-Required controls:
-
-- `permissions: contents: write`
-- concurrency by tag reference:
-  - group: `release-artifacts-${{ github.ref }}`
-  - `cancel-in-progress: false`
+- Top-level workflow permissions remain least-privilege (`contents: read`), with job-level elevation to `contents: write` where required.
+- `concurrency` single lane for releases on main (`cancel-in-progress: false`).
+- Keep current Go setup and cache blocks unchanged in the artifacts job.
 
 ## `.goreleaser.yml` Changelog Ownership
 
@@ -133,8 +111,8 @@ Additional rules:
 Update `docs/guides/release-process.md` to describe:
 
 1. CI hard gate via `workflow_run` from `ci`.
-2. Semantic tagging with GitHub App token and SHA drift guard.
-3. Tag-driven GoReleaser publish flow.
+2. Semantic tagging with GitHub App token.
+3. Artifact publication conditioned on semantic-release output in the same workflow.
 4. Org-level app secret/variable convention.
 5. GoReleaser-generated changelog ownership.
 
@@ -142,7 +120,7 @@ Update `docs/guides/release-process.md` to describe:
 
 1. PRs and pushes to `main` run `ci` with existing caching unchanged.
 2. Codecov upload runs without `CODECOV_TOKEN` and fails CI on upload errors.
-3. Semantic release runs only after successful `ci` on `main` push.
-4. Semantic release exits without releasing if `origin/main` advanced beyond tested SHA.
-5. Tag `vX.Y.Z` triggers artifact workflow.
+3. Release workflow runs only after successful `ci` on `main` push.
+4. Semantic release runs before artifact publishing and exposes released version output.
+5. Artifact publishing runs only when a semantic version was released and publishes from tag `vX.Y.Z`.
 6. GoReleaser publishes assets and generates release notes/changelog using `changelog.use: github`.

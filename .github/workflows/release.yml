@@ -1,0 +1,86 @@
+name: release
+
+on:
+  workflow_run:
+    workflows: ["ci"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+jobs:
+  semantic-release:
+    name: Semantic Release
+    runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.semrel.outputs.version }}
+    steps:
+      - name: Create GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          owner: go-modkit
+          repositories: modkit
+
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Run semantic-release
+        id: semrel
+        uses: go-semantic-release/action@v1
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          allow-initial-development-versions: true
+          changelog-generator-opt: "emojis=true"
+
+  publish-artifacts:
+    name: Publish CLI release artifacts
+    needs: semantic-release
+    if: needs.semantic-release.outputs.version != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Checkout released tag
+        run: |
+          git fetch --force --tags
+          TAG="v${{ needs.semantic-release.outputs.version }}"
+          test "$(git rev-parse "$TAG")"
+          git checkout "$TAG"
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.25.7"
+          cache-dependency-path: |
+            tools/tools.go
+            go.mod
+
+      - name: Publish CLI release artifacts
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

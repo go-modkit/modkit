@@ -1,27 +1,21 @@
 # Release Process
 
-modkit uses a split, gated release architecture to ensure that only verified code is released and that release actors have minimal, scoped permissions.
+modkit uses a CI-gated release workflow so semantic versioning and artifact publishing stay in one controlled pipeline.
 
 ## Release Flow
 
-The release process follows a three-stage pipeline:
+The release process follows a two-stage pipeline:
 
 1.  **Continuous Integration (`ci.yml`)**:
     *   Runs on every pull request and merge to `main`.
     *   Executes linting, vulnerability scans, coverage tests, and CLI smoke tests.
     *   Must pass successfully on `main` to trigger the next stage.
 
-2.  **Semantic Versioning (`release-semantic.yml`)**:
-    *   Triggered via `workflow_run` when the CI workflow completes successfully on the `main` branch.
-    *   **GitHub App Authentication**: Uses `vars.RELEASE_APP_ID` and `secrets.RELEASE_APP_PRIVATE_KEY` to generate a scoped installation token. This allows the workflow to bypass branch protection rules (specifically to push tags) using a dedicated service identity rather than a personal access token.
-    *   **SHA Drift Guard**: Before proceeding, the workflow verifies that the current `origin/main` SHA matches the SHA that triggered the CI run. This prevents "drift" where a new commit is pushed to `main` before the previous release completes, ensuring we only tag exactly what was tested.
-    *   **Version Detection**: Runs `go-semantic-release` to analyze Conventional Commits. If a new version is required, it creates and pushes a git tag (e.g., `v1.2.3`).
-
-3.  **Artifact Publication (`release-artifacts.yml`)**:
-    *   Triggered by the push of a version tag (`v*`).
-    *   **GoReleaser**: Builds binaries for multiple platforms (`darwin`, `linux`, `windows` for both `amd64` and `arm64`).
-    *   **Changelog Ownership**: GoReleaser is configured to use GitHub-native release notes (`use: github`) as the source of truth for the changelog.
-    *   Publishes the release with binaries and `checksums.txt` to GitHub.
+2.  **Release (`release.yml`)**:
+    *   Triggered via `workflow_run` when the `ci` workflow completes successfully on a `main` push.
+    *   **Semantic job**: Uses `vars.RELEASE_APP_ID` and `secrets.RELEASE_APP_PRIVATE_KEY` to create a scoped GitHub App token, checks out `main`, and runs `go-semantic-release`.
+    *   **Artifacts job**: Runs only if semantic release emits a version, checks out the created release tag (`v<version>`), and runs GoReleaser.
+    *   **Changelog Ownership**: GoReleaser uses GitHub-native release notes (`use: github`) as the source of truth for changelog content.
 
 ## Security Rationale
 
@@ -31,8 +25,8 @@ We use a dedicated GitHub App for release operations instead of a standard `GITH
 - **Bypass Rules**: It acts as a "bypass actor" in repository rulesets, allowing it to push tags to protected branches without requiring a full PR cycle for the tag itself.
 - **Auditability**: Release actions are clearly attributed to the App identity in the audit log.
 
-### SHA Drift Guard
-In a high-velocity environment, multiple commits might land on `main` in quick succession. The SHA drift guard ensures that the release workflow only tags the specific commit that passed CI. If `main` has moved, the workflow fails safely, and the next CI run (for the newer commit) will handle the release.
+### Single Workflow Control
+Semantic tagging and artifact publishing run in one workflow so artifact publication is conditioned on a released semantic version output rather than on an independent tag-triggered workflow.
 
 ## Quality Gates
 
