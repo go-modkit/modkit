@@ -26,7 +26,8 @@
 
 <!-- Commands run and their results -->
 ```bash
-make fmt && make lint && make test
+make fmt && make lint && make vuln && make test && make test-coverage
+make cli-smoke-build && make cli-smoke-scaffold
 ```
 
 ## Checklist
@@ -34,7 +35,10 @@ make fmt && make lint && make test
 <!-- All boxes should be checked before requesting review -->
 - [ ] Code follows project style (`make fmt` passes)
 - [ ] Linter passes (`make lint`)
+- [ ] Vulnerability scan passes (`make vuln`)
 - [ ] Tests pass (`make test`)
+- [ ] Coverage tests pass (`make test-coverage`)
+- [ ] CLI smoke checks pass (`make cli-smoke-build && make cli-smoke-scaffold`)
 - [ ] Tests added/updated for new functionality
 - [ ] Documentation updated (if applicable)
 - [ ] Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/)

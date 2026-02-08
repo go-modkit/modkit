@@ -108,15 +108,10 @@ make cli-smoke-scaffold
 ### Install Development Tools
 
 ```bash
-# goimports (for make fmt)
-go install golang.org/x/tools/cmd/goimports@latest
-
-# golangci-lint (for make lint)
-go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-
-# govulncheck (for make vuln)
-go install golang.org/x/vuln/cmd/govulncheck@latest
+make tools
 ```
+
+`make tools` installs tool versions pinned by the repository.
 
 ## Contribution Guidelines
 
@@ -129,9 +124,13 @@ go install golang.org/x/vuln/cmd/govulncheck@latest
 ### Pull Request Process
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feat/my-feature`)
+2. Update `main` and create a feature worktree branch:
+   - `git fetch origin && git switch main && git pull --ff-only origin main`
+   - `git worktree add .worktrees/my-feature -b feat/my-feature main`
+   - Work from `.worktrees/my-feature` (do not commit on `main`)
 3. Make your changes with tests
-4. Run `make fmt && make lint && make test`
+4. Run `make fmt && make lint && make vuln && make test && make test-coverage`
+   - Also run CLI gate: `make cli-smoke-build && make cli-smoke-scaffold`
 5. Commit with a conventional prefix (`feat:`, `fix:`, `docs:`, `chore:`)
 6. Open a pull request with a clear description
 

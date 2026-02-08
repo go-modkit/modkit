@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Questions & Discussions
-    url: https://github.com/aryeko/modkit/discussions
+    url: https://github.com/go-modkit/modkit/discussions
     about: Ask questions and discuss ideas (don't open an issue)
   - name: Security Vulnerabilities
-    url: https://github.com/aryeko/modkit/security/policy
+    url: https://github.com/go-modkit/modkit/security/policy
     about: Report security issues privately

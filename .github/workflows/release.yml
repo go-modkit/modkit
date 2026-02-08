@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -23,6 +27,28 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           allow-initial-development-versions: true
           changelog-generator-opt: "emojis=true"
+
+      - name: Set up Go
+        if: steps.semrel.outputs.version != ''
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.25.7"
+          cache-dependency-path: |
+            tools/tools.go
+            go.mod
+
+      - name: Refresh tags
+        if: steps.semrel.outputs.version != ''
+        run: git fetch --force --tags
+
+      - name: Publish CLI release artifacts
+        if: steps.semrel.outputs.version != ''
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Release info
         if: steps.semrel.outputs.version != ''

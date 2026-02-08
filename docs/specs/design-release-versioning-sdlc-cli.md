@@ -56,9 +56,9 @@ Current release flow creates semantic versions and release notes, but it does no
 
 ## 6. Required CI Changes
 
-## 6.1. Add CLI Smoke-Test Job in `ci.yml`
+## 6.1. Maintain CLI Smoke-Test Job in `ci.yml`
 
-Add a new job `cli-smoke` that runs on pull requests and pushes.
+`cli-smoke` is already present in `ci.yml` and must remain a required check on pull requests and pushes.
 
 Validation sequence:
 
@@ -180,7 +180,7 @@ This initiative is complete when all are true:
 
 ### Phase 1: CI Guardrails
 
-- Add `cli-smoke` job to `ci.yml`.
+- Confirm `cli-smoke` job remains enforced in `ci.yml`.
 - Validate against current `main`.
 
 ### Phase 2: Release Artifacts
@@ -207,7 +207,7 @@ This initiative is complete when all are true:
 
 The follow-up PR (after `feat/cli-tooling` merge) should include:
 
-- [ ] `.github/workflows/ci.yml` updated with `cli-smoke` job.
+- [ ] `cli-smoke` job in `.github/workflows/ci.yml` is preserved and remains required.
 - [ ] `.github/workflows/release.yml` updated for CLI artifact publishing.
 - [ ] `.goreleaser.yml` added and validated.
 - [ ] README install section updated.

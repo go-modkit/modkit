@@ -224,6 +224,7 @@ See [Architecture Guide](docs/architecture.md) for details.
 - [API Reference](docs/reference/api.md) — Types and functions
 - [Architecture](docs/architecture.md) — How modkit works under the hood
 - [FAQ](docs/faq.md) — Common questions
+- [Release Process](docs/guides/release-process.md) — CI and versioned CLI release flow
 
 **Examples:**
 - [hello-simple](examples/hello-simple/) — Minimal example, no Docker
