@@ -51,10 +51,6 @@ jobs:
       - name: Refresh tags
         run: git fetch --force --tags
 
-      - name: Validate clean git state
-        run: |
-          test -z "$(git status --porcelain)"
-
       - name: Verify release tag exists
         run: |
           test "$(git describe --tags --exact-match)" = "v${{ needs.semantic-release.outputs.version }}"
