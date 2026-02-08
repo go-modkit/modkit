@@ -157,8 +157,6 @@ func WithProviderOverrides(overrides ...ProviderOverride) BootstrapOption
 
 ## http
 
----
-
 ### NewRouter
 
 ```go
