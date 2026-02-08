@@ -123,13 +123,13 @@ Returns a root-scoped resolver that enforces module visibility.
 func BootstrapWithOptions(root module.Module, opts ...BootstrapOption) (*App, error)
 ```
 
-Bootstraps with explicit options. In v1, `WithProviderOverrides` is the mutation option for tests.
+Bootstraps with explicit options. Use `WithProviderOverrides` to replace provider implementations, typically for testing.
 
 ```go
 type ProviderOverride struct {
     Token   module.Token
     Build   func(module.Resolver) (any, error)
-    Cleanup func(context.Context) error
+    Cleanup func(context.Context) error  // Optional; called when harness is closed
 }
 
 func WithProviderOverrides(overrides ...ProviderOverride) BootstrapOption

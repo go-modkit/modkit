@@ -174,7 +174,7 @@ func TestBootstrapWithOptions_RejectsUnknownOverrideToken(t *testing.T) {
 
 	_, err := kernel.BootstrapWithOptions(root,
 		kernel.WithProviderOverrides(kernel.ProviderOverride{
-			Token: module.Token("missing"),
+			Token: module.Token("root.missing"),
 			Build: func(module.Resolver) (any, error) { return "x", nil },
 		}),
 	)
@@ -189,7 +189,7 @@ func TestBootstrapWithOptions_RejectsUnknownOverrideToken(t *testing.T) {
 }
 
 func TestBootstrapWithOptions_RejectsOverrideTokenNotVisibleFromRoot(t *testing.T) {
-	hidden := module.Token("hidden")
+	hidden := module.Token("B.hidden")
 
 	modB := mod("B", nil,
 		[]module.ProviderDef{{
