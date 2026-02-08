@@ -1,4 +1,4 @@
-name: release
+name: Release
 
 on:
   workflow_run:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: release-main
+  group: release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -30,26 +30,15 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ vars.RELEASE_APP_ID }}
+          app-id: ${{ secrets.RELEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
           owner: go-modkit
           repositories: modkit
 
-      - name: Checkout main
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
-          ref: main
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
-
-      - name: SHA drift guard
-        run: |
-          EXPECTED_SHA="${{ github.event.workflow_run.head_sha }}"
-          ACTUAL_SHA=$(git rev-parse HEAD)
-          if [ "$EXPECTED_SHA" != "$ACTUAL_SHA" ]; then
-            echo "SHA drift detected: main is at $ACTUAL_SHA, but CI ran on $EXPECTED_SHA"
-            exit 1
-          fi
 
       - name: Run semantic-release
         id: semrel
@@ -71,22 +60,16 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ vars.RELEASE_APP_ID }}
+          app-id: ${{ secrets.RELEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
           owner: go-modkit
           repositories: modkit
 
       - uses: actions/checkout@v6
         with:
+          ref: "v${{ needs.semantic-release.outputs.version }}"
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
-
-      - name: Checkout released tag
-        run: |
-          git fetch --force --tags
-          TAG="v${{ needs.semantic-release.outputs.version }}"
-          test "$(git rev-parse "$TAG")"
-          git checkout "$TAG"
 
       - name: Set up Go
         uses: actions/setup-go@v6

@@ -34,20 +34,6 @@ jobs:
           go-version: "1.25.7"
           cache-dependency-path: "**/*.sum"
 
-      # - name: Cache Tools and Modules
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: |
-      #       ~/go/bin
-      #       ~/go/pkg/mod
-      #       ~/.cache/golangci-lint
-      #     # Key based on tools/tools.go and go.sum (tool versions only)
-      #     # This cache is stable: only invalidates when tools change, not app dependencies
-      #     # Caches both binaries and modules to prevent re-downloading on every run
-      #     key: ${{ runner.os }}-tools-${{ hashFiles('tools/tools.go', 'go.sum') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-tools-
-
       - name: Install tools
         # Use make tools to install versions pinned in go.mod/tools.go
         # With the cache above, this will be a near-instant no-op if binaries exist
