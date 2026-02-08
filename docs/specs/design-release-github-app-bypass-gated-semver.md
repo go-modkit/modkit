@@ -30,12 +30,12 @@ This keeps responsibilities in one gated workflow:
 
 Use org-level credentials (shared across repos):
 
-- Variable: `RELEASE_APP_ID=2823689`
+- Secret: `RELEASE_APP_ID=<app id>`
 - Secret: `RELEASE_APP_PRIVATE_KEY=<PEM>`
 
 Workflow usage requirements:
 
-- Read app credentials from `${{ vars.RELEASE_APP_ID }}` and `${{ secrets.RELEASE_APP_PRIVATE_KEY }}`.
+- Read app credentials from `${{ secrets.RELEASE_APP_ID }}` and `${{ secrets.RELEASE_APP_PRIVATE_KEY }}`.
 - Scope generated app token to target repo when creating token:
   - `owner: go-modkit`
   - `repositories: modkit`
@@ -77,16 +77,15 @@ Release gate condition:
 Core steps:
 
 1. Create GitHub App installation token via `actions/create-github-app-token@v2` using org var/secret and owner/repositories scoping.
-2. Checkout `main` with app token.
-3. Verify checked-out `main` commit equals `${{ github.event.workflow_run.head_sha }}`; fail if drifted.
-4. Run `go-semantic-release/action@v1` with app token and expose released version output.
-5. Run artifact publish job only when semantic release emits a non-empty version.
-6. In artifacts job, generate scoped GitHub App token and publish artifacts from released tag `v<version>` via `goreleaser/goreleaser-action@v6`.
+2. Checkout repository with app token.
+3. Run `go-semantic-release/action@v1` with app token and expose released version output.
+4. Run artifact publish job only when semantic release emits a non-empty version.
+5. In artifacts job, generate scoped GitHub App token and publish artifacts from released tag `v<version>` via `goreleaser/goreleaser-action@v6`.
 
 Required controls:
 
 - Top-level workflow permissions remain least-privilege (`contents: read`), with job-level elevation to `contents: write` where required.
-- `concurrency` single lane for releases on main (`cancel-in-progress: false`).
+- `concurrency` single lane per release ref (`cancel-in-progress: false`).
 - Keep current Go setup and cache blocks unchanged in the artifacts job.
 
 ## `.goreleaser.yml` Changelog Ownership
@@ -114,7 +113,7 @@ Update `docs/guides/release-process.md` to describe:
 1. CI hard gate via `workflow_run` from `ci`.
 2. Semantic tagging with GitHub App token.
 3. Artifact publication conditioned on semantic-release output in the same workflow.
-4. Org-level app secret/variable convention.
+4. Org-level app secret convention.
 5. GoReleaser-generated changelog ownership.
 
 ## Acceptance Criteria
@@ -122,6 +121,6 @@ Update `docs/guides/release-process.md` to describe:
 1. PRs and pushes to `main` run `ci` with existing caching unchanged.
 2. Codecov upload runs without `CODECOV_TOKEN` and fails CI on upload errors.
 3. Release workflow runs only after successful `ci` on `main` push.
-4. Semantic release runs before artifact publishing, fails on SHA drift from triggering CI run, and exposes released version output.
+4. Semantic release runs before artifact publishing and exposes released version output.
 5. Artifact publishing runs only when a semantic version was released, uses app-token auth, and publishes from tag `vX.Y.Z`.
 6. GoReleaser publishes assets and generates release notes/changelog using `changelog.use: github`.

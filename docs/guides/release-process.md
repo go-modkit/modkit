@@ -13,7 +13,7 @@ The release process follows a two-stage pipeline:
 
 2.  **Release (`release.yml`)**:
     *   Triggered via `workflow_run` when the `ci` workflow completes successfully on a `main` push.
-    *   **Semantic job**: Uses `vars.RELEASE_APP_ID` and `secrets.RELEASE_APP_PRIVATE_KEY` to create a scoped GitHub App token, checks out `main`, verifies the checked-out commit matches `workflow_run.head_sha`, and runs `go-semantic-release`.
+    *   **Semantic job**: Uses `secrets.RELEASE_APP_ID` and `secrets.RELEASE_APP_PRIVATE_KEY` to create a scoped GitHub App token, checks out the repository with that token, and runs `go-semantic-release`.
     *   **Artifacts job**: Runs only if semantic release emits a version, creates a scoped GitHub App token, checks out the created release tag (`v<version>`), and runs GoReleaser.
     *   **Changelog Ownership**: GoReleaser uses GitHub-native release notes (`use: github`) as the source of truth for changelog content.
 
@@ -26,7 +26,7 @@ We use a dedicated GitHub App for release operations instead of a standard `GITH
 - **Auditability**: Release actions are clearly attributed to the App identity in the audit log.
 
 ### Single Workflow Control
-Semantic tagging and artifact publishing run in one workflow so artifact publication is conditioned on a released semantic version output rather than on an independent tag-triggered workflow. The semantic job includes a SHA drift guard so release execution fails if `main` moved after the CI run that triggered the workflow.
+Semantic tagging and artifact publishing run in one workflow so artifact publication is conditioned on a released semantic version output rather than on an independent tag-triggered workflow.
 
 ## Quality Gates
 
