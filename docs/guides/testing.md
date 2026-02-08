@@ -166,6 +166,34 @@ func TestIntegration(t *testing.T) {
 }
 ```
 
+## Using TestKit
+
+Use `modkit/testkit` when you want less boilerplate for bootstrap, typed retrieval, and provider overrides.
+
+```go
+func TestAuthModule_WithTestKit(t *testing.T) {
+    h := testkit.New(t,
+        auth.NewModule(auth.Options{}),
+        testkit.WithOverrides(
+            testkit.OverrideValue(configmodule.TokenAuthUsername, "demo"),
+            testkit.OverrideValue(configmodule.TokenAuthPassword, "demo"),
+        ),
+    )
+
+    handler := testkit.Get[*auth.Handler](t, h, auth.TokenHandler)
+    if handler == nil {
+        t.Fatal("expected handler")
+    }
+}
+```
+
+Decision guidance:
+
+- Use test module replacement when changing module wiring semantics.
+- Use TestKit override when isolating dependency behavior without changing graph shape.
+
+`testkit.New` registers cleanup with `t.Cleanup` by default. Use `testkit.WithoutAutoClose()` only when you need explicit close timing.
+
 ## Smoke Tests with Testcontainers
 
 For full integration tests, use testcontainers:

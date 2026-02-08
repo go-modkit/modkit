@@ -11,6 +11,7 @@ This is a quick reference for modkit's core types. For full documentation, see [
 | `kernel` | `github.com/go-modkit/modkit/modkit/kernel` | Graph builder, bootstrap |
 | `http` | `github.com/go-modkit/modkit/modkit/http` | HTTP adapter |
 | `logging` | `github.com/go-modkit/modkit/modkit/logging` | Logging interface |
+| `testkit` | `github.com/go-modkit/modkit/modkit/testkit` | Testing harness and overrides |
 
 ---
 
@@ -116,6 +117,24 @@ func (a *App) Resolver() Resolver
 
 Returns a root-scoped resolver that enforces module visibility.
 
+### BootstrapWithOptions
+
+```go
+func BootstrapWithOptions(root module.Module, opts ...BootstrapOption) (*App, error)
+```
+
+Bootstraps with explicit options. Use `WithProviderOverrides` to replace provider implementations, typically for testing.
+
+```go
+type ProviderOverride struct {
+    Token   module.Token
+    Build   func(module.Resolver) (any, error)
+    Cleanup func(context.Context) error  // Optional; called when harness is closed
+}
+
+func WithProviderOverrides(overrides ...ProviderOverride) BootstrapOption
+```
+
 ### Errors
 
 | Type | When |
@@ -129,6 +148,10 @@ Returns a root-scoped resolver that enforces module visibility.
 | `ProviderCycleError` | Provider depends on itself |
 | `ProviderBuildError` | Provider's `Build` function failed |
 | `ControllerBuildError` | Controller's `Build` function failed |
+| `DuplicateOverrideTokenError` | Override list contains duplicate token |
+| `OverrideTokenNotFoundError` | Override targets missing provider token |
+| `OverrideTokenNotVisibleFromRootError` | Override token not visible from root |
+| `BootstrapOptionConflictError` | Multiple options mutate same token |
 
 ---
 
@@ -185,6 +208,59 @@ func Serve(addr string, handler http.Handler) error
 ```
 
 Starts an HTTP server with graceful shutdown on SIGINT/SIGTERM.
+
+---
+
+## testkit
+
+### New / NewE
+
+```go
+func New(tb testkit.TB, root module.Module, opts ...testkit.Option) *testkit.Harness
+func NewE(tb testkit.TB, root module.Module, opts ...testkit.Option) (*testkit.Harness, error)
+```
+
+Bootstraps a test harness. `New` fails the test on bootstrap error. `NewE` returns the error.
+
+### Harness lifecycle
+
+```go
+func (h *Harness) App() *kernel.App
+func (h *Harness) Close() error
+func (h *Harness) CloseContext(ctx context.Context) error
+```
+
+`Close` runs provider cleanup hooks first and then app closers.
+
+### Overrides
+
+```go
+func WithOverrides(overrides ...Override) Option
+func OverrideValue(token module.Token, value any) Override
+func OverrideBuild(token module.Token, build func(module.Resolver) (any, error)) Override
+func WithoutAutoClose() Option
+```
+
+Applies token-level provider overrides while preserving graph and visibility semantics.
+
+### Typed Helpers
+
+```go
+func Get[T any](tb testkit.TB, h *testkit.Harness, token module.Token) T
+func GetE[T any](h *testkit.Harness, token module.Token) (T, error)
+func Controller[T any](tb testkit.TB, h *testkit.Harness, moduleName, controllerName string) T
+func ControllerE[T any](h *testkit.Harness, moduleName, controllerName string) (T, error)
+```
+
+Typed wrappers for provider and controller retrieval in tests.
+
+### Key errors
+
+| Type | When |
+|------|------|
+| `ControllerNotFoundError` | Controller key was not found in harness app |
+| `TypeAssertionError` | Typed helper could not assert expected type |
+| `HarnessCloseError` | Hook close and/or app close returned errors |
 
 ---
 

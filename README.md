@@ -169,6 +169,7 @@ The CLI automatically registers providers and controllers in your module's `Defi
 | `modkit/kernel` | Graph builder, visibility enforcer, bootstrap |
 | `modkit/http` | HTTP adapter for chi router |
 | `modkit/logging` | Logging interface with slog adapter |
+| `modkit/testkit` | Test harness for bootstrap, overrides, and typed test helpers |
 
 ## Architecture
 
