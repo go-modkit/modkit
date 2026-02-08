@@ -15,6 +15,32 @@ A minimal modkit example with no external dependencies (no Docker, no database).
 go run main.go
 ```
 
+Print the module graph while starting the server:
+
+```bash
+go run main.go --graph-format mermaid
+go run main.go --graph-format dot
+```
+
+Example Mermaid output:
+
+```text
+graph TD
+    m0["app"]
+    classDef root stroke-width:3px;
+    class m0 root;
+```
+
+Example DOT output:
+
+```text
+digraph modkit {
+    rankdir=LR;
+    "app";
+    "app" [shape=doublecircle];
+}
+```
+
 ## Test
 
 ```bash

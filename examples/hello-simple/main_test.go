@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/go-modkit/modkit/modkit/kernel"
 	"github.com/go-modkit/modkit/modkit/module"
 	"github.com/go-modkit/modkit/modkit/testkit"
 	"github.com/stretchr/testify/assert"
@@ -94,6 +95,34 @@ func TestAppModule_Providers(t *testing.T) {
 		val, err := p.Build(nil)
 		assert.NoError(t, err)
 		assert.IsType(t, &Counter{}, val)
+	})
+}
+
+func TestExportGraphForExample(t *testing.T) {
+	app, err := kernel.Bootstrap(NewAppModule("test message"))
+	if err != nil {
+		t.Fatalf("Bootstrap failed: %v", err)
+	}
+
+	t.Run("mermaid", func(t *testing.T) {
+		out, err := exportGraphForExample(app, "mermaid")
+		assert.NoError(t, err)
+		assert.Contains(t, out, "graph TD")
+		assert.Contains(t, out, "m0[\"app\"]")
+	})
+
+	t.Run("dot", func(t *testing.T) {
+		out, err := exportGraphForExample(app, "dot")
+		assert.NoError(t, err)
+		assert.Contains(t, out, "digraph modkit {")
+		assert.Contains(t, out, "\"app\" [shape=doublecircle];")
+	})
+
+	t.Run("invalid format", func(t *testing.T) {
+		out, err := exportGraphForExample(app, "json")
+		assert.Error(t, err)
+		assert.Empty(t, out)
+		assert.Contains(t, err.Error(), "expected mermaid or dot")
 	})
 }
 
