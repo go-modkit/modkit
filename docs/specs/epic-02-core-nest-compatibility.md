@@ -1,5 +1,8 @@
 # Epic 02: Core NestJS Compatibility
 
+**Status:** Implemented (v1)
+**Last Reviewed:** 2026-02-08
+
 ## Overview
 
 This epic brings modkit to feature parity with NestJS's core module system, implementing the features that make sense in Go's idiomatic context while documenting why certain NestJS features are intentionally skipped or implemented differently.
@@ -93,15 +96,15 @@ func main() {
 
 #### Acceptance Criteria
 
-- [ ] `App.Close()` method implemented
-- [ ] `App.CloseContext(ctx)` method for timeout support
-- [ ] Providers implementing `io.Closer` are called in reverse init order
-- [ ] Multiple close errors aggregated into single error
-- [ ] Close is idempotent (safe to call multiple times)
-- [ ] Tests for close ordering
-- [ ] Tests for error aggregation
-- [ ] Example updated to demonstrate graceful shutdown
-- [ ] Documentation in `docs/guides/lifecycle.md` updated
+- [x] `App.Close()` method implemented
+- [x] `App.CloseContext(ctx)` method for timeout support
+- [x] Providers implementing `io.Closer` are called in reverse init order
+- [x] Multiple close errors aggregated into single error
+- [x] Close is idempotent (safe to call multiple times)
+- [x] Tests for close ordering
+- [x] Tests for error aggregation
+- [x] Example updated to demonstrate graceful shutdown
+- [x] Documentation in `docs/guides/lifecycle.md` updated
 
 ---
 
@@ -163,12 +166,12 @@ This is more complex and may not be worth it for v1. Start with explicit token r
 
 #### Acceptance Criteria
 
-- [ ] Modules can export tokens from imported modules
-- [ ] Validation: cannot re-export non-exported tokens (clear error)
-- [ ] Transitive re-exporting works (A→B→C)
-- [ ] Tests for re-export scenarios
-- [ ] Tests for invalid re-export attempts
-- [ ] Documentation updated
+- [x] Modules can export tokens from imported modules
+- [x] Validation: cannot re-export non-exported tokens (clear error)
+- [x] Transitive re-exporting works (A→B→C)
+- [x] Tests for re-export scenarios
+- [x] Tests for invalid re-export attempts
+- [x] Documentation updated
 
 ---
 
@@ -214,7 +217,7 @@ NestJS concepts for Go developers coming from the Node.js ecosystem.
 | | Controllers | ✅ Implemented | Same concept |
 | | Global modules | ⏭️ Skipped | Anti-pattern in Go; prefer explicit imports |
 | | Dynamic modules | ⏭️ Different | Use constructor functions with options |
-| | Module re-exporting | 🔄 This Epic | Exporting tokens from imported modules |
+| | Module re-exporting | ✅ Implemented | Exporting tokens from imported modules |
 | **Providers** |
 | | Singleton scope | ✅ Implemented | Default and only scope |
 | | Request scope | ⏭️ Skipped | Use context.Context instead |
@@ -227,9 +230,9 @@ NestJS concepts for Go developers coming from the Node.js ecosystem.
 | **Lifecycle** |
 | | onModuleInit | ⏭️ Skipped | Put init logic in `Build()` function |
 | | onApplicationBootstrap | ⏭️ Skipped | Controllers built = app bootstrapped |
-| | onModuleDestroy | ✅ This Epic | Via `io.Closer` interface |
+| | onModuleDestroy | ✅ Implemented | Via `io.Closer` interface |
 | | beforeApplicationShutdown | ⏭️ Skipped | Covered by `io.Closer` |
-| | onApplicationShutdown | ✅ This Epic | `App.Close()` method |
+| | onApplicationShutdown | ✅ Implemented | `App.Close()` method |
 | | enableShutdownHooks | ⏭️ Different | Use `signal.NotifyContext` (Go stdlib) |
 | **HTTP** |
 | | Controllers | ✅ Implemented | `RouteRegistrar` interface |
@@ -240,8 +243,8 @@ NestJS concepts for Go developers coming from the Node.js ecosystem.
 | | Pipes | ⏭️ Different | Validation in handler or middleware |
 | | Exception filters | ⏭️ Different | Error handling middleware |
 | **Other** |
-| | CLI scaffolding | ❌ Not planned | Go boilerplate is minimal |
-| | Devtools | ❌ Not planned | Use standard Go tooling |
+| | CLI scaffolding | ✅ Implemented | `modkit` CLI ships project/module/provider/controller generators |
+| | Devtools | ⏸️ Decision pending | Roadmap item remains open in PRD (P2 decision) |
 | | Microservices | ❌ Not planned | Out of scope |
 | | WebSockets | ❌ Not planned | Use gorilla/websocket directly |
 | | GraphQL | ❌ Not planned | Use gqlgen directly |
@@ -285,11 +288,11 @@ ordersModule := NewOrdersModule(configModule)
 
 #### Acceptance Criteria
 
-- [ ] `docs/guides/nestjs-compatibility.md` created
-- [ ] Feature matrix with all major NestJS features
-- [ ] Justification for each skipped/different feature
-- [ ] Go-idiomatic alternatives documented
-- [ ] Cross-linked from README and other relevant docs
+- [x] `docs/guides/nestjs-compatibility.md` created
+- [x] Feature matrix with all major NestJS features
+- [x] Justification for each skipped/different feature
+- [x] Go-idiomatic alternatives documented
+- [x] Cross-linked from README and other relevant docs
 
 ---
 

@@ -1,5 +1,8 @@
 # Epic: Examples & Documentation Enhancement
 
+**Status:** Implemented (v1)
+**Last Reviewed:** 2026-02-08
+
 ## Overview
 
 Enhance modkit examples to demonstrate all documented patterns and close the gap between documentation and working code. The `hello-mysql` example will be extended with authentication, validation, middleware patterns, and lifecycle management.
@@ -20,23 +23,23 @@ Enhance modkit examples to demonstrate all documented patterns and close the gap
 **Description**: Add a complete authentication module to `hello-mysql` demonstrating JWT-based auth, protected routes, and user context extraction.
 
 **Acceptance Criteria**:
-- [ ] JWT middleware extracts and validates tokens
-- [ ] Protected routes require valid authentication
-- [ ] User info is available in request context
-- [ ] Mix of public and authenticated endpoints works
-- [ ] Token generation endpoint exists
-- [ ] Tests cover auth success and failure cases
+- [x] JWT middleware extracts and validates tokens
+- [x] Protected routes require valid authentication
+- [x] User info is available in request context
+- [x] Mix of public and authenticated endpoints works
+- [x] Token generation endpoint exists
+- [x] Tests cover auth success and failure cases
 
 **Documentation Reference**: `docs/guides/authentication.md`
 
 #### Tasks
-- [ ] Create `internal/modules/auth/` module structure
-- [ ] Implement JWT middleware with token validation
-- [ ] Add typed context helpers for user extraction
-- [ ] Create `/auth/login` endpoint for token generation
-- [ ] Protect existing `/users` CRUD routes (except GET list)
-- [ ] Add auth module tests (unit + integration)
-- [ ] Update README with auth usage examples
+- [x] Create `internal/modules/auth/` module structure
+- [x] Implement JWT middleware with token validation
+- [x] Add typed context helpers for user extraction
+- [x] Create `/auth/login` endpoint for token generation
+- [x] Protect existing `/users` CRUD routes (except GET list)
+- [x] Add auth module tests (unit + integration)
+- [x] Update README with auth usage examples
 
 ---
 
@@ -45,22 +48,22 @@ Enhance modkit examples to demonstrate all documented patterns and close the gap
 **Description**: Add structured request validation to `hello-mysql` demonstrating validation patterns with proper error responses.
 
 **Acceptance Criteria**:
-- [ ] Request body validation on POST/PUT endpoints
-- [ ] Field-level validation error responses
-- [ ] RFC 7807 Problem Details for validation errors
-- [ ] Query parameter validation examples
-- [ ] Path parameter validation examples
+- [x] Request body validation on POST/PUT endpoints
+- [x] Field-level validation error responses
+- [x] RFC 7807 Problem Details for validation errors
+- [x] Query parameter validation examples
+- [x] Path parameter validation examples
 
 **Documentation Reference**: `docs/guides/validation.md`
 
 #### Tasks
-- [ ] Add validation helper package in `internal/validation/`
-- [ ] Implement field-level validation for CreateUserRequest
-- [ ] Implement field-level validation for UpdateUserRequest
-- [ ] Add validation error response type (RFC 7807 extension)
-- [ ] Add query parameter validation example (list pagination)
-- [ ] Add validation tests
-- [ ] Document validation patterns in example README
+- [x] Add validation helper package in `internal/validation/`
+- [x] Implement field-level validation for CreateUserRequest
+- [x] Implement field-level validation for UpdateUserRequest
+- [x] Add validation error response type (RFC 7807 extension)
+- [x] Add query parameter validation example (list pagination)
+- [x] Add validation tests
+- [x] Document validation patterns in example README
 
 ---
 
@@ -69,22 +72,22 @@ Enhance modkit examples to demonstrate all documented patterns and close the gap
 **Description**: Add examples of common middleware patterns: CORS, rate limiting, and custom middleware as providers.
 
 **Acceptance Criteria**:
-- [ ] CORS middleware configured and working
-- [ ] Rate limiting middleware with configurable limits
-- [ ] Custom middleware registered as provider
-- [ ] Route group with scoped middleware
-- [ ] Middleware ordering is demonstrated
+- [x] CORS middleware configured and working
+- [x] Rate limiting middleware with configurable limits
+- [x] Custom middleware registered as provider
+- [x] Route group with scoped middleware
+- [x] Middleware ordering is demonstrated
 
 **Documentation Reference**: `docs/guides/middleware.md`
 
 #### Tasks
-- [ ] Add CORS middleware configuration
-- [ ] Implement rate limiting middleware using `golang.org/x/time/rate`
-- [ ] Create timing/metrics middleware example
-- [ ] Add route group example (`/api/v1/` prefix)
-- [ ] Register middleware as providers for dependency injection
-- [ ] Add middleware tests
-- [ ] Document middleware patterns in example README
+- [x] Add CORS middleware configuration
+- [x] Implement rate limiting middleware using `golang.org/x/time/rate`
+- [x] Create timing/metrics middleware example
+- [x] Add route group example (`/api/v1/` prefix)
+- [x] Register middleware as providers for dependency injection
+- [x] Add middleware tests
+- [x] Document middleware patterns in example README
 
 ---
 
@@ -93,20 +96,20 @@ Enhance modkit examples to demonstrate all documented patterns and close the gap
 **Description**: Add examples demonstrating proper resource cleanup and graceful shutdown patterns.
 
 **Acceptance Criteria**:
-- [ ] Database connection cleanup on shutdown
-- [ ] Graceful shutdown with in-flight request handling
-- [ ] Context-based cancellation patterns
-- [ ] Resource cleanup order is correct
+- [x] Database connection cleanup on shutdown
+- [x] Graceful shutdown with in-flight request handling
+- [x] Context-based cancellation patterns
+- [x] Resource cleanup order is correct
 
 **Documentation Reference**: `docs/guides/lifecycle.md`
 
 #### Tasks
-- [ ] Add cleanup interface and implementation to database module
-- [ ] Implement graceful shutdown hook in main
-- [ ] Add context cancellation example for long-running operations
-- [ ] Document cleanup order (LIFO)
-- [ ] Add lifecycle tests
-- [ ] Update README with lifecycle patterns
+- [x] Add cleanup interface and implementation to database module
+- [x] Implement graceful shutdown hook in main
+- [x] Add context cancellation example for long-running operations
+- [x] Document cleanup order (LIFO)
+- [x] Add lifecycle tests
+- [x] Update README with lifecycle patterns
 
 ---
 
@@ -115,20 +118,20 @@ Enhance modkit examples to demonstrate all documented patterns and close the gap
 **Description**: Demonstrate route grouping patterns for API versioning and scoped middleware.
 
 **Acceptance Criteria**:
-- [ ] API versioning with `/api/v1/` prefix
-- [ ] Route groups with shared middleware
+- [x] API versioning with `/api/v1/` prefix
+- [x] Route groups with shared middleware
 - [ ] Nested route groups example
 - [ ] Controller uses groups effectively
 
 **Documentation Reference**: `docs/guides/controllers.md`
 
 #### Tasks
-- [ ] Refactor routes to use `/api/v1/` prefix
+- [x] Refactor routes to use `/api/v1/` prefix
 - [ ] Add route group with auth middleware
 - [ ] Add nested group example (e.g., `/api/v1/admin/`)
 - [ ] Update controller to demonstrate grouping
-- [ ] Add routing tests for groups
-- [ ] Document routing patterns
+- [x] Add routing tests for groups
+- [x] Document routing patterns
 
 ---
 
@@ -137,22 +140,22 @@ Enhance modkit examples to demonstrate all documented patterns and close the gap
 **Description**: Improve test coverage for core modkit library and ensure examples have comprehensive tests.
 
 **Acceptance Criteria**:
-- [ ] `buildVisibility()` has direct unit tests
-- [ ] Provider/Controller build errors are tested
-- [ ] HTTP middleware edge cases are tested
-- [ ] Example tests cover new features
-- [ ] CI coverage meets threshold
+- [x] `buildVisibility()` has direct unit tests
+- [x] Provider/Controller build errors are tested
+- [x] HTTP middleware edge cases are tested
+- [x] Example tests cover new features
+- [x] CI coverage meets threshold
 
 **Documentation Reference**: `docs/guides/testing.md`
 
 #### Tasks
-- [ ] Add unit tests for `buildVisibility()` in kernel
-- [ ] Add tests for ProviderBuildError scenarios
-- [ ] Add tests for ControllerBuildError scenarios  
-- [ ] Add HTTP middleware error recovery tests
-- [ ] Add router edge case tests (conflicts, invalid methods)
-- [ ] Ensure all new example features have tests
-- [ ] Update testing guide with new patterns
+- [x] Add unit tests for `buildVisibility()` in kernel
+- [x] Add tests for ProviderBuildError scenarios
+- [x] Add tests for ControllerBuildError scenarios
+- [x] Add HTTP middleware error recovery tests
+- [x] Add router edge case tests (conflicts, invalid methods)
+- [x] Ensure all new example features have tests
+- [x] Update testing guide with new patterns
 
 ---
 
@@ -161,19 +164,19 @@ Enhance modkit examples to demonstrate all documented patterns and close the gap
 **Description**: Ensure all documentation guides reference working example code and patterns are consistent.
 
 **Acceptance Criteria**:
-- [ ] All guides reference example code where applicable
-- [ ] Code snippets in docs match actual example code
-- [ ] No orphaned documentation (patterns without examples)
-- [ ] README links are correct
+- [x] All guides reference example code where applicable
+- [x] Code snippets in docs match actual example code
+- [x] No orphaned documentation (patterns without examples)
+- [x] README links are correct
 
 #### Tasks
-- [ ] Audit `docs/guides/authentication.md` vs example code
-- [ ] Audit `docs/guides/validation.md` vs example code
-- [ ] Audit `docs/guides/middleware.md` vs example code
-- [ ] Audit `docs/guides/lifecycle.md` vs example code
-- [ ] Update guides with correct code references
-- [ ] Add "See example" links to each guide
-- [ ] Update main README with feature matrix
+- [x] Audit `docs/guides/authentication.md` vs example code
+- [x] Audit `docs/guides/validation.md` vs example code
+- [x] Audit `docs/guides/middleware.md` vs example code
+- [x] Audit `docs/guides/lifecycle.md` vs example code
+- [x] Update guides with correct code references
+- [x] Add "See example" links to each guide
+- [x] Update main README with feature matrix
 
 ---
 

@@ -1,9 +1,10 @@
 # Design Spec: SDLC Flow for Versioning and CLI Releases
 
-**Status:** Draft
+**Status:** Implemented (v1)
 **Date:** 2026-02-07
 **Author:** Sisyphus (AI Agent)
-**Applies After:** `feat/cli-tooling` is merged to `main`
+**Last Reviewed:** 2026-02-08
+**Applies After:** N/A (landed on `main`)
 
 ## 1. Overview
 
@@ -207,8 +208,8 @@ This initiative is complete when all are true:
 
 The follow-up PR (after `feat/cli-tooling` merge) should include:
 
-- [ ] `cli-smoke` job in `.github/workflows/ci.yml` is preserved and remains required.
-- [ ] `.github/workflows/release.yml` updated for CLI artifact publishing.
-- [ ] `.goreleaser.yml` added and validated.
-- [ ] README install section updated.
+- [x] `cli-smoke` job in `.github/workflows/ci.yml` is preserved and remains required.
+- [x] `.github/workflows/release.yml` updated for CLI artifact publishing.
+- [x] `.goreleaser.yml` added and validated.
+- [x] README install section updated.
 - [ ] `make fmt && make lint && make vuln && make test && make test-coverage` run and recorded.

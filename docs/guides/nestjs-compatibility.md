@@ -1,5 +1,7 @@
 # NestJS Compatibility Guide
 
+**Last Reviewed:** 2026-02-08
+
 This guide maps NestJS concepts to modkit equivalents (or intentional differences) to help Go developers understand what carries over from the NestJS model and what changes in a Go-idiomatic framework.
 
 ## Feature Matrix
@@ -14,7 +16,7 @@ This guide maps NestJS concepts to modkit equivalents (or intentional difference
 |  | Controllers | ✅ Implemented | Same concept |
 |  | Global modules | ⏭️ Skipped | Anti-pattern in Go; prefer explicit imports |
 |  | Dynamic modules | ⏭️ Different | Use constructor functions with options |
-|  | Module re-exporting | 🔄 This Epic | Exporting tokens from imported modules |
+|  | Module re-exporting | ✅ Implemented | Exporting tokens from imported modules |
 | **Providers** |  |  |  |
 |  | Singleton scope | ✅ Implemented | Default and only scope |
 |  | Request scope | ⏭️ Skipped | Use context.Context instead |
@@ -27,9 +29,9 @@ This guide maps NestJS concepts to modkit equivalents (or intentional difference
 | **Lifecycle** |  |  |  |
 |  | onModuleInit | ⏭️ Skipped | Put init logic in `Build()` function |
 |  | onApplicationBootstrap | ⏭️ Skipped | Controllers built = app bootstrapped |
-|  | onModuleDestroy | ✅ This Epic | Via `io.Closer` interface |
+|  | onModuleDestroy | ✅ Implemented | Via `io.Closer` interface |
 |  | beforeApplicationShutdown | ⏭️ Skipped | Covered by `io.Closer` |
-|  | onApplicationShutdown | ✅ This Epic | `App.Close()` method |
+|  | onApplicationShutdown | ✅ Implemented | `App.Close()` method |
 |  | enableShutdownHooks | ⏭️ Different | Use `signal.NotifyContext` (Go stdlib) |
 | **HTTP** |  |  |  |
 |  | Controllers | ✅ Implemented | `RouteRegistrar` interface |
@@ -40,8 +42,8 @@ This guide maps NestJS concepts to modkit equivalents (or intentional difference
 |  | Pipes | ⏭️ Different | Validation in handler or middleware |
 |  | Exception filters | ⏭️ Different | Error handling middleware |
 | **Other** |  |  |  |
-|  | CLI scaffolding | ❌ Not planned | Go boilerplate is minimal |
-|  | Devtools | ❌ Not planned | Use standard Go tooling |
+|  | CLI scaffolding | ✅ Implemented | `modkit` CLI ships scaffolding commands for apps/modules/providers/controllers |
+|  | Devtools | ⏸️ Decision pending | Listed as a P2 decision in the PRD roadmap |
 |  | Microservices | ❌ Not planned | Out of scope |
 |  | WebSockets | ❌ Not planned | Use gorilla/websocket directly |
 |  | GraphQL | ❌ Not planned | Use gqlgen directly |
@@ -240,11 +242,11 @@ router.Use(RecoverErrors)
 
 **NestJS:** CLI generates projects, modules, and scaffolding.
 
-**modkit:** Not planned.
+**modkit:** Implemented.
 
-**Justification:** Go projects are small and convention-driven. Standard tooling already covers init, formatting, and generation.
+**Justification:** `modkit` now ships a dedicated CLI (`cmd/modkit`) with scaffold commands and release artifacts. This improves onboarding while keeping framework runtime behavior explicit and Go-idiomatic.
 
-**Alternative:** Use Go tooling and Makefiles for common workflows.
+**Alternative:** You can still use plain Go tooling and manual wiring; the CLI is optional convenience, not required runtime magic.
 
 ```go
 //go:generate go run ./internal/tools/wire
@@ -254,9 +256,9 @@ router.Use(RecoverErrors)
 
 **NestJS:** Framework-specific devtools for inspection and hot reload.
 
-**modkit:** Not planned.
+**modkit:** Decision pending.
 
-**Justification:** Go has a rich ecosystem for profiling and debugging that works across frameworks.
+**Justification:** The PRD tracks devtools as a P2 decision. Current guidance remains to rely on standard Go tooling until a concrete built-in devtools scope is accepted.
 
 **Alternative:** Use standard tooling like `pprof` and `delve`.
 

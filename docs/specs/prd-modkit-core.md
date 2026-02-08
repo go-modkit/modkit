@@ -111,7 +111,7 @@ Errors should be:
 *   [x] Module definition & graph resolution
 *   [x] Visibility enforcement
 *   [x] Basic HTTP adapter (Chi)
-*   [x] Lifecycle hooks (OnStart/OnStop)
+*   [x] Graceful shutdown APIs (`App.Close` / `App.CloseContext`) with closer ordering and error aggregation.
 *   [x] Generic Helpers: Reduce type-casting noise with `module.Get[T]` helper.
 
 ### Phase 2: Ecosystem & Tooling (Next)
@@ -133,6 +133,16 @@ Errors should be:
    - Provide graph export output (Mermaid/DOT) for architecture introspection.
 4. **P2 - Devtools direction decision (Phase 3)**
    - Either define a minimal built-in endpoint scope or formally de-scope from PRD to match current guidance.
+
+### Synchronization Summary (2026-02-08)
+
+P1 roadmap/spec synchronization reconciled shipped-state mismatches across roadmap docs and guide surfaces:
+
+1. `docs/specs/epic-01-examples-enhancement.md`: checklist state updated to reflect delivered hello-mysql capabilities; unresolved route-group follow-ups kept open.
+2. `docs/specs/epic-02-core-nest-compatibility.md`: graceful shutdown, re-export, and compatibility-doc acceptance criteria reconciled to implemented state with evidence-backed checks.
+3. `docs/guides/nestjs-compatibility.md`: matrix wording aligned (CLI = implemented, lifecycle/re-export = implemented, devtools = decision pending).
+4. `docs/specs/design-release-versioning-sdlc-cli.md`: moved from draft intent to implemented-state checklist for released pipeline artifacts.
+5. `README.md`: guide index reconciled with shipped docs by adding the configuration guide link.
 
 ## 8. Success Metrics
 
