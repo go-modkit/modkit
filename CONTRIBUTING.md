@@ -62,7 +62,7 @@ Examples:
 
 Valid types: `feat`, `fix`, `docs`, `test`, `chore`, `refactor`, `perf`, `ci`
 
-**Note**: Commit message headers must be ≤50 characters.
+**Note**: Commit message headers must be <=80 characters.
 
 ## Development Workflow
 

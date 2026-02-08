@@ -68,7 +68,7 @@ setup-hooks: tools
 
 # Validate a commit message (for manual testing)
 lint-commit:
-	@echo "$(MSG)" | $(COMMITLINT) lint
+	@echo "$(MSG)" | $(COMMITLINT) lint --config .commitlint.yml
 
 cli-smoke-build:
 	go build -o /tmp/modkit ./cmd/modkit
