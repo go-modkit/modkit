@@ -29,6 +29,15 @@ type Container struct {
 }
 
 func newContainer(graph *Graph, visibility Visibility) (*Container, error) {
+	providers, err := providerEntriesFromGraph(graph)
+	if err != nil {
+		return nil, err
+	}
+
+	return newContainerWithProviders(providers, visibility), nil
+}
+
+func providerEntriesFromGraph(graph *Graph) (map[module.Token]providerEntry, error) {
 	providers := make(map[module.Token]providerEntry)
 	for i := range graph.Modules {
 		node := &graph.Modules[i]
@@ -47,8 +56,17 @@ func newContainer(graph *Graph, visibility Visibility) (*Container, error) {
 		}
 	}
 
+	return providers, nil
+}
+
+func newContainerWithProviders(providers map[module.Token]providerEntry, visibility Visibility) *Container {
+	providerCopy := make(map[module.Token]providerEntry, len(providers))
+	for token, entry := range providers {
+		providerCopy[token] = entry
+	}
+
 	return &Container{
-		providers:    providers,
+		providers:    providerCopy,
 		instances:    make(map[module.Token]any),
 		visibility:   visibility,
 		locks:        make(map[module.Token]*sync.Mutex),
@@ -56,7 +74,7 @@ func newContainer(graph *Graph, visibility Visibility) (*Container, error) {
 		cleanupHooks: make([]func(context.Context) error, 0),
 		closers:      make([]io.Closer, 0),
 		buildOrder:   make([]module.Token, 0),
-	}, nil
+	}
 }
 
 // Get resolves a provider without module visibility checks.

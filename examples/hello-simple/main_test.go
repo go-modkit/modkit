@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/go-modkit/modkit/modkit/module"
+	"github.com/go-modkit/modkit/modkit/testkit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -94,4 +95,14 @@ func TestAppModule_Providers(t *testing.T) {
 		assert.NoError(t, err)
 		assert.IsType(t, &Counter{}, val)
 	})
+}
+
+func TestAppModule_TestKitOverrideGreeting(t *testing.T) {
+	h := testkit.New(t,
+		NewAppModule("real"),
+		testkit.WithOverrides(testkit.OverrideValue(TokenGreeting, "fake")),
+	)
+
+	controller := testkit.Controller[*GreetingController](t, h, "app", "GreetingController")
+	assert.Equal(t, "fake", controller.message)
 }

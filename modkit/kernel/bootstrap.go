@@ -5,10 +5,67 @@ import (
 	"context"
 	"errors"
 	"io"
+	"slices"
+	"strconv"
 	"sync/atomic"
 
 	"github.com/go-modkit/modkit/modkit/module"
 )
+
+type bootstrapConfig struct {
+	providerOverrides []ProviderOverride
+	firstOptionByTok  map[module.Token]int
+	optionNames       map[module.Token][]string
+	currentOptionIdx  int
+	err               error
+}
+
+func newBootstrapConfig() bootstrapConfig {
+	return bootstrapConfig{
+		providerOverrides: make([]ProviderOverride, 0),
+		firstOptionByTok:  make(map[module.Token]int),
+		optionNames:       make(map[module.Token][]string),
+	}
+}
+
+func (c *bootstrapConfig) setCurrentOption(index int) {
+	c.currentOptionIdx = index
+}
+
+func (c *bootstrapConfig) addProviderOverrides(overrides []ProviderOverride) {
+	if c.err != nil {
+		return
+	}
+
+	seenInThisOption := make(map[module.Token]bool)
+	optionName := c.providerOverrideOptionName(c.currentOptionIdx)
+	for _, override := range overrides {
+		if override.Build == nil {
+			c.err = &OverrideBuildNilError{Token: override.Token}
+			return
+		}
+
+		if seenInThisOption[override.Token] {
+			c.err = &DuplicateOverrideTokenError{Token: override.Token}
+			return
+		}
+		seenInThisOption[override.Token] = true
+
+		if firstIdx, ok := c.firstOptionByTok[override.Token]; ok && firstIdx != c.currentOptionIdx {
+			names := append(slices.Clone(c.optionNames[override.Token]), optionName)
+			c.err = &BootstrapOptionConflictError{Token: override.Token, Options: names}
+			return
+		}
+
+		c.firstOptionByTok[override.Token] = c.currentOptionIdx
+		c.optionNames[override.Token] = append(c.optionNames[override.Token], optionName)
+		c.providerOverrides = append(c.providerOverrides, override)
+	}
+}
+
+func (c *bootstrapConfig) providerOverrideOptionName(index int) string {
+	return "WithProviderOverrides#" + strconv.Itoa(index+1)
+}
 
 // App represents a bootstrapped modkit application with its dependency graph,
 // container, and instantiated controllers.
@@ -28,6 +85,11 @@ func controllerKey(moduleName, controllerName string) string {
 // It builds the module graph, validates dependencies, creates the DI container,
 // and instantiates all controllers.
 func Bootstrap(root module.Module) (*App, error) {
+	return BootstrapWithOptions(root)
+}
+
+// BootstrapWithOptions constructs a modkit application from a root module and explicit bootstrap options.
+func BootstrapWithOptions(root module.Module, opts ...BootstrapOption) (*App, error) {
 	graph, err := BuildGraph(root)
 	if err != nil {
 		return nil, err
@@ -38,10 +100,37 @@ func Bootstrap(root module.Module) (*App, error) {
 		return nil, err
 	}
 
-	container, err := newContainer(graph, visibility)
+	cfg := newBootstrapConfig()
+	for idx, opt := range opts {
+		if opt == nil {
+			return nil, &NilBootstrapOptionError{Index: idx}
+		}
+		cfg.setCurrentOption(idx)
+		opt.apply(&cfg)
+		if cfg.err != nil {
+			return nil, cfg.err
+		}
+	}
+
+	providers, err := providerEntriesFromGraph(graph)
 	if err != nil {
 		return nil, err
 	}
+
+	for _, override := range cfg.providerOverrides {
+		entry, ok := providers[override.Token]
+		if !ok {
+			return nil, &OverrideTokenNotFoundError{Token: override.Token}
+		}
+		if !visibility[graph.Root][override.Token] {
+			return nil, &OverrideTokenNotVisibleFromRootError{Root: graph.Root, Token: override.Token}
+		}
+		entry.build = override.Build
+		entry.cleanup = override.Cleanup
+		providers[override.Token] = entry
+	}
+
+	container := newContainerWithProviders(providers, visibility)
 
 	controllers := make(map[string]any)
 	perModule := make(map[string]map[string]bool)

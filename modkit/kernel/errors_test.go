@@ -27,6 +27,12 @@ func TestKernelErrorStrings(t *testing.T) {
 		{"ProviderCycle", &ProviderCycleError{Token: "t"}},
 		{"ProviderBuild", &ProviderBuildError{Module: "mod", Token: "t", Err: errors.New("boom")}},
 		{"ControllerBuild", &ControllerBuildError{Module: "mod", Controller: "c", Err: errors.New("boom")}},
+		{"OverrideTokenNotFound", &OverrideTokenNotFoundError{Token: "t"}},
+		{"OverrideTokenNotVisibleFromRoot", &OverrideTokenNotVisibleFromRootError{Root: "root", Token: "t"}},
+		{"DuplicateOverrideToken", &DuplicateOverrideTokenError{Token: "t"}},
+		{"BootstrapOptionConflict", &BootstrapOptionConflictError{Token: "t", Options: []string{"a", "b"}}},
+		{"NilBootstrapOption", &NilBootstrapOptionError{Index: 0}},
+		{"OverrideBuildNil", &OverrideBuildNilError{Token: "t"}},
 	}
 	for _, tc := range tests {
 		if tc.err == nil {

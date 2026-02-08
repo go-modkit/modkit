@@ -4,9 +4,11 @@ import (
 	"errors"
 	"testing"
 
+	configmodule "github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/config"
 	"github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/database"
 	"github.com/go-modkit/modkit/modkit/kernel"
 	"github.com/go-modkit/modkit/modkit/module"
+	"github.com/go-modkit/modkit/modkit/testkit"
 )
 
 func TestModule_Bootstrap(t *testing.T) {
@@ -71,5 +73,23 @@ func TestAuthAndDatabase_DefaultConfigComposition(t *testing.T) {
 
 	if _, err := kernel.Bootstrap(root); err != nil {
 		t.Fatalf("bootstrap failed: %v", err)
+	}
+}
+
+func TestModule_TestKitOverrideConfigTokens(t *testing.T) {
+	h := testkit.New(t,
+		NewModule(Options{}),
+		testkit.WithOverrides(
+			testkit.OverrideValue(configmodule.TokenAuthUsername, "override-user"),
+			testkit.OverrideValue(configmodule.TokenAuthPassword, "override-pass"),
+		),
+	)
+
+	handler := testkit.Get[*Handler](t, h, TokenHandler)
+	if handler.cfg.Username != "override-user" {
+		t.Fatalf("username = %q", handler.cfg.Username)
+	}
+	if handler.cfg.Password != "override-pass" {
+		t.Fatalf("password = %q", handler.cfg.Password)
 	}
 }

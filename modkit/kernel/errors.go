@@ -189,3 +189,59 @@ func (e *ControllerBuildError) Error() string {
 func (e *ControllerBuildError) Unwrap() error {
 	return e.Err
 }
+
+// OverrideTokenNotFoundError is returned when an override token does not exist in the provider graph.
+type OverrideTokenNotFoundError struct {
+	Token module.Token
+}
+
+func (e *OverrideTokenNotFoundError) Error() string {
+	return fmt.Sprintf("override token not found: token=%q", e.Token)
+}
+
+// OverrideTokenNotVisibleFromRootError is returned when an override token is not visible from root scope.
+type OverrideTokenNotVisibleFromRootError struct {
+	Root  string
+	Token module.Token
+}
+
+func (e *OverrideTokenNotVisibleFromRootError) Error() string {
+	return fmt.Sprintf("override token not visible from root: root=%q token=%q", e.Root, e.Token)
+}
+
+// DuplicateOverrideTokenError is returned when the same override token is declared more than once.
+type DuplicateOverrideTokenError struct {
+	Token module.Token
+}
+
+func (e *DuplicateOverrideTokenError) Error() string {
+	return fmt.Sprintf("duplicate override token: %q", e.Token)
+}
+
+// BootstrapOptionConflictError is returned when multiple options mutate the same token.
+type BootstrapOptionConflictError struct {
+	Token   module.Token
+	Options []string
+}
+
+func (e *BootstrapOptionConflictError) Error() string {
+	return fmt.Sprintf("bootstrap option conflict: token=%q options=%v", e.Token, e.Options)
+}
+
+// NilBootstrapOptionError is returned when a nil bootstrap option is passed.
+type NilBootstrapOptionError struct {
+	Index int
+}
+
+func (e *NilBootstrapOptionError) Error() string {
+	return fmt.Sprintf("nil bootstrap option: index=%d", e.Index)
+}
+
+// OverrideBuildNilError is returned when an override has a nil Build function.
+type OverrideBuildNilError struct {
+	Token module.Token
+}
+
+func (e *OverrideBuildNilError) Error() string {
+	return fmt.Sprintf("override build is nil: token=%q", e.Token)
+}
