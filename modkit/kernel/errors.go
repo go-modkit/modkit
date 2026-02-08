@@ -13,6 +13,18 @@ var ErrExportAmbiguous = errors.New("export token is ambiguous across imports")
 // ErrNilGraph is returned when BuildVisibility is called with a nil graph.
 var ErrNilGraph = errors.New("graph is nil")
 
+// ErrNilApp is returned when an operation requiring an app receives nil.
+var ErrNilApp = errors.New("app is nil")
+
+// UnsupportedGraphFormatError is returned when graph export receives an unsupported format.
+type UnsupportedGraphFormatError struct {
+	Format GraphFormat
+}
+
+func (e *UnsupportedGraphFormatError) Error() string {
+	return fmt.Sprintf("unsupported graph format: %q", e.Format)
+}
+
 // RootModuleNilError is returned when Bootstrap is called with a nil root module.
 type RootModuleNilError struct{}
 
