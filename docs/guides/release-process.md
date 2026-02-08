@@ -8,14 +8,15 @@ This repository uses a unified SDLC flow for CI and releases:
    - coverage tests
    - CLI smoke scaffolding checks
 2. Merges to `main` trigger the release workflow.
-3. `go-semantic-release` determines whether a new semantic version should be released from Conventional Commits.
-4. If a version is released, GoReleaser builds and publishes CLI artifacts to the GitHub Release:
+3. The `semantic-release` job runs `go-semantic-release` and decides whether a new semantic version should be released from Conventional Commits.
+4. The `publish-artifacts` job runs with `needs: semantic-release` only when a version is emitted.
+5. `publish-artifacts` checks out a fresh runner workspace, validates a clean git state, and then runs GoReleaser to build and publish CLI artifacts to the same GitHub Release:
    - `darwin/amd64`
    - `darwin/arm64`
    - `linux/amd64`
    - `linux/arm64`
    - `windows/amd64`
-5. Release assets include archives and `checksums.txt`.
+6. Release assets include archives and `checksums.txt`.
 
 ## Quality Gates
 
