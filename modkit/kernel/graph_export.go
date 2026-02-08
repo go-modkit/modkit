@@ -37,15 +37,15 @@ func ExportGraph(g *Graph, format GraphFormat) (string, error) {
 
 	switch format {
 	case GraphFormatMermaid:
-		return exportMermaid(g, sortedModules), nil
+		return exportMermaid(g, sortedModules)
 	case GraphFormatDOT:
-		return exportDOT(g, sortedModules), nil
+		return exportDOT(g, sortedModules)
 	default:
 		return "", &UnsupportedGraphFormatError{Format: format}
 	}
 }
 
-func exportMermaid(g *Graph, sortedModules []string) string {
+func exportMermaid(g *Graph, sortedModules []string) (string, error) {
 	lines := make([]string, 0, len(sortedModules)*2+3)
 	lines = append(lines, "graph TD")
 
@@ -57,7 +57,10 @@ func exportMermaid(g *Graph, sortedModules []string) string {
 	}
 
 	for _, name := range sortedModules {
-		node := g.Nodes[name]
+		node, err := graphNodeByName(g, name)
+		if err != nil {
+			return "", err
+		}
 		imports := append([]string(nil), node.Imports...)
 		sort.Strings(imports)
 		fromID := ids[name]
@@ -74,10 +77,10 @@ func exportMermaid(g *Graph, sortedModules []string) string {
 		lines = append(lines, "    classDef root stroke-width:3px;", "    class "+rootID+" root;")
 	}
 
-	return strings.Join(lines, "\n")
+	return strings.Join(lines, "\n"), nil
 }
 
-func exportDOT(g *Graph, sortedModules []string) string {
+func exportDOT(g *Graph, sortedModules []string) (string, error) {
 	lines := make([]string, 0, len(sortedModules)*2+4)
 	lines = append(lines, "digraph modkit {", "    rankdir=LR;")
 
@@ -90,7 +93,10 @@ func exportDOT(g *Graph, sortedModules []string) string {
 	}
 
 	for _, name := range sortedModules {
-		node := g.Nodes[name]
+		node, err := graphNodeByName(g, name)
+		if err != nil {
+			return "", err
+		}
 		imports := append([]string(nil), node.Imports...)
 		sort.Strings(imports)
 		for _, imported := range imports {
@@ -102,7 +108,15 @@ func exportDOT(g *Graph, sortedModules []string) string {
 	}
 
 	lines = append(lines, "}")
-	return strings.Join(lines, "\n")
+	return strings.Join(lines, "\n"), nil
+}
+
+func graphNodeByName(g *Graph, name string) (*ModuleNode, error) {
+	node, ok := g.Nodes[name]
+	if !ok || node == nil {
+		return nil, &GraphNodeNotFoundError{Node: name}
+	}
+	return node, nil
 }
 
 func sortedModuleNames(g *Graph) []string {

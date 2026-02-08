@@ -12,7 +12,9 @@ func TestKernelErrorStrings(t *testing.T) {
 	}{
 		{"NilGraph", ErrNilGraph},
 		{"NilApp", ErrNilApp},
+		{"GraphNodeNotFound", ErrGraphNodeNotFound},
 		{"UnsupportedGraphFormat", &UnsupportedGraphFormatError{Format: GraphFormat("json")}},
+		{"GraphNodeNotFoundTyped", &GraphNodeNotFoundError{Node: "missing"}},
 		{"RootModuleNil", &RootModuleNilError{}},
 		{"InvalidModuleName", &InvalidModuleNameError{Name: "mod"}},
 		{"ModuleNotPointer", &ModuleNotPointerError{Module: "mod"}},
@@ -59,5 +61,9 @@ func TestErrorWraps(t *testing.T) {
 	ambiguous := &ExportAmbiguousError{Module: "m", Token: "t", Imports: []string{"a", "b"}}
 	if !errors.Is(ambiguous, ErrExportAmbiguous) {
 		t.Fatalf("expected ExportAmbiguousError to unwrap to ErrExportAmbiguous")
+	}
+	nodeMissing := &GraphNodeNotFoundError{Node: "x"}
+	if !errors.Is(nodeMissing, ErrGraphNodeNotFound) {
+		t.Fatalf("expected GraphNodeNotFoundError to unwrap to ErrGraphNodeNotFound")
 	}
 }

@@ -147,6 +147,29 @@ func TestExportGraphErrors(t *testing.T) {
 	if unsupported.Format != kernel.GraphFormat("json") {
 		t.Fatalf("unexpected format: %q", unsupported.Format)
 	}
+
+	malformed := &kernel.Graph{
+		Root: "app",
+		Modules: []kernel.ModuleNode{
+			{Name: "app"},
+		},
+		Nodes: map[string]*kernel.ModuleNode{},
+	}
+
+	_, err = kernel.ExportGraph(malformed, kernel.GraphFormatMermaid)
+	if err == nil {
+		t.Fatalf("expected missing-node error for malformed graph")
+	}
+	var nodeMissing *kernel.GraphNodeNotFoundError
+	if !errors.As(err, &nodeMissing) {
+		t.Fatalf("expected GraphNodeNotFoundError, got %T", err)
+	}
+	if nodeMissing.Node != "app" {
+		t.Fatalf("unexpected missing node name: %q", nodeMissing.Node)
+	}
+	if !errors.Is(err, kernel.ErrGraphNodeNotFound) {
+		t.Fatalf("expected ErrGraphNodeNotFound, got %v", err)
+	}
 }
 
 func TestExportAppGraphErrors(t *testing.T) {
