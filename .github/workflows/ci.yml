@@ -71,10 +71,8 @@ jobs:
       - name: Test with coverage
         run: make test-coverage
       - name: Upload coverage to Codecov
-        if: ${{ secrets.CODECOV_TOKEN != '' }}
         uses: codecov/codecov-action@v5
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           files: .coverage/coverage.out
           fail_ci_if_error: false
 

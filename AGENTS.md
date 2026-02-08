@@ -73,6 +73,19 @@ High-signal packages by density:
 - If `make vuln` or `make test-coverage` is not run or fails, leave corresponding checklist items unchecked (or mark N/A with explicit reason).
 - After any new commit on the PR branch, rerun affected checks and re-reconcile the checklist.
 
+## WORKTREE AND BRANCH SAFETY
+- `main` is integration-only. Never commit directly on `main`/`master`.
+- Start each task from updated `origin/main`: `git fetch origin && git switch main && git pull --ff-only origin main`.
+- Create a dedicated branch in a dedicated worktree for each task: `git worktree add .worktrees/<task> -b <type>/<task> main`.
+- Do all edits, tests, and commits only inside that linked worktree branch.
+- Never push directly to `main`; all changes land through PR merge.
+- If a commit lands on `main` by mistake: create a rescue branch from the pre-revert state, cherry-pick or move intended commits there, then `git revert` on `main`.
+
+## SKILL USAGE EXPECTATION
+- Before acting, evaluate available skills and load matching skills for the task.
+- Use `superpowers/using-git-worktrees` when starting implementation work.
+- Use `superpowers/verification-before-completion` before declaring completion.
+
 ## COMMANDS
 ```bash
 make fmt
