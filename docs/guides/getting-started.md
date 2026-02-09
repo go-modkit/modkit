@@ -129,12 +129,29 @@ curl http://localhost:8080/greet
 # Hello, modkit!
 ```
 
+## SQLite Fast Start (No Docker)
+
+If you want a quick database-backed example without Docker, try the SQLite
+example module:
+
+```bash
+export SQLITE_PATH="/tmp/modkit.db"
+go run ./examples/hello-sqlite/cmd/api/main.go
+```
+
+Then:
+
+```bash
+curl http://localhost:8080/health
+```
+
 ## Next Steps
 
 - [Modules Guide](modules.md) — Learn about imports, exports, and visibility
 - [Testing Guide](testing.md) — Testing patterns for modkit apps
 - [Architecture Guide](../architecture.md) — How modkit works under the hood
 - [Example App](../../examples/hello-mysql/) — Full CRUD API with MySQL, migrations, and Swagger
+- [SQLite Example](../../examples/hello-sqlite/) — Fast local eval, no Docker required
 
 ## Troubleshooting Quickstart
 
