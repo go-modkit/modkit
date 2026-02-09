@@ -5,9 +5,11 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os/exec"
 	"testing"
 	"time"
 
@@ -18,6 +20,8 @@ import (
 )
 
 func TestSmoke_HealthAndUsers(t *testing.T) {
+	requireDocker(t)
+
 	ctx := context.Background()
 	container, dsn := startMySQL(t, ctx)
 	defer func() {
@@ -97,6 +101,24 @@ func TestSmoke_HealthAndUsers(t *testing.T) {
 	}
 	if body.ID != 1 || body.Name == "" || body.Email == "" {
 		t.Fatalf("unexpected body: %+v", body)
+	}
+}
+
+func requireDocker(t *testing.T) {
+	t.Helper()
+
+	if _, err := exec.LookPath("docker"); err != nil {
+		t.Skip("docker binary not found")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "docker", "info")
+	if err := cmd.Run(); err != nil {
+		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+			t.Skip("docker info timed out")
+		}
+		t.Skipf("docker unavailable: %v", err)
 	}
 }
 

@@ -57,6 +57,10 @@ jobs:
             go.mod
       - name: Test with coverage
         run: make test-coverage
+      - name: Example smoke (Postgres, SQLite)
+        run: |
+          go test ./examples/hello-postgres/...
+          go test ./examples/hello-sqlite/...
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
