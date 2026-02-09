@@ -22,6 +22,18 @@ const (
 	defaultChiVersion          = "v5.2.4"
 )
 
+var (
+	readBuildInfo   = debug.ReadBuildInfo
+	mkdirAll        = os.MkdirAll
+	parseTemplateFS = template.ParseFS
+	createFile      = func(path string) (io.WriteCloser, error) {
+		// #nosec G304 -- path is cleaned with filepath.Clean before calling createFile.
+		return os.Create(path)
+	}
+	executeTemplate = func(t *template.Template, w io.Writer, data any) error { return t.Execute(w, data) }
+	closeWriteFile  = func(c io.Closer) error { return c.Close() }
+)
+
 var newAppCmd = &cobra.Command{
 	Use:   "app [name]",
 	Short: "Create a new modkit application",
@@ -60,7 +72,7 @@ func createNewApp(name string) error {
 	}
 
 	for _, dir := range dirs {
-		if err := os.MkdirAll(dir, 0o750); err != nil {
+		if err := mkdirAll(dir, 0o750); err != nil {
 			return fmt.Errorf("failed to create directory %s: %w", dir, err)
 		}
 	}
@@ -85,20 +97,20 @@ func createNewApp(name string) error {
 
 	tplFS := templates.FS()
 	for tplName, destPath := range files {
-		tpl, err := template.ParseFS(tplFS, tplName)
+		tpl, err := parseTemplateFS(tplFS, tplName)
 		if err != nil {
 			return fmt.Errorf("failed to parse template %s: %w", tplName, err)
 		}
 
 		// Clean path for safety
 		destPath = filepath.Clean(destPath)
-		f, err := os.Create(destPath)
+		f, err := createFile(destPath)
 		if err != nil {
 			return fmt.Errorf("failed to create file %s: %w", destPath, err)
 		}
 
-		err = tpl.Execute(f, data)
-		closeErr := f.Close()
+		err = executeTemplate(tpl, f, data)
+		closeErr := closeWriteFile(f)
 
 		if err != nil {
 			return fmt.Errorf("failed to execute template %s: %w", tplName, err)
@@ -129,7 +141,7 @@ func resolveScaffoldModkitVersion() string {
 		return v
 	}
 
-	if info, ok := debug.ReadBuildInfo(); ok {
+	if info, ok := readBuildInfo(); ok {
 		if v := normalizeSemver(info.Main.Version); v != "" {
 			if isStableTagVersion(v) {
 				return v

@@ -140,4 +140,4 @@ curl http://localhost:8080/greet
 
 - `modkit: command not found`: install CLI with `go install github.com/go-modkit/modkit/cmd/modkit@latest` and ensure `$(go env GOPATH)/bin` is in `PATH`.
 - `go run cmd/api/main.go` fails after scaffolding: run `go mod tidy` in the scaffolded app directory, then retry.
-- Health endpoint fails: ensure app is running on `:8080`, then retry `curl http://localhost:8080/health`.
+- Endpoint check fails: if you scaffolded with the CLI, retry `curl http://localhost:8080/health`; if you followed this guide manually, test `curl http://localhost:8080/greet`.
