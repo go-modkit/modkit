@@ -1,21 +1,28 @@
 # Release Process
 
-modkit uses a CI-gated release workflow so semantic versioning and artifact publishing stay in one controlled pipeline.
+modkit uses a CI-gated release process powered by Release Please and GoReleaser.
 
 ## Release Flow
 
-The release process follows a two-stage pipeline:
+The release process follows a three-stage pipeline:
 
 1.  **Continuous Integration (`ci.yml`)**:
     *   Runs on every pull request and merge to `main`.
     *   Executes linting, vulnerability scans, coverage tests, and CLI smoke tests.
     *   Must pass successfully on `main` to trigger the next stage.
 
-2.  **Release (`release.yml`)**:
-    *   Triggered via `workflow_run` when the `ci` workflow completes successfully on a `main` push.
-    *   **Semantic job**: Uses `secrets.RELEASE_APP_ID` and `secrets.RELEASE_APP_PRIVATE_KEY` to create a scoped GitHub App token, checks out the repository with that token, and runs `go-semantic-release`.
-    *   **Artifacts job**: Runs only if semantic release emits a version, creates a scoped GitHub App token, checks out the created release tag (`v<version>`), and runs GoReleaser.
-    *   **Changelog Ownership**: GoReleaser uses GitHub-native release notes (`use: github`) as the source of truth for changelog content.
+2.  **Release PR / Tagging (`release.yml`)**:
+    *   Triggered by `workflow_run` after `ci` completes on `main`.
+    *   Runs only when CI concluded successfully for a `push` event on `main`.
+    *   Uses `secrets.RELEASE_APP_ID` and `secrets.RELEASE_APP_PRIVATE_KEY` to mint a scoped GitHub App token.
+    *   Runs `googleapis/release-please-action@v4` with `release-please-config.json` and `.release-please-manifest.json`.
+    *   Release Please creates/updates a release PR containing version/changelog updates (`CHANGELOG.md`).
+    *   When that release PR is merged, Release Please tags the release commit (`vX.Y.Z`) and creates the GitHub Release.
+
+3.  **Artifact Publication (`release.yml`)**:
+    *   Runs only when Release Please reports `release_created == true`.
+    *   Uses a scoped GitHub App token, checks out the exact released tag, and runs GoReleaser.
+    *   GoReleaser uses GitHub-native release notes (`changelog.use: github`) as changelog source of truth for release artifacts.
 
 ## Security Rationale
 
@@ -25,8 +32,8 @@ We use a dedicated GitHub App for release operations instead of a standard `GITH
 - **Bypass Rules**: It acts as a "bypass actor" in repository rulesets, allowing it to push tags to protected branches without requiring a full PR cycle for the tag itself.
 - **Auditability**: Release actions are clearly attributed to the App identity in the audit log.
 
-### Single Workflow Control
-Semantic tagging and artifact publishing run in one workflow so artifact publication is conditioned on a released semantic version output rather than on an independent tag-triggered workflow.
+### Release Please Control
+Version/changelog commits are handled by Release Please via release PRs. The release workflow is hard-gated by successful CI completion on `main`, and artifact publication is conditioned on Release Please output in the same workflow.
 
 ## Quality Gates
 

@@ -1,10 +1,10 @@
-# Design Spec: GitHub App Bypass + CI-Gated Release Workflow + GoReleaser Changelog
+# Design Spec: GitHub App Bypass + Release Please + GoReleaser Artifacts
 
 ## Status
 
 - Type: design spec
 - Scope: `go-modkit/modkit`
-- Goal: standard, CI-gated release flow with automatic changelog and artifact publishing
+- Goal: standard CI-gated release flow with release PRs, tag-on-version-commit semantics, and automated artifact publishing
 
 ## Constraints
 
@@ -17,13 +17,14 @@
 ## Desired Release Architecture
 
 1. `ci` workflow runs on pull requests and pushes to `main`.
-2. A single `release` workflow runs only after `ci` completes successfully on `main` push.
-3. Inside `release`, semantic tagging runs first and artifact publishing runs only when a version was released.
-4. Changelog and release notes are generated automatically by GoReleaser.
+2. A single `release` workflow runs via `workflow_run` after `ci` success on `main` push and executes Release Please.
+3. Release Please maintains a release PR with changelog/version updates and, on merge, creates tag `vX.Y.Z` on that version commit.
+4. Artifact publishing runs only when Release Please reports `release_created == true`.
+5. GoReleaser publishes artifacts from the created tag and uses GitHub release notes/changelog ownership.
 
-This keeps responsibilities in one gated workflow:
+This keeps responsibilities clear:
 
-- Semantic release: version calculation + tag orchestration.
+- Release Please: version/changelog PR + release tag creation.
 - GoReleaser: GitHub Release content + artifacts + changelog generation.
 
 ## Organization-Level Secrets and Variables
@@ -64,29 +65,47 @@ Keep existing jobs/caching unchanged. Apply only these updates:
 
 Trigger:
 
-- `on.workflow_run.workflows: ["ci"]` (must match workflow `name` exactly)
+- `on.workflow_run.workflows: ["ci"]`
 - `types: [completed]`
 - `branches: [main]`
 
-Release gate condition:
+Release orchestration:
 
-- `github.event.workflow_run.conclusion == 'success'`
-- `github.event.workflow_run.event == 'push'`
-- `github.event.workflow_run.head_branch == 'main'`
+- Gate must require all of:
+  - `github.event.workflow_run.conclusion == 'success'`
+  - `github.event.workflow_run.event == 'push'`
+  - `github.event.workflow_run.head_branch == 'main'`
+- Run `googleapis/release-please-action@v4` using:
+  - `config-file: release-please-config.json`
+  - `manifest-file: .release-please-manifest.json`
+- Use GitHub App token for action authentication.
 
 Core steps:
 
 1. Create GitHub App installation token via `actions/create-github-app-token@v2` using org var/secret and owner/repositories scoping.
-2. Checkout repository with app token.
-3. Run `go-semantic-release/action@v1` with app token and expose released version output.
-4. Run artifact publish job only when semantic release emits a non-empty version.
-5. In artifacts job, generate scoped GitHub App token and publish artifacts from released tag `v<version>` via `goreleaser/goreleaser-action@v6`.
+2. Run Release Please action to create/update release PR and create release on merge.
+3. Capture outputs (`release_created`, `tag_name`, `version`).
+4. Run artifact publish job only when `release_created == true`.
+5. In artifacts job, generate scoped GitHub App token and publish artifacts from `tag_name` via `goreleaser/goreleaser-action@v6`.
 
 Required controls:
 
 - Top-level workflow permissions remain least-privilege (`contents: read`), with job-level elevation to `contents: write` where required.
 - `concurrency` single lane per release ref (`cancel-in-progress: false`).
 - Keep current Go setup and cache blocks unchanged in the artifacts job.
+
+### C) Release Please Configuration
+
+Required files:
+
+- `release-please-config.json`
+- `.release-please-manifest.json`
+
+Configuration requirements:
+
+- Root package (`."`) uses `release-type: go`.
+- Changelog path is `CHANGELOG.md`.
+- Manifest tracks current released version baseline for root package.
 
 ## `.goreleaser.yml` Changelog Ownership
 
@@ -110,9 +129,9 @@ Additional rules:
 
 Update `docs/guides/release-process.md` to describe:
 
-1. CI hard gate via `workflow_run` from `ci`.
-2. Semantic tagging with GitHub App token.
-3. Artifact publication conditioned on semantic-release output in the same workflow.
+1. CI hard gate via branch protection and required checks before merge to `main`.
+2. Release Please release PR lifecycle and tag creation semantics.
+3. Artifact publication conditioned on Release Please outputs in the same workflow.
 4. Org-level app secret convention.
 5. GoReleaser-generated changelog ownership.
 
@@ -120,7 +139,7 @@ Update `docs/guides/release-process.md` to describe:
 
 1. PRs and pushes to `main` run `ci` with existing caching unchanged.
 2. Codecov upload runs without `CODECOV_TOKEN` and fails CI on upload errors.
-3. Release workflow runs only after successful `ci` on `main` push.
-4. Semantic release runs before artifact publishing and exposes released version output.
-5. Artifact publishing runs only when a semantic version was released, uses app-token auth, and publishes from tag `vX.Y.Z`.
+3. Release workflow runs only after successful `ci` completion on `main` push and uses Release Please with config/manifest files.
+4. Release PR includes changelog/version updates and merged release commit is tagged `vX.Y.Z`.
+5. Artifact publishing runs only when Release Please reports `release_created == true`, uses app-token auth, and publishes from emitted tag.
 6. GoReleaser publishes assets and generates release notes/changelog using `changelog.use: github`.
