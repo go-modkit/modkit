@@ -2,6 +2,8 @@ go 1.25.7
 
 use (
 	.
+	./examples/hello-postgres
+	./examples/hello-sqlite
 	./examples/hello-mysql
 	./examples/hello-simple
 )
