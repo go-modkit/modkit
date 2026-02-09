@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -32,20 +33,6 @@ jobs:
         with:
           go-version: "1.25.7"
           cache-dependency-path: "**/*.sum"
-
-      # - name: Cache Tools and Modules
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: |
-      #       ~/go/bin
-      #       ~/go/pkg/mod
-      #       ~/.cache/golangci-lint
-      #     # Key based on tools/tools.go and go.sum (tool versions only)
-      #     # This cache is stable: only invalidates when tools change, not app dependencies
-      #     # Caches both binaries and modules to prevent re-downloading on every run
-      #     key: ${{ runner.os }}-tools-${{ hashFiles('tools/tools.go', 'go.sum') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-tools-
 
       - name: Install tools
         # Use make tools to install versions pinned in go.mod/tools.go
@@ -74,7 +61,8 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           files: .coverage/coverage.out
-          fail_ci_if_error: false
+          fail_ci_if_error: true
+          use_oidc: true
 
   cli-smoke:
     name: CLI Smoke Test

@@ -169,11 +169,11 @@ Open an issue or start a discussion. We're happy to help!
 
 ## Releases
 
-Releases are automated using [go-semantic-release](https://github.com/go-semantic-release/semantic-release).
+Releases are automated using [Release Please](https://github.com/googleapis/release-please-action).
 
 ### How It Works
 
-When changes are merged to `main`, the release workflow analyzes commit messages:
+When changes are merged to `main`, Release Please updates or creates a release PR based on commit messages. Merging that release PR creates the version tag and GitHub Release:
 
 | Commit Type | Release Action | Example |
 |-------------|----------------|---------|
