@@ -7,11 +7,19 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime/debug"
+	"strings"
 	"text/template"
 
 	"github.com/spf13/cobra"
 
 	"github.com/go-modkit/modkit/internal/cli/templates"
+)
+
+const (
+	scaffoldVersionOverrideEnv = "MODKIT_SCAFFOLD_VERSION"
+	defaultModkitVersion       = "v0.14.0"
+	defaultChiVersion          = "v5.2.4"
 )
 
 var newAppCmd = &cobra.Command{
@@ -64,8 +72,8 @@ func createNewApp(name string) error {
 		ChiVersion    string
 	}{
 		Name:          name,
-		ModkitVersion: "v0.9.0", // TODO: Get latest version dynamically or hardcode for MVP
-		ChiVersion:    "v5.2.4",
+		ModkitVersion: resolveScaffoldModkitVersion(),
+		ChiVersion:    defaultChiVersion,
 	}
 
 	// Render templates
@@ -114,4 +122,38 @@ func createNewApp(name string) error {
 	fmt.Printf("Run:\n  cd %s\n  go run cmd/api/main.go\n", name)
 
 	return nil
+}
+
+func resolveScaffoldModkitVersion() string {
+	if v := normalizeSemver(os.Getenv(scaffoldVersionOverrideEnv)); v != "" {
+		return v
+	}
+
+	if info, ok := debug.ReadBuildInfo(); ok {
+		if v := normalizeSemver(info.Main.Version); v != "" {
+			return v
+		}
+	}
+
+	return defaultModkitVersion
+}
+
+func normalizeSemver(v string) string {
+	v = strings.TrimSpace(v)
+	if v == "" || v == "(devel)" {
+		return ""
+	}
+
+	if strings.HasPrefix(v, "v") {
+		if len(v) > 1 && v[1] >= '0' && v[1] <= '9' {
+			return v
+		}
+		return ""
+	}
+
+	if v[0] < '0' || v[0] > '9' {
+		return ""
+	}
+
+	return "v" + v
 }

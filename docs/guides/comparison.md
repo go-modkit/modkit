@@ -2,6 +2,11 @@
 
 This guide compares modkit with other Go dependency injection and application frameworks.
 
+Before choosing, also review:
+
+- [Fit and Trade-offs](fit-and-tradeoffs.md)
+- [Adoption and Migration Guide](adoption-migration.md)
+
 ## Quick Comparison
 
 | Feature | modkit | google/wire | uber-go/fx | samber/do |

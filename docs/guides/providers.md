@@ -232,3 +232,18 @@ provider cycle detected: a.service → b.service → a.service
 - Export only the tokens that other modules actually need
 - Handle errors explicitly in `Build` functions
 - Test providers in isolation before integration testing modules
+
+## Conventions (Recommended)
+
+1. Use token format `module.component` (for example, `users.service`).
+2. Keep token constants close to module definitions to avoid drift.
+3. Resolve dependencies with `module.Get[T](r, token)` and return early on errors.
+4. Return interface types from providers when consumers should not depend on concrete implementations.
+5. Keep `Build` focused on wiring and construction, not business logic.
+6. Export only tokens that are intentionally public to importing modules.
+
+## Anti-Patterns to Avoid
+
+- **Stringly-typed token scattering**: repeating raw token strings across packages instead of central constants.
+- **Hidden cross-module dependency**: resolving a token from another module that was not exported.
+- **Heavy factory logic**: embedding retries, polling, or business workflows in `Build` instead of a service method.

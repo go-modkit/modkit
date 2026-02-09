@@ -4,8 +4,8 @@ This guide walks you through building your first modkit app: a simple HTTP serve
 
 **What you'll build:** A `/greet` endpoint that returns a greeting message.
 
-**Prerequisites:** Go 1.25.7+ and familiarity with `net/http`.
-We pin the patch level to 1.25.7 in CI to align with vulnerability scanning and keep a consistent security posture.
+**Prerequisites:** Go 1.25.x and familiarity with `net/http`.
+CI is pinned to Go 1.25.7. See the [Stability and Compatibility Policy](stability-compatibility.md) for support expectations.
 
 ## Install
 
@@ -135,3 +135,9 @@ curl http://localhost:8080/greet
 - [Testing Guide](testing.md) — Testing patterns for modkit apps
 - [Architecture Guide](../architecture.md) — How modkit works under the hood
 - [Example App](../../examples/hello-mysql/) — Full CRUD API with MySQL, migrations, and Swagger
+
+## Troubleshooting Quickstart
+
+- `modkit: command not found`: install CLI with `go install github.com/go-modkit/modkit/cmd/modkit@latest` and ensure `$(go env GOPATH)/bin` is in `PATH`.
+- `go run cmd/api/main.go` fails after scaffolding: run `go mod tidy` in the scaffolded app directory, then retry.
+- Health endpoint fails: ensure app is running on `:8080`, then retry `curl http://localhost:8080/health`.
