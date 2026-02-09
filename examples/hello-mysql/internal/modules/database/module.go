@@ -6,10 +6,17 @@ import (
 
 	configmodule "github.com/go-modkit/modkit/examples/hello-mysql/internal/modules/config"
 	"github.com/go-modkit/modkit/examples/hello-mysql/internal/platform/mysql"
+	"github.com/go-modkit/modkit/modkit/data/sqlmodule"
 	"github.com/go-modkit/modkit/modkit/module"
 )
 
-const TokenDB module.Token = "database.db"
+const (
+	// TokenDB is kept for backwards compatibility with the existing hello-mysql
+	// token path.
+	TokenDB module.Token = sqlmodule.TokenDB
+
+	TokenDialect module.Token = sqlmodule.TokenDialect
+)
 
 type Options struct {
 	Config module.Module
@@ -57,7 +64,13 @@ func (m Module) Definition() module.ModuleDef {
 					return CleanupDB(ctx, db)
 				},
 			},
+			{
+				Token: TokenDialect,
+				Build: func(_ module.Resolver) (any, error) {
+					return sqlmodule.DialectMySQL, nil
+				},
+			},
 		},
-		Exports: []module.Token{TokenDB},
+		Exports: []module.Token{TokenDB, TokenDialect},
 	}
 }
