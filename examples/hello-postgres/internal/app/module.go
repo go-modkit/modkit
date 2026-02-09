@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/go-modkit/modkit/modkit/data/postgres"
+	"github.com/go-modkit/modkit/modkit/data/sqlmodule"
 	"github.com/go-modkit/modkit/modkit/module"
 )
 
@@ -16,6 +17,10 @@ func (m *Module) Definition() module.ModuleDef {
 		Name: "app",
 		Imports: []module.Module{
 			postgres.NewModule(postgres.Options{}),
+		},
+		Exports: []module.Token{
+			sqlmodule.TokenDB,
+			sqlmodule.TokenDialect,
 		},
 	}
 }

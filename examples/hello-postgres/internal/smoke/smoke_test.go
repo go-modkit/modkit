@@ -1,10 +1,13 @@
 package smoke
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os/exec"
 	"testing"
 	"time"
@@ -13,12 +16,11 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 
-	"github.com/go-modkit/modkit/examples/hello-postgres/internal/app"
+	"github.com/go-modkit/modkit/examples/hello-postgres/internal/httpserver"
 	"github.com/go-modkit/modkit/modkit/data/sqlmodule"
-	"github.com/go-modkit/modkit/modkit/testkit"
 )
 
-func TestSmoke_Postgres_ModuleBootsAndQueries(t *testing.T) {
+func TestSmoke_Postgres_ModuleBootsAndServes(t *testing.T) {
 	requireDocker(t)
 
 	ctx := context.Background()
@@ -30,10 +32,46 @@ func TestSmoke_Postgres_ModuleBootsAndQueries(t *testing.T) {
 	t.Setenv("POSTGRES_DSN", dsn)
 	t.Setenv("POSTGRES_CONNECT_TIMEOUT", "2s")
 
-	h := testkit.New(t, app.NewModule())
+	boot, handler, err := httpserver.BuildAppHandler()
+	if err != nil {
+		t.Fatalf("build handler failed: %v", err)
+	}
 
-	db := testkit.Get[*sql.DB](t, h, sqlmodule.TokenDB)
-	dialect := testkit.Get[sqlmodule.Dialect](t, h, sqlmodule.TokenDialect)
+	srv := httptest.NewServer(handler)
+	defer srv.Close()
+
+	resp, err := http.Get(srv.URL + "/api/v1/health")
+	if err != nil {
+		t.Fatalf("health request failed: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200, got %d", resp.StatusCode)
+	}
+
+	buf := new(bytes.Buffer)
+	_, _ = buf.ReadFrom(resp.Body)
+	if got := bytes.TrimSpace(buf.Bytes()); len(got) == 0 {
+		t.Fatalf("expected non-empty body")
+	}
+
+	dbAny, err := boot.Get(sqlmodule.TokenDB)
+	if err != nil {
+		t.Fatalf("resolve db: %v", err)
+	}
+	db, ok := dbAny.(*sql.DB)
+	if !ok {
+		t.Fatalf("unexpected db type: %T", dbAny)
+	}
+
+	dialectAny, err := boot.Get(sqlmodule.TokenDialect)
+	if err != nil {
+		t.Fatalf("resolve dialect: %v", err)
+	}
+	dialect, ok := dialectAny.(sqlmodule.Dialect)
+	if !ok {
+		t.Fatalf("unexpected dialect type: %T", dialectAny)
+	}
 	if dialect != sqlmodule.DialectPostgres {
 		t.Fatalf("unexpected dialect: %q", dialect)
 	}
