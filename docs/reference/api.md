@@ -13,6 +13,19 @@ This is a quick reference for modkit's core types. For full documentation, see [
 | `logging` | `github.com/go-modkit/modkit/modkit/logging` | Logging interface |
 | `testkit` | `github.com/go-modkit/modkit/modkit/testkit` | Testing harness and overrides |
 
+## Stability Matrix
+
+| Package | Stability (v0.x) | Upgrade Impact Notes |
+|---------|-------------------|----------------------|
+| `module` | Medium | Core metadata types are expected to stay recognizable, but fields/validation behavior may evolve before `v1.0.0`. |
+| `config` | Medium | Typed config helpers are stable in intent; option surfaces may expand. |
+| `kernel` | Medium | Bootstrap and graph semantics are central; error typing and option behavior may tighten over time. |
+| `http` | Medium | Router/registration APIs are stable in direction; middleware defaults may change in minor releases. |
+| `logging` | High | Thin contract; changes are expected to be low churn. |
+| `testkit` | Medium | Test ergonomics can evolve; prefer documented helpers over internal assumptions. |
+
+For release-phase guarantees and deprecation expectations, see [Stability and Compatibility Policy](../guides/stability-compatibility.md).
+
 ---
 
 ## module

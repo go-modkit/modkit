@@ -6,11 +6,11 @@ Thanks for your interest in contributing! modkit is in early development, so the
 
 ### Prerequisites
 
-- Go 1.25.7+
+- Go 1.25.x (CI pinned to 1.25.7)
 - Docker (for running the example app)
 - Make
 
-We pin the patch level to 1.25.7 in CI to align with vulnerability scanning and keep a consistent security posture.
+See the [Stability and Compatibility Policy](docs/guides/stability-compatibility.md) for toolchain and upgrade expectations.
 
 ### Clone and Test
 
@@ -166,6 +166,10 @@ New to modkit? Look for issues labeled [`good first issue`](https://github.com/g
 ## Questions?
 
 Open an issue or start a discussion. We're happy to help!
+
+## Maintainer Operations
+
+Maintainer triage targets, labeling flow, and adoption KPI cadence are documented in [Maintainer Operations](docs/guides/maintainer-operations.md).
 
 ## Releases
 

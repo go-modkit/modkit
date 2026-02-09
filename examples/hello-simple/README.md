@@ -2,6 +2,17 @@
 
 A minimal modkit example with no external dependencies (no Docker, no database).
 
+## Version and Audience
+
+- Target modkit line: `v0.x` (see root stability policy)
+- Audience: first-time evaluators who want a sub-5-minute run
+
+## Learning Goals
+
+- Understand module definition shape (`Name`, `Providers`, `Controllers`)
+- See provider resolution and singleton behavior
+- Verify route registration and bootstrap flow quickly
+
 ## What This Example Shows
 
 - Single module with providers and a controller

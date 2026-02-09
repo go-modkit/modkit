@@ -2,6 +2,17 @@
 
 Example consuming app for modkit using MySQL, sqlc, and migrations.
 
+## Version and Audience
+
+- Target modkit line: `v0.x` (see root stability policy)
+- Audience: evaluators validating production-like module composition
+
+## Learning Goals
+
+- See multi-module imports/exports in a realistic app
+- Validate auth, validation, middleware, lifecycle, and error patterns
+- Run end-to-end flows (migrate, seed, API, Swagger) with repeatable commands
+
 ## What This Example Includes
 - Modules: `AppModule`, `DatabaseModule`, `UsersModule`, `AuditModule` (consumes `UsersService` export).
 - Endpoints (under `/api/v1`):

@@ -7,11 +7,31 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime/debug"
+	"strings"
 	"text/template"
 
 	"github.com/spf13/cobra"
 
 	"github.com/go-modkit/modkit/internal/cli/templates"
+)
+
+const (
+	scaffoldVersionOverrideEnv = "MODKIT_SCAFFOLD_VERSION"
+	defaultModkitVersion       = "v0.14.0"
+	defaultChiVersion          = "v5.2.4"
+)
+
+var (
+	readBuildInfo   = debug.ReadBuildInfo
+	mkdirAll        = os.MkdirAll
+	parseTemplateFS = template.ParseFS
+	createFile      = func(path string) (io.WriteCloser, error) {
+		// #nosec G304 -- path is cleaned with filepath.Clean before calling createFile.
+		return os.Create(path)
+	}
+	executeTemplate = func(t *template.Template, w io.Writer, data any) error { return t.Execute(w, data) }
+	closeWriteFile  = func(c io.Closer) error { return c.Close() }
 )
 
 var newAppCmd = &cobra.Command{
@@ -52,7 +72,7 @@ func createNewApp(name string) error {
 	}
 
 	for _, dir := range dirs {
-		if err := os.MkdirAll(dir, 0o750); err != nil {
+		if err := mkdirAll(dir, 0o750); err != nil {
 			return fmt.Errorf("failed to create directory %s: %w", dir, err)
 		}
 	}
@@ -64,8 +84,8 @@ func createNewApp(name string) error {
 		ChiVersion    string
 	}{
 		Name:          name,
-		ModkitVersion: "v0.9.0", // TODO: Get latest version dynamically or hardcode for MVP
-		ChiVersion:    "v5.2.4",
+		ModkitVersion: resolveScaffoldModkitVersion(),
+		ChiVersion:    defaultChiVersion,
 	}
 
 	// Render templates
@@ -77,20 +97,20 @@ func createNewApp(name string) error {
 
 	tplFS := templates.FS()
 	for tplName, destPath := range files {
-		tpl, err := template.ParseFS(tplFS, tplName)
+		tpl, err := parseTemplateFS(tplFS, tplName)
 		if err != nil {
 			return fmt.Errorf("failed to parse template %s: %w", tplName, err)
 		}
 
 		// Clean path for safety
 		destPath = filepath.Clean(destPath)
-		f, err := os.Create(destPath)
+		f, err := createFile(destPath)
 		if err != nil {
 			return fmt.Errorf("failed to create file %s: %w", destPath, err)
 		}
 
-		err = tpl.Execute(f, data)
-		closeErr := f.Close()
+		err = executeTemplate(tpl, f, data)
+		closeErr := closeWriteFile(f)
 
 		if err != nil {
 			return fmt.Errorf("failed to execute template %s: %w", tplName, err)
@@ -114,4 +134,48 @@ func createNewApp(name string) error {
 	fmt.Printf("Run:\n  cd %s\n  go run cmd/api/main.go\n", name)
 
 	return nil
+}
+
+func resolveScaffoldModkitVersion() string {
+	if v := normalizeSemver(os.Getenv(scaffoldVersionOverrideEnv)); v != "" {
+		return v
+	}
+
+	if info, ok := readBuildInfo(); ok {
+		if v := normalizeSemver(info.Main.Version); v != "" {
+			if isStableTagVersion(v) {
+				return v
+			}
+		}
+	}
+
+	return defaultModkitVersion
+}
+
+func normalizeSemver(v string) string {
+	v = strings.TrimSpace(v)
+	if v == "" || v == "(devel)" {
+		return ""
+	}
+
+	if strings.HasPrefix(v, "v") {
+		if len(v) > 1 && v[1] >= '0' && v[1] <= '9' {
+			return v
+		}
+		return ""
+	}
+
+	if v[0] < '0' || v[0] > '9' {
+		return ""
+	}
+
+	return "v" + v
+}
+
+func isStableTagVersion(v string) bool {
+	if v == "" {
+		return false
+	}
+
+	return !strings.ContainsAny(v, "-+")
 }

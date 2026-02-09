@@ -10,7 +10,7 @@
 
 **A Go framework for building modular backend services, inspired by NestJS.**
 
-> **Note:** modkit is in **early development**. APIs may change before v1.0. After v1.0, changes will follow semantic versioning.
+> **Note:** modkit is in **early development**. Read the [Stability and Compatibility Policy](docs/guides/stability-compatibility.md) before adopting in production.
 
 modkit brings NestJS-style module organization to Go—without reflection, decorators, or magic. Define modules with explicit imports, providers, controllers, and exports. The kernel builds a dependency graph, enforces visibility, and bootstraps your app deterministically.
 
@@ -58,7 +58,7 @@ See the [full comparison](docs/guides/comparison.md) for details.
 
 ## Requirements
 
-- Go 1.25.7+
+- Go 1.25.x (CI pinned to 1.25.7)
 
 ## Installation
 
@@ -80,50 +80,22 @@ Or download a pre-built binary from the [releases page](https://github.com/go-mo
 
 ## Quickstart (CLI)
 
-Scaffold a new modkit application in seconds:
+Use this as the canonical first-run path:
 
 ```bash
-# Create a new app
 modkit new app myapp
 cd myapp
-
-# Run the application
 go run cmd/api/main.go
+curl http://localhost:8080/health
 ```
 
-Add providers and controllers to existing modules:
+Expected output:
 
-```bash
-# Create a new module
-cd internal/modules
-mkdir users
-cd users
-
-# Initialize module.go with basic structure
-cat > module.go << 'EOF'
-package users
-
-import "github.com/go-modkit/modkit/modkit/module"
-
-type UsersModule struct{}
-
-func (m *UsersModule) Definition() module.ModuleDef {
-    return module.ModuleDef{
-        Name: "users",
-        Providers: []module.ProviderDef{},
-        Controllers: []module.ControllerDef{},
-    }
-}
-EOF
-
-# Add a provider
-modkit new provider service
-
-# Add a controller
-modkit new controller users
+```text
+ok
 ```
 
-The CLI automatically registers providers and controllers in your module's `Definition()` function.
+If this path fails, use the troubleshooting section in [Getting Started](docs/guides/getting-started.md).
 
 ## Quick Example
 
@@ -231,6 +203,9 @@ See [Architecture Guide](docs/architecture.md) for details.
 
 **Guides:**
 - [Getting Started](docs/guides/getting-started.md) — Your first modkit app
+- [Stability and Compatibility Policy](docs/guides/stability-compatibility.md) — Versioning guarantees and upgrade expectations
+- [Adoption and Migration Guide](docs/guides/adoption-migration.md) — Incremental adoption strategy and exit paths
+- [Fit and Trade-offs](docs/guides/fit-and-tradeoffs.md) — When to choose modkit and when not to
 - [Modules](docs/guides/modules.md) — Module composition and visibility
 - [Graph Visualization](docs/guides/graph-visualization.md) — Export module graph as Mermaid or DOT
 - [Providers](docs/guides/providers.md) — Dependency injection patterns
@@ -246,6 +221,7 @@ See [Architecture Guide](docs/architecture.md) for details.
 - [Testing](docs/guides/testing.md) — Testing patterns
 - [NestJS Compatibility](docs/guides/nestjs-compatibility.md) — Feature parity and Go-idiomatic differences
 - [Comparison](docs/guides/comparison.md) — vs Wire, Fx, and others
+- [Maintainer Operations](docs/guides/maintainer-operations.md) — Triage SLAs and adoption KPI cadence
 
 **Reference:**
 - [API Reference](docs/reference/api.md) — Types and functions
