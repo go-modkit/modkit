@@ -6,7 +6,7 @@ require (
 	github.com/conventionalcommit/commitlint v0.10.1
 	github.com/dave/dst v0.27.3
 	github.com/evilmartians/lefthook/v2 v2.1.0
-	github.com/go-chi/chi/v5 v5.2.4
+	github.com/go-chi/chi/v5 v5.2.5
 	github.com/golangci/golangci-lint v1.64.8
 	github.com/seriousben/go-patch-cover v0.2.0
 	github.com/spf13/cobra v1.10.2
