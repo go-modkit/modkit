@@ -35,8 +35,8 @@ func (e *ProviderError) Unwrap() error {
 
 // Common errors
 var (
-	ErrDefinitionNotFound = errors.New("Definition method not found")
-	ErrProvidersNotFound  = errors.New("Providers field not found in Definition")
+	ErrDefinitionNotFound = errors.New("definition method not found")
+	ErrProvidersNotFound  = errors.New("providers field not found in definition")
 	ErrTokenExists        = errors.New("provider token already exists")
 )
 
@@ -263,7 +263,7 @@ func (e *ControllerError) Unwrap() error {
 }
 
 // ErrControllersNotFound is returned when Controllers field is not found in Definition
-var ErrControllersNotFound = errors.New("Controllers field not found in Definition")
+var ErrControllersNotFound = errors.New("controllers field not found in definition")
 
 // AddController registers a new controller in the module definition
 func AddController(filePath, controllerName, buildFunc string) error {
