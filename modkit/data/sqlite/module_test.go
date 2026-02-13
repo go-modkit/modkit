@@ -286,11 +286,12 @@ func TestMultipleSQLiteInstancesBootstrap(t *testing.T) {
 	if err != nil {
 		t.Fatalf("analytics tokens: %v", err)
 	}
+	configMod := DefaultConfigModule()
 
 	root := &multiInstanceRootModule{
 		imports: []module.Module{
-			NewModule(Options{Name: "primary"}),
-			NewModule(Options{Name: "analytics"}),
+			NewModule(Options{Name: "primary", Config: configMod}),
+			NewModule(Options{Name: "analytics", Config: configMod}),
 		},
 		exports: []module.Token{
 			primaryTokens.DB,
