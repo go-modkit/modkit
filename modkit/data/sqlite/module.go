@@ -103,32 +103,32 @@ func invalidModuleDef(err error) module.ModuleDef {
 func buildDB(r module.Resolver, dbToken module.Token) (*sql.DB, error) {
 	path, err := module.Get[string](r, TokenPath)
 	if err != nil {
-		return nil, &BuildError{Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("path: %w", err)}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("path: %w", err)}
 	}
 	busyTimeout, err := module.Get[time.Duration](r, TokenBusyTimeout)
 	if err != nil {
-		return nil, &BuildError{Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("busy_timeout: %w", err)}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("busy_timeout: %w", err)}
 	}
 	journalMode, err := module.Get[string](r, TokenJournalMode)
 	if err != nil {
-		return nil, &BuildError{Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("journal_mode: %w", err)}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("journal_mode: %w", err)}
 	}
 	connectTimeout, err := module.Get[time.Duration](r, TokenConnectTimeout)
 	if err != nil {
-		return nil, &BuildError{Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("connect_timeout: %w", err)}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("connect_timeout: %w", err)}
 	}
 
 	if busyTimeout < 0 {
-		return nil, &BuildError{Token: dbToken, Stage: StageInvalidConfig, Err: fmt.Errorf("busy_timeout must be >= 0")}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageInvalidConfig, Err: fmt.Errorf("busy_timeout must be >= 0")}
 	}
 	if connectTimeout < 0 {
-		return nil, &BuildError{Token: dbToken, Stage: StageInvalidConfig, Err: fmt.Errorf("connect_timeout must be >= 0")}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageInvalidConfig, Err: fmt.Errorf("connect_timeout must be >= 0")}
 	}
 
 	dsn := buildDSN(path, busyTimeout, journalMode)
 	db, err := sql.Open(driverName, dsn)
 	if err != nil {
-		return nil, &BuildError{Token: dbToken, Stage: StageOpen, Err: err}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageOpen, Err: err}
 	}
 
 	if connectTimeout == 0 {
@@ -139,7 +139,7 @@ func buildDB(r module.Resolver, dbToken module.Token) (*sql.DB, error) {
 	defer cancel()
 	if err := db.PingContext(ctx); err != nil {
 		_ = db.Close()
-		return nil, &BuildError{Token: dbToken, Stage: StagePing, Err: err}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StagePing, Err: err}
 	}
 
 	return db, nil

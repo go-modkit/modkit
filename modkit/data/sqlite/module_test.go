@@ -107,40 +107,54 @@ func TestModuleExportsDialectAndDBTokens(t *testing.T) {
 	}
 }
 
-func TestConnectTimeoutZeroSkipsPing(t *testing.T) {
-	testDrv.Reset()
-	t.Setenv("SQLITE_PATH", "test.db")
-	t.Setenv("SQLITE_CONNECT_TIMEOUT", "0")
-
-	h := testkit.New(t, NewModule(Options{}))
-	_ = testkit.Get[*sql.DB](t, h, sqlmodule.TokenDB)
-
-	open, ping, _, _, _ := testDrv.Snapshot()
-	if open != 0 {
-		t.Fatalf("expected open=0, got %d", open)
+func TestConnectTimeoutPingBehavior(t *testing.T) {
+	cases := []struct {
+		name            string
+		timeout         string
+		wantOpen        int
+		wantOpenNonZero bool
+		wantPing        int
+		wantDeadline    bool
+	}{
+		{
+			name:     "zero timeout skips ping",
+			timeout:  "0",
+			wantOpen: 0,
+			wantPing: 0,
+		},
+		{
+			name:            "non-zero timeout pings with deadline",
+			timeout:         "25ms",
+			wantOpenNonZero: true,
+			wantPing:        1,
+			wantDeadline:    true,
+		},
 	}
-	if ping != 0 {
-		t.Fatalf("expected ping=0, got %d", ping)
-	}
-}
 
-func TestConnectTimeoutNonZeroPingsWithTimeout(t *testing.T) {
-	testDrv.Reset()
-	t.Setenv("SQLITE_PATH", "test.db")
-	t.Setenv("SQLITE_CONNECT_TIMEOUT", "25ms")
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			testDrv.Reset()
+			t.Setenv("SQLITE_PATH", "test.db")
+			t.Setenv("SQLITE_CONNECT_TIMEOUT", tc.timeout)
 
-	h := testkit.New(t, NewModule(Options{}))
-	_ = testkit.Get[*sql.DB](t, h, sqlmodule.TokenDB)
+			h := testkit.New(t, NewModule(Options{}))
+			_ = testkit.Get[*sql.DB](t, h, sqlmodule.TokenDB)
 
-	open, ping, _, sawDeadline, _ := testDrv.Snapshot()
-	if open == 0 {
-		t.Fatalf("expected open>0, got %d", open)
-	}
-	if ping != 1 {
-		t.Fatalf("expected ping=1, got %d", ping)
-	}
-	if !sawDeadline {
-		t.Fatalf("expected ping to observe a context deadline")
+			open, ping, _, sawDeadline, _ := testDrv.Snapshot()
+			if tc.wantOpenNonZero {
+				if open == 0 {
+					t.Fatalf("expected open>0, got %d", open)
+				}
+			} else if open != tc.wantOpen {
+				t.Fatalf("expected open=%d, got %d", tc.wantOpen, open)
+			}
+			if ping != tc.wantPing {
+				t.Fatalf("expected ping=%d, got %d", tc.wantPing, ping)
+			}
+			if tc.wantDeadline != sawDeadline {
+				t.Fatalf("expected deadline=%v, got %v", tc.wantDeadline, sawDeadline)
+			}
+		})
 	}
 }
 
@@ -163,6 +177,9 @@ func TestPingFailureReturnsTypedBuildErrorAndClosesDB(t *testing.T) {
 	}
 	if be.Stage != StagePing {
 		t.Fatalf("expected stage=%s, got %s", StagePing, be.Stage)
+	}
+	if be.Provider != driverName {
+		t.Fatalf("expected provider=%q, got %q", driverName, be.Provider)
 	}
 	if be.Token != sqlmodule.TokenDB {
 		t.Fatalf("expected token=%q, got %q", sqlmodule.TokenDB, be.Token)
@@ -253,6 +270,9 @@ func TestNegativeConnectTimeoutFailsWithInvalidConfig(t *testing.T) {
 	}
 	if be.Stage != StageInvalidConfig {
 		t.Fatalf("expected stage=%s, got %s", StageInvalidConfig, be.Stage)
+	}
+	if be.Provider != driverName {
+		t.Fatalf("expected provider=%q, got %q", driverName, be.Provider)
 	}
 }
 

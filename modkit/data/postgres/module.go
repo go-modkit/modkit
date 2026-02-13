@@ -100,45 +100,45 @@ func invalidModuleDef(err error) module.ModuleDef {
 func buildDB(r module.Resolver, dbToken module.Token) (*sql.DB, error) {
 	dsn, err := module.Get[string](r, TokenDSN)
 	if err != nil {
-		return nil, &BuildError{Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("dsn: %w", err)}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("dsn: %w", err)}
 	}
 	maxOpen, err := module.Get[int](r, TokenMaxOpenConns)
 	if err != nil {
-		return nil, &BuildError{Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("max_open_conns: %w", err)}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("max_open_conns: %w", err)}
 	}
 	maxIdle, err := module.Get[int](r, TokenMaxIdleConns)
 	if err != nil {
-		return nil, &BuildError{Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("max_idle_conns: %w", err)}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("max_idle_conns: %w", err)}
 	}
 	maxIdleSet, err := module.Get[bool](r, tokenMaxIdleConnsSet)
 	if err != nil {
-		return nil, &BuildError{Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("max_idle_conns_set: %w", err)}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("max_idle_conns_set: %w", err)}
 	}
 	maxLifetime, err := module.Get[time.Duration](r, TokenConnMaxLifetime)
 	if err != nil {
-		return nil, &BuildError{Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("conn_max_lifetime: %w", err)}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("conn_max_lifetime: %w", err)}
 	}
 	connectTimeout, err := module.Get[time.Duration](r, TokenConnectTimeout)
 	if err != nil {
-		return nil, &BuildError{Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("connect_timeout: %w", err)}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageResolveConfig, Err: fmt.Errorf("connect_timeout: %w", err)}
 	}
 
 	if maxOpen < 0 {
-		return nil, &BuildError{Token: dbToken, Stage: StageInvalidConfig, Err: fmt.Errorf("max_open_conns must be >= 0")}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageInvalidConfig, Err: fmt.Errorf("max_open_conns must be >= 0")}
 	}
 	if maxIdle < 0 {
-		return nil, &BuildError{Token: dbToken, Stage: StageInvalidConfig, Err: fmt.Errorf("max_idle_conns must be >= 0")}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageInvalidConfig, Err: fmt.Errorf("max_idle_conns must be >= 0")}
 	}
 	if maxLifetime < 0 {
-		return nil, &BuildError{Token: dbToken, Stage: StageInvalidConfig, Err: fmt.Errorf("conn_max_lifetime must be >= 0")}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageInvalidConfig, Err: fmt.Errorf("conn_max_lifetime must be >= 0")}
 	}
 	if connectTimeout < 0 {
-		return nil, &BuildError{Token: dbToken, Stage: StageInvalidConfig, Err: fmt.Errorf("connect_timeout must be >= 0")}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageInvalidConfig, Err: fmt.Errorf("connect_timeout must be >= 0")}
 	}
 
 	db, err := sql.Open(driverName, dsn)
 	if err != nil {
-		return nil, &BuildError{Token: dbToken, Stage: StageOpen, Err: err}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageOpen, Err: err}
 	}
 
 	if maxOpen > 0 {
@@ -159,7 +159,7 @@ func buildDB(r module.Resolver, dbToken module.Token) (*sql.DB, error) {
 	defer cancel()
 	if err := db.PingContext(ctx); err != nil {
 		_ = db.Close()
-		return nil, &BuildError{Token: dbToken, Stage: StagePing, Err: err}
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StagePing, Err: err}
 	}
 
 	return db, nil
