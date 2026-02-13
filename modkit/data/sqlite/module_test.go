@@ -158,6 +158,48 @@ func TestConnectTimeoutPingBehavior(t *testing.T) {
 	}
 }
 
+func TestResolveConfigErrorReturnsBuildError(t *testing.T) {
+	testDrv.Reset()
+	t.Setenv("SQLITE_PATH", "test.db")
+	t.Setenv("SQLITE_BUSY_TIMEOUT", "nope")
+	t.Setenv("SQLITE_CONNECT_TIMEOUT", "0")
+
+	h := testkit.New(t, NewModule(Options{}))
+	_, err := testkit.GetE[*sql.DB](h, sqlmodule.TokenDB)
+	if err == nil {
+		t.Fatal("expected error")
+	}
+
+	var be *BuildError
+	if !errors.As(err, &be) {
+		t.Fatalf("expected BuildError, got %T", err)
+	}
+	if be.Stage != StageResolveConfig {
+		t.Fatalf("expected stage=%s, got %s", StageResolveConfig, be.Stage)
+	}
+}
+
+func TestNegativeBusyTimeoutReturnsInvalidConfig(t *testing.T) {
+	testDrv.Reset()
+	t.Setenv("SQLITE_PATH", "test.db")
+	t.Setenv("SQLITE_BUSY_TIMEOUT", "-1ms")
+	t.Setenv("SQLITE_CONNECT_TIMEOUT", "0")
+
+	h := testkit.New(t, NewModule(Options{}))
+	_, err := testkit.GetE[*sql.DB](h, sqlmodule.TokenDB)
+	if err == nil {
+		t.Fatal("expected error")
+	}
+
+	var be *BuildError
+	if !errors.As(err, &be) {
+		t.Fatalf("expected BuildError, got %T", err)
+	}
+	if be.Stage != StageInvalidConfig {
+		t.Fatalf("expected stage=%s, got %s", StageInvalidConfig, be.Stage)
+	}
+}
+
 func TestPingFailureReturnsTypedBuildErrorAndClosesDB(t *testing.T) {
 	testDrv.Reset()
 	pingErr := errors.New("ping failed")
