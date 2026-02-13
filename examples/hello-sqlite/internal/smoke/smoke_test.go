@@ -48,7 +48,7 @@ func roundTripSQLite(t *testing.T, db *sql.DB) {
 	if _, err := db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL)`); err != nil {
 		t.Fatalf("create table: %v", err)
 	}
-	if _, err := db.ExecContext(ctx, `INSERT INTO users (id, name) VALUES (1, 'Ada')`); err != nil {
+	if _, err := db.ExecContext(ctx, `INSERT OR REPLACE INTO users (id, name) VALUES (1, 'Ada')`); err != nil {
 		t.Fatalf("insert: %v", err)
 	}
 	var name string

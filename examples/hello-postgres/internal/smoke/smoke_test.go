@@ -50,7 +50,9 @@ func TestSmoke_Postgres_ModuleBootsAndServes(t *testing.T) {
 	}
 
 	buf := new(bytes.Buffer)
-	_, _ = buf.ReadFrom(resp.Body)
+	if _, err := buf.ReadFrom(resp.Body); err != nil {
+		t.Fatalf("read body: %v", err)
+	}
 	if got := bytes.TrimSpace(buf.Bytes()); len(got) == 0 {
 		t.Fatalf("expected non-empty body")
 	}
