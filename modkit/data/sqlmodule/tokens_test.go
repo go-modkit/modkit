@@ -2,6 +2,7 @@ package sqlmodule
 
 import (
 	"errors"
+	"strings"
 	"testing"
 )
 
@@ -48,5 +49,16 @@ func TestNamedTokens_InvalidName(t *testing.T) {
 				t.Fatalf("error %T is not *InvalidNameError", err)
 			}
 		})
+	}
+}
+
+func TestInvalidNameErrorMessage(t *testing.T) {
+	err := &InvalidNameError{Name: "bad name", Reason: "name must not contain spaces"}
+	msg := err.Error()
+	if !strings.Contains(msg, "bad name") {
+		t.Fatalf("expected name in error message, got %q", msg)
+	}
+	if !strings.Contains(msg, "name must not contain spaces") {
+		t.Fatalf("expected reason in error message, got %q", msg)
 	}
 }
