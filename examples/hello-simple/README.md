@@ -26,6 +26,15 @@ A minimal modkit example with no external dependencies (no Docker, no database).
 go run main.go
 ```
 
+## Run with Docker Compose
+
+```bash
+docker compose up -d --build
+curl http://localhost:8080/health
+curl http://localhost:8080/greet
+docker compose down -v
+```
+
 Print the module graph while starting the server:
 
 ```bash
