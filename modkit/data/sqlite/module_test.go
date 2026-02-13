@@ -200,6 +200,35 @@ func TestNegativeBusyTimeoutReturnsInvalidConfig(t *testing.T) {
 	}
 }
 
+func TestMissingDriverReturnsBuildError(t *testing.T) {
+	testDrv.Reset()
+	t.Setenv("SQLITE_PATH", "test.db")
+	t.Setenv("SQLITE_CONNECT_TIMEOUT", "0")
+
+	origDrivers := listDrivers
+	listDrivers = func() []string { return []string{} }
+	t.Cleanup(func() {
+		listDrivers = origDrivers
+	})
+
+	h := testkit.New(t, NewModule(Options{}))
+	_, err := testkit.GetE[*sql.DB](h, sqlmodule.TokenDB)
+	if err == nil {
+		t.Fatal("expected error")
+	}
+
+	var be *BuildError
+	if !errors.As(err, &be) {
+		t.Fatalf("expected BuildError, got %T", err)
+	}
+	if be.Stage != StageOpen {
+		t.Fatalf("expected stage=%s, got %s", StageOpen, be.Stage)
+	}
+	if !strings.Contains(err.Error(), driverName) {
+		t.Fatalf("expected driver name in error")
+	}
+}
+
 func TestPingFailureReturnsTypedBuildErrorAndClosesDB(t *testing.T) {
 	testDrv.Reset()
 	pingErr := errors.New("ping failed")

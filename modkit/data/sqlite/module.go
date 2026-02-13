@@ -18,6 +18,8 @@ const (
 	moduleNameBase = "data.sqlite"
 )
 
+var listDrivers = sql.Drivers
+
 // Options configures a SQLite provider module.
 type Options struct {
 	// Config provides SQLite configuration tokens (path/DSN, DSN options, ping timeout).
@@ -126,6 +128,9 @@ func buildDB(r module.Resolver, dbToken module.Token) (*sql.DB, error) {
 	}
 
 	dsn := buildDSN(path, busyTimeout, journalMode)
+	if !driverRegistered(driverName) {
+		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageOpen, Err: fmt.Errorf("driver %q is not registered", driverName)}
+	}
 	db, err := sql.Open(driverName, dsn)
 	if err != nil {
 		return nil, &BuildError{Provider: driverName, Token: dbToken, Stage: StageOpen, Err: err}
@@ -143,6 +148,15 @@ func buildDB(r module.Resolver, dbToken module.Token) (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+func driverRegistered(name string) bool {
+	for _, driver := range listDrivers() {
+		if driver == name {
+			return true
+		}
+	}
+	return false
 }
 
 func buildDSN(base string, busyTimeout time.Duration, journalMode string) string {
