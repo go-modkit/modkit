@@ -5,6 +5,7 @@ SHELL := /bin/sh
 GOPATH ?= $(shell go env GOPATH)
 GOIMPORTS ?= $(GOPATH)/bin/goimports
 GOLANGCI_LINT ?= $(GOPATH)/bin/golangci-lint
+GOLANGCI_LINT_VERSION ?= v2.5.0
 GOVULNCHECK ?= $(GOPATH)/bin/govulncheck
 GO_PATCH_COVER ?= $(GOPATH)/bin/go-patch-cover
 LEFTHOOK ?= $(GOPATH)/bin/lefthook
@@ -53,7 +54,8 @@ test-patch-coverage: test-coverage
 # Install all development tools (tracked in tools/tools.go)
 tools:
 	@echo "Installing development tools..."
-	@cat tools/tools.go | grep _ | awk '{print $$2}' | xargs -I {} sh -c 'go install {}'
+	@cat tools/tools.go | grep _ | awk '{print $$2}' | grep -v golangci-lint | xargs -I {} sh -c 'go install {}'
+	@go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
 	@echo "Done: All tools installed"
 
 # Install development tools and setup git hooks

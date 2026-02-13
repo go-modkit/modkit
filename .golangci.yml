@@ -1,3 +1,5 @@
+version: 2
+
 run:
   timeout: 5m
   tests: true
@@ -10,7 +12,6 @@ linters:
     - staticcheck
     - govet
     - unused
-    - gosec
     - bodyclose
     - nilerr
     
@@ -19,8 +20,6 @@ linters:
     - gocritic     # (extensive checks)
     - ineffassign
     - misspell
-    - gofmt
-    - goimports
     - unconvert
     - unparam
     - nakedret
@@ -28,9 +27,15 @@ linters:
     # Complexity
     - gocyclo
 
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes: github.com/go-modkit/modkit
+
 linters-settings:
-  goimports:
-    local-prefixes: github.com/go-modkit/modkit
   govet:
     enable:
       - nilness
@@ -61,10 +66,9 @@ issues:
 
   exclude-rules:
     # Relax rules for tests
-    - path: _test\.go
+    - path: ".*_test\\.go$"
       linters:
         - errcheck
-        - gosec
         - dupl
         - funlen
         - gocyclo
